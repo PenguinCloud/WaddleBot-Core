@@ -21,18 +21,21 @@ The specifics are the actual modules of the tag class. These are either pre-buil
 Specifics are essentially a function (though they may utilize sub-functions) and may take or require a parameter. See documentation for specifics.
 
 ## Examples
-Tag: Command
-Specific: !help
+### Tag: Command
+#### Specific: 
+* !help - List how to use the command tag
 
-Tag: Event
-Specifc: TwitchSub
+### Tag: Event
+#### Specifc: 
+* TwitchSub - Actions to take when a subscriber to twitch happens
 
-Tag: Chat
-Specifics: Racist or Unwanted Word
+### Tag: Chat
+#### Specifics: 
+* Racist or Unwanted Word - matches on word and takes an action
 
-### Some prebuilt-in always available modules
-Tag: Community <name>
-Specifics: 
+## Some prebuilt-in always available modules
+### Tag: Community <name>
+#### Specifics: 
 * Manage <action> - Manages communities which you have access to! Common Actions:
   * add <name> - Creates a community if you are a premium user (counts against your community credits!)
   * rem <name> - Removes a community if you are the communities' owner
@@ -71,15 +74,15 @@ Specifics:
   * rem <name> <role> - Removes the user from the role
 * More to come!
 
-Tag: Policy <tag name> <specific name> [parameter] (If parameter is availble, must be set, or use any for all of them)
-Specifics:
+### Tag: Policy <tag name> <specific name> [parameter] (If parameter is availble, must be set, or use any for all of them)
+#### Specifics:
 * Role <action> - Manages the access list for roles. Common actions:
   * add <name> - Adds the role to the allow list
   * rem <name> - Removes the role from the allow list
   * ls - List the allow list of roles
 
-Tag: User <name>
-Specifics:
+### Tag: User <name>
+#### Specifics:
  * RepCheck - Bans, Timeouts, Censor Hits, Channels Modding, etc. turn into a reputation score... everyone starts at 0
  * Ban - Bans user from channel
  * RemBan - Removes ban from user specified
@@ -89,8 +92,8 @@ Specifics:
  * IDValidation - Utilizes a third party service to validate your identity... which boosts your reputation
  * Puzzle - Asks the user a question (math, basic science, ascii word id, etc.) which they must pass or loose reputation (bot defense)
  
-Tag: DoorCheck
-Specifics:
+### Tag: DoorCheck
+#### Specifics:
 * ChatReq <role name> <req name> - Sets requirements for the role of users before they can chat. Only applies first matched role, global community is always last. Common requirement names:
   * time <time>- Amount of time the user in this role has to be in the channel before they can talk
   * follow <bool> - Is the user in this role a follower (twitch) or subscriber (youtube) etc. of the channel
@@ -101,7 +104,7 @@ Specifics:
 * RoleReq <community name> <role name> - Sets what roles in what communities are allowed, for example a common global role is Creator (a la streamer)... you can allow or disallow. This can be used to just allow your community members to join the chat. Any users which do not match any of these (when set) will automatically be timed out continously at the max timeout for the platform.
 * AutoShout <community name> <role name> <optional text> - Sends a shoutout message to the channel when a user belonging to a community and role starts chatting on the channel, some platforms will add additional details (such as last game played) as well, if available.
 
-Tag: Alias
+### Tag: Alias
 Specifics:
 * Link <name> <action> - a linker object. Common actions:
   * tag <name> <param> - Sets the tag and it's params for this linker (required before link object goes active)
