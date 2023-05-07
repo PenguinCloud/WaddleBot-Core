@@ -20,6 +20,6 @@ Specifics are essentially a function (though they may utilize sub-functions) and
 ### Specifc: 
 * TwitchSub - Actions to take when a subscriber to twitch happens
 
-## Tag: Chat
+## Tag: StringSearch
 ### Specifics: 
 * Racist or Unwanted Word - matches on word and takes an action
