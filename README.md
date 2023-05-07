@@ -5,6 +5,8 @@
 MenialBot is a combination of a water service (MenailBotler) and serverless scripting (Lambda / OpenWhisk) which enables you to tag and direct traffic live to scripts any time anywhere! 
 The bot is built on top of MatterBridge, and supports all channels which MatterBridge does!
 
+![ MenialBot Diagram](https://drive.google.com/file/d/1uau4QM2bG7Q1ZcT16rotaASh9GrTZj-m/view)
+
 # Why this bot vs others
 ## Scalable and Modular
 The MenialBot is able to handle a large load as the watcher service (MenialBotler) is only a collect and forward docker service. Simply split channels between multiple docker deployments! 
