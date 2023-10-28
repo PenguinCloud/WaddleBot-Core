@@ -39,6 +39,7 @@ General: menialbot@penguintech.io
 ## community
 
 * Join in and become a contributor!
+jfish
 
 
 # Resources
