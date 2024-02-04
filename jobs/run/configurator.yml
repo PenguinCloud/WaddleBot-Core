@@ -1,0 +1,7 @@
+---
+
+
+- name: Assemble from fragment configs from a directory
+  ansible.builtin.assemble:
+    src: /etc/someapp/fragments
+    dest: /etc/someapp/someapp.conf
