@@ -1,7 +1,21 @@
 ---
+- name: Generate discord config fragment
+  ansible.builtin.template:
+    dest: "/etc/{{ app.title }}"
+    src: "{{playbook_dir}}/templates/discord.j2"
+    owner: "{{ run.user }}"
+    group: "{{ run.user }}"
 
+- name: Generate twitch config fragment
+  ansible.builtin.template:
+    src: "{{playbook_dir}}/templates/twitch.j2"
+    dest: "/etc/{{ app.title }}"
+    owner: "{{ run.user }}"
+    group: "{{ run.user }}"
 
 - name: Assemble from fragment configs from a directory
   ansible.builtin.assemble:
-    src: /etc/someapp/fragments
-    dest: /etc/someapp/someapp.conf
+    src: "/etc/{{ app.title }}"
+    dest: "/etc/{{ app.title }}/matterbridge.toml"
+    owner: "{{ run.user }}"
+    group: "{{ run.user }}"
