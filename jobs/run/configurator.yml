@@ -1,8 +1,8 @@
 ---
 - name: Generate discord config fragment
   ansible.builtin.template:
-    dest: "/etc/{{ app.title }}"
     src: "{{playbook_dir}}/templates/discord.j2"
+    dest: "/etc/{{ app.title }}"
     owner: "{{ run.user }}"
     group: "{{ run.user }}"
 
