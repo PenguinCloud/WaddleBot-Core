@@ -1,7 +1,7 @@
 run:
   user: waddlebot
 app:
-  title: "{{ lookup('ansible.builtin.env', 'APP_TILE') }}"
+  title: "{{ lookup('ansible.builtin.env', 'APP_TITLE') }}"
 user:
   name: "{{ lookup('ansible.builtin.env', 'USER_NAME') }}"
   discord:

@@ -9,7 +9,7 @@ WORKDIR /opt/manager
 
 
 # PUT YER ARGS in here
-ARG APP_TITLE="WADDLEBOT" 
+ARG APP_TITLE="waddlebot" 
 ARG MATTERBRIDGE_VERSION="1.26.0"
 # BUILD IT!
 RUN ansible-playbook entrypoint.yml -c local --tags build

@@ -1,20 +1,37 @@
 ---
-- name: Create a directory if it does not exist
+- name: Add the user {{ run.user }}
+  ansible.builtin.user:
+    name: "{{ run.user }}"
+    comment: Specified Run User
+
+- name: Create /etc/{{ app.title }} if it does not exist
   ansible.builtin.file:
-    path:  "{{ item }}"
+    path:  "/etc/{{ app.title }}"
     state: directory
     mode: '0755'
     owner: "{{ run.user }}"
     group: "{{ run.user }}"
-  loop:
-    - "/etc/{{ app.title }}"
-    - "/opt/{{ app.title }}"
-    - /opt/matterbridge
+
+- name: Create /opt/{{ app.title }} if it does not exist
+  ansible.builtin.file:
+    path:  "/opt/{{ app.title }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ run.user }}"
+    group: "{{ run.user }}"
+
+- name: Create /opt/matterbridge if it does not exist
+  ansible.builtin.file:
+    path:  /opt/matterbridge
+    state: directory
+    mode: '0755'
+    owner: "{{ run.user }}"
+    group: "{{ run.user }}"  
 
 - name: Create a symbolic link for etc for convenience
   ansible.builtin.file:
-    src: "/opt/{{ app.title }}/etc"
-    dest: "/etc/{{ app.title }}"
+    dest: "/opt/{{ app.title }}/etc"
+    src: "/etc/{{ app.title }}"
     owner: "{{ run.user }}"
     group: "{{ run.user }}"
     state: link
