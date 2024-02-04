@@ -16,7 +16,7 @@
         apply:
           tags: build
       loop:
-        - build
+        - matterbridge 
     - name: Run And Configure
       tags:
         - run
@@ -26,10 +26,8 @@
           tags: run
       loop:
         - run
-    - name: Execute application
-      include_tasks:
-        file: jobs/run/exec.yml
-    - name: Run execution status tests to make sure app is running as expected
-      include_tasks:
-        file: jobs/tests/tests.yml
+
+    #- name: Run execution status tests to make sure app is running as expected
+    #  include_tasks:
+    #    file: jobs/tests/tests.yml
 

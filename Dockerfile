@@ -1,4 +1,4 @@
-FROM ghcr.io/penguincloud/core:v5.0.1 AS BUILD
+FROM ghcr.io/penguincloud/core AS BUILD
 LABEL company="Penguin Tech Group LLC"
 LABEL org.opencontainers.image.authors="info@penguintech.group"
 LABEL license="GNU AGPL3"
@@ -9,16 +9,23 @@ WORKDIR /opt/manager
 
 
 # PUT YER ARGS in here
-ARG APP_TITLE="PTGAPP" # Change this to actual title for Default
-
+ARG APP_TITLE="WADDLEBOT" 
+ARG MATTERBRIDGE_VERSION="1.26.0"
 # BUILD IT!
-RUN ansible-playbook build.yml -c local
+RUN ansible-playbook entrypoint.yml -c local --tags build
 
 # PUT YER ENVS in here
-ENV HELLO="WORLD"
+ENV USER_NAME="waddlebot" 
+ENV USER_DISCORD_ID="001112223"
+ENV USER_DISCORD_NAME="PenguinzRockExample"
+ENV DISCORD_TOKEN="123getme"
+ENV DISCORD_ENABLE="0"
+ENV TWITCH_TOKEN="123getme"
+ENV TWITCH_ENABLE="0"
+
 
 # Switch to non-root user
-USER ptg-user
+USER waddlebot
 
 # Entrypoint time (aka runtime)
 ENTRYPOINT ["/bin/bash","/opt/manager/entrypoint.sh"]
