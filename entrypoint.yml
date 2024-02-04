@@ -8,26 +8,30 @@
   become_user: root
   remote_user: root
   tasks:
-     - name: Build
+    - name: Build
+      loop_control:
+        loop_var: job
       tags:
-        - build
+       - build
       include_tasks:
-        file: "jobs/build/{{ item }}.yml"
+        file: "jobs/build/{{ job }}.yml"
         apply:
           tags: build
       loop:
+        - filesystem
         - matterbridge 
     - name: Run And Configure
+      loop_control:
+        loop_var: job
       tags:
+        - configurator
         - run
       include_tasks:
-        file: jobs/run/{{ item }}.yml
+        file: jobs/run/{{ job }}.yml
         apply:
           tags: run
       loop:
         - run
 
-    #- name: Run execution status tests to make sure app is running as expected
-    #  include_tasks:
-    #    file: jobs/tests/tests.yml
+
 
