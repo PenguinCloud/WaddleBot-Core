@@ -5,6 +5,7 @@
     dest: "/etc/{{ app.title }}"
     owner: "{{ run.user }}"
     group: "{{ run.user }}"
+  when: discord.enable == "1"
 
 - name: Generate twitch config fragment
   ansible.builtin.template:
@@ -12,6 +13,7 @@
     dest: "/etc/{{ app.title }}"
     owner: "{{ run.user }}"
     group: "{{ run.user }}"
+  when: twitch.enable == "1"
 
 - name: Assemble from fragment configs from a directory
   ansible.builtin.assemble:
