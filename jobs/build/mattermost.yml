@@ -1,0 +1,6 @@
+---
+- name: Get the matterbridge archive
+  ansible.builtin.unarchive:
+    src: "https://github.com/42wim/matterbridge/archive/refs/tags/v{{ matterbridge.version }}.tar.gz"
+    dest: /opt/matterbridge
+    remote_src: true
