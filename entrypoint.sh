@@ -1,3 +1,3 @@
 #!/bin/bash
 ansible-playbook entrypoint.yml  -c local 
-matter
+matterbridge -c /etc/matterbridge.toml

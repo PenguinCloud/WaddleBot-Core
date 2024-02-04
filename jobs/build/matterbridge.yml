@@ -1,8 +1,6 @@
 ---
-- name: Get the matterbridge archive
-  ansible.builtin.unarchive:
-    src: "https://github.com/42wim/matterbridge/archive/refs/tags/v{{ matterbridge.version }}.tar.gz"
-    dest: /opt/matterbridge
-    remote_src: true
-    owner: "{{ run.user }}"
-    group: "{{ run.user }}"
+- name: Get binary for Matterbridge
+  ansible.builtin.get_url:
+    url: https://github.com/42wim/matterbridge/releases/download/v{{ matterbridge.version }}/matterbridge-{{ matterbridge.version }}-linux-64bit
+    dest: /usr/local/bin/matterbridge
+    mode: "0555"
