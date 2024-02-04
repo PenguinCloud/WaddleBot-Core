@@ -1,0 +1,20 @@
+---
+- name: Create a directory if it does not exist
+  ansible.builtin.file:
+    path:  "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ run.user }}"
+    group: "{{ run.user }}"
+  loop:
+    - "/etc/{{ app.title }}"
+    - "/opt/{{ app.title }}"
+    - /opt/matterbridge
+
+- name: Create a symbolic link for etc for convenience
+  ansible.builtin.file:
+    src: "/opt/{{ app.title }}/etc"
+    dest: "/etc/{{ app.title }}"
+    owner: "{{ run.user }}"
+    group: "{{ run.user }}"
+    state: link
