@@ -15,6 +15,7 @@ ARG MATTERBRIDGE_VERSION="1.26.0"
 RUN ansible-playbook entrypoint.yml -c local --tags build
 
 # PUT YER ENVS in here
+ENV APP_TITLE="waddlebot" 
 ENV USER_NAME="waddlebot" 
 ENV USER_DISCORD_ID="001112223"
 ENV USER_DISCORD_NAME="PenguinzRockExample"
