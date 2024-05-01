@@ -1,5 +1,5 @@
 # Always on PreBuilt In
-
+All built in commands will start with a ! , while "marketplace" modules will start with a hashtag (#)
 ## Tag: Community <name>
 ### Specifics: 
 * Manage <action> - Manages communities which you have access to! Common Actions:
@@ -40,10 +40,6 @@
   * rem <name> <role> - Removes the user from the role
 * More to come!
 
-## Tag: Policy <tag name> <specific name> [parameter] (If parameter is availble, must be set, or use any for all of them)
-### Specifics:
-
-
 ## Tag: Identity <name>
 ### Specifics:
  * RepCheck - Bans, Timeouts, Censor Hits, Channels Modding, etc. turn into a reputation score... everyone starts at 0
@@ -59,7 +55,7 @@
    * rem <name> - Removes the role from the allow list
    * ls - List the allow list of roles
  
-## Tag: Guard
+## Tag: Policy
 ### Specifics:
 * ChatReq <role name> <req name> - Sets requirements for the role of users before they can chat. Only applies first matched role, global community is always last. Common requirement names:
   * time <time>- Amount of time the user in this role has to be in the channel before they can talk
