@@ -19,19 +19,16 @@
           tags: build
       loop:
         - filesystem
-        - matterbridge 
-    - name: Run And Configure
+        - matterbridge
+    - name: Run and Configure
       loop_control:
         loop_var: job
       tags:
-        - configurator
         - run
+        - configure
       include_tasks:
-        file: jobs/run/{{ job }}.yml
+        file: "jobs/run/{{ job }}.yml"
         apply:
-          tags: run
+          tags: configure
       loop:
-        - run
-
-
-
+        - configurator
