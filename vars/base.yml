@@ -9,6 +9,7 @@ user:
     name: "{{ lookup('ansible.builtin.env', 'USER_DISCORD_NAME') }}"
 twitch:
   name: "{{ lookup('ansible.builtin.env', 'TWITCH_NAME') }}"
+  nick: "{{ lookup('ansible.builtin.env', 'TWITCH_NICK') }}"
   channel: "{{ lookup('ansible.builtin.env', 'TWITCH_CHANNEL') }}"
   token: "{{ lookup('ansible.builtin.env', 'TWITCH_TOKEN') }}"
   enable: "{{ lookup('ansible.builtin.env', 'TWITCH_ENABLE') }}"
