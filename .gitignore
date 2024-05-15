@@ -5,3 +5,7 @@ id_rsa*
 venv/
 .idea/
 
+test.db
+__pycahce__/
+*.cpython-312.pyc
+
