@@ -9,4 +9,5 @@ venv/
 test.db
 __pycahce__/
 *.cpython-312.pyc
+*.table
 

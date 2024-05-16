@@ -3,8 +3,15 @@ import time
 import re
 from pydal import DAL, Field
 
-from src.user.user_manager import UserManager
+# from src.user.user_manager import UserManager
+from src.identity.identity_manager import IdentityManager
 from src.community.community_manager import CommunityManager
+from src.community.community_members_manager import CommunityMembersManager
+from src.community.community_module_manager import CommunityModuleManager
+from src.roles.roles_manager import RolesManager
+from src.discord.discord_manager import DiscordManager
+from src.twitch.twitch_manager import TwitchManager
+from src.marketplace.marketplace_manager import MarketplaceManager
 
 # TODO: Add these commands to the REDIS cache
 botCommands = { "!help": "Displays the list of available commands.",
@@ -25,8 +32,14 @@ class matterbridgelink:
         # Setup database instances
         db = DAL(connectionString, pool_size=2)
 
-        self.userManager = UserManager(db)
+        self.identityManager = IdentityManager(db)
+        self.discordManager = DiscordManager(db)
+        self.twitchManager = TwitchManager(db)
+        self.marketplaceManager = MarketplaceManager(db)
         self.communityManager = CommunityManager(db)
+        self.communityMembersManager = CommunityMembersManager(db)
+        self.communityModuleManager = CommunityModuleManager(db)
+        self.rolesManager = RolesManager(db)
 
         # Create the database on initialization
         self.create_DB()
@@ -47,7 +60,7 @@ class matterbridgelink:
 
                     # Create a user if the user does not exist
                     if 'username' in messageData[0]:
-                        self.add_user(messageData[0]['username'])
+                        self.add_identity(messageData[0]['username'])
 
                     if 'text' in messageData[0] and 'gateway' in messageData[0]:
                         gateway = messageData[0]['gateway']
@@ -127,15 +140,33 @@ class matterbridgelink:
         print("Creating the database, if not exists....")
 
         # Create the user table, if it doesnt exist
-        self.userManager.create_user_table()
+        self.identityManager.create_identity_table()
 
         # Create the community table, if it doesnt exist
         self.communityManager.create_community_table()
 
+        # Create the community members table, if it doesnt exist
+        self.communityMembersManager.create_community_members_table()
+
+        # Create the community module table, if it doesnt exist
+        self.communityModuleManager.create_community_module_table()
+
+        # Create the roles table, if it doesnt exist
+        self.rolesManager.create_roles_table()
+
+        # Create the discord table, if it doesnt exist
+        self.discordManager.create_discord_table()
+
+        # Create the twitch table, if it doesnt exist
+        self.twitchManager.create_twitch_table()
+
+        # Create the marketplace table, if it doesnt exist
+        self.marketplaceManager.create_marketplace_table()
+
     # Function to add user to the database, if the user does not exist
-    def add_user(self, username):
-        # Get message from the UserManager
-        msg = self.userManager.create_user(username)
+    def add_identity(self, username):
+        # Get message from the identityManager
+        msg = self.identityManager.create_identity(username)
 
         # Log the resulting message
         print(msg) 

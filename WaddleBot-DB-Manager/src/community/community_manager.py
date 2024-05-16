@@ -3,15 +3,13 @@ from pydal import DAL, Field
 
 class CommunityManager:
     def __init__(self, db):
-        # self.connectionString = connectionString
-        # self.db = DAL(connectionString,pool_size=0)
         self.db = db
         
     # Function to create the user table
     def create_community_table(self):
         self.db.define_table('communities', 
-                            Field('communityname'),
-                            Field('communitydescription'))
+                            Field('community_name'),
+                            Field('community_description'))
         self.db.commit()
 
     # Function to create a new community entry, if the community already exists, it will return an error
@@ -21,7 +19,7 @@ class CommunityManager:
         if community:
             return "Community already exists."
         else:
-            self.db.communities.insert(communityname=communityname)
+            self.db.communities.insert(community_name=communityname)
 
             # # Remove spaces from the community name
             # communityname = communityname.replace(" ", "_")
@@ -34,30 +32,6 @@ class CommunityManager:
             self.db.commit()
 
             return "Community created successfully"
-
-    # Function to add a user to a community
-    def add_user_to_community(self, communityname, username):
-        # Check if the community exists
-        community = self.get_community_by_name(communityname)
-        if not community:
-            return "Community does not exist."
-
-        # Check if the user exists
-        user = self.db(self.db.users.username == username).select().first()
-        if not user:
-            return "User does not exist."
-
-        # Check if the user is already a member of the community
-        member = self.db(self.db[communityname].member == username).select().first()
-        if member:
-            return "User is already a member of the community."
-
-        # Add the user to the community
-        self.db[communityname].insert(member=username)
-
-        self.db.commit()
-
-        return "User added to community successfully" 
     
     # Function to remove a community
     def remove_community(self, communityname):
@@ -70,7 +44,7 @@ class CommunityManager:
         # self.db(self.db.communities.communityname == communityname).delete()
 
         # Remove the community record from the communities table
-        self.db(self.db.communities.communityname == communityname).delete()
+        self.db(self.db.communities.community_name == communityname).delete()
 
         print(f"Community removed successfully from the communities table. Deleting the {communityname} table....")
 
@@ -90,7 +64,7 @@ class CommunityManager:
 
     # Function to retrieve a specific community by communityname
     def get_community_by_name(self, communityname):
-        community = self.db(self.db.communities.communityname == communityname).select().first()
+        community = self.db(self.db.communities.community_name == communityname).select().first()
 
         return community
     
@@ -102,7 +76,7 @@ class CommunityManager:
             return "Community does not exist."
 
         # Update the description of the community
-        self.db(self.db.communities.communityname == communityname).update(communitydescription=communitydescription)
+        self.db(self.db.communities.community_name == communityname).update(community_description=communitydescription)
         self.db.commit()
 
         return "Description added to community successfully"
