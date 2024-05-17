@@ -1,12 +1,12 @@
 # WaddleBot DB Manager
 
-This is a python script that handles commands from the waddlebot core implementation and interacts with the a Database.
+This is a python Flask REST API that handles all DB CRUD requests with the Waddlebot Database (WIP).
 
 # Basic Setup
 
 ## 1. Python local testing
 
-To test the script without it being in a container, do the following (all the commands are to be executed in the WaddleBot-DB-Manager folder for now):
+To test the API without it being in a container, do the following (all the commands are to be executed in the WaddleBot-DB-Manager folder for now):
 
 1. Ensure that you have python installed on your local machine, preferably v3.12. 
 Download link: (https://www.python.org/downloads/)
@@ -35,3 +35,5 @@ If its installed correctly, you will see this output:
 6. Run the app by running the following command while having the virtual env active:
 
 `py dbmanager.py`
+
+7. The endpoints UI should now be available at http://127.0.0.1:5000/. 

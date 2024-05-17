@@ -15,13 +15,13 @@ class DiscordManager:
         self.db.commit()
 
     # Function to add a new discord channel community entry, if the community already exists, it will return an error
-    def create_discord(self, channel): 
+    def create_discord(self, channel, community_id, servers=[], aliases=[]): 
         # Before a new discord channel is created, we need to check if the channel already exists
         discord = self.get_discord_by_channel(channel)
         if discord:
             return "Discord channel already exists."
         else:
-            self.db.discord.insert(channel=channel)
+            self.db.discord.insert(channel=channel, community_id=community_id, servers=servers, aliases=aliases)
 
             self.db.commit()
 
@@ -33,16 +33,50 @@ class DiscordManager:
 
         return discord
     
-    # Function to add a server to a discord channel
-    def add_server_to_discord(self, channel, server):
+    # Function get discord by ID
+    def get_discord_by_id(self, id):
+        discord = self.db(self.db.discord.id == id).select().first()
+
+        return discord
+    
+    # Function to remove a discord channel
+    def remove_discord(self, channel):
         # Check if the discord channel exists
         discord = self.get_discord_by_channel(channel)
         if not discord:
             return "Discord channel does not exist."
 
-        # Add the server to the discord channel
-        self.db(self.db.discord.channel == channel).update_record(servers=server)
+        # Remove the discord channel
+        self.db(self.db.discord.channel == channel).delete()
 
         self.db.commit()
 
-        return "Server added to discord channel successfully"
+        return "Discord channel removed successfully"
+    
+    # Function to get a list of all discord servers
+    def get_discords(self):
+        discords = self.db(self.db.discord).select()
+
+        return discords
+    
+    # Function to update a discord server, depending on the given fields in a data dictionary
+    def update_discord(self, channel, data):
+        # Check if the discord server exists
+        discord = self.get_discord_by_channel(channel)
+        if not discord:
+            return "Discord channel does not exist."
+        
+        # Update the discord server
+        if 'channel' in data:
+            discord.channel = data['channel']
+        if 'community_id' in data:
+            discord.community_id = data['community_id']
+        if 'servers' in data:
+            discord.servers = data['servers']
+        if 'aliases' in data:
+            discord.aliases = data['aliases']
+
+        self.db.commit()
+
+        return "Discord channel updated successfully"
+

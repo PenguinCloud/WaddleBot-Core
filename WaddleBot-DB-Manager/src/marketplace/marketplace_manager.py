@@ -54,3 +54,35 @@ class MarketplaceManager:
         marketplace = self.db(self.db.marketplace.name == name).select().first()
 
         return marketplace
+    
+    # Function to get a marketplace by ID
+    def get_marketplace_by_id(self, id):
+        marketplace = self.db(self.db.marketplace.id == id).select().first()
+
+        return marketplace
+    
+    # Function to update a marketplace, depending on the given fields in a data dictionary
+    def update_marketplace(self, name, data):
+        # Check if the marketplace exists
+        marketplace = self.get_marketplace_by_name(name)
+        if not marketplace:
+            return "Marketplace does not exist."
+        
+        # Update the marketplace
+        if 'name' in data:
+            marketplace.name = data['name']
+        if 'description' in data:
+            marketplace.description = data['description']
+        if 'gateway_url' in data:
+            marketplace.gateway_url = data['gateway_url']
+        if 'module_type_id' in data:
+            marketplace.module_type_id = data['module_type_id']
+        if 'metadata' in data:
+            marketplace.metadata = data['metadata']
+
+        marketplace.update_record()
+
+        self.db.commit()
+
+        return "Marketplace updated successfully"
+

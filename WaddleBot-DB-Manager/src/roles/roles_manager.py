@@ -47,3 +47,23 @@ class RolesManager:
         self.db.commit()
 
         return "Role removed successfully"
+    
+    # Function to get a list of all roles
+    def get_roles(self):
+        roles = self.db(self.db.roles).select()
+
+        return roles
+    
+    # Function to update a role
+    def update_role(self, name, description, privilages, requirements):
+        # Check if the role exists
+        role = self.get_role_by_name(name)
+        if not role:
+            return "Role does not exist."
+
+        # Update the role
+        self.db(self.db.roles.name == name).update(description=description, privilages=privilages, requirements=requirements)
+
+        self.db.commit()
+
+        return "Role updated successfully"
