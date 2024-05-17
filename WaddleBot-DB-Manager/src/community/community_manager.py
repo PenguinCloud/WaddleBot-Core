@@ -13,28 +13,20 @@ class CommunityManager:
         self.db.commit()
 
     # Function to create a new community entry, if the community already exists, it will return an error
-    def create_community(self, communityname): 
+    def create_community(self, community_name, community_description): 
         # Before a new community is created, we need to check if the community already exists
-        community = self.get_community_by_name(communityname)
+        community = self.get_community_by_name(community_name)
         if community:
             return "Community already exists."
         else:
-            self.db.communities.insert(community_name=communityname)
-
-            # # Remove spaces from the community name
-            # communityname = communityname.replace(" ", "_")
-
-            # # Create a new table for the community
-            # self.db.define_table(communityname, 
-            #                 Field('member'),
-            #                 Field('role', default='member'))
+            self.db.communities.insert(community_name=community_name, community_description=community_description)
 
             self.db.commit()
 
             return "Community created successfully"
     
     # Function to remove a community
-    def remove_community(self, communityname):
+    def delete_community(self, communityname):
         # Check if the community exists
         community = self.get_community_by_name(communityname)
         if not community:
@@ -68,15 +60,19 @@ class CommunityManager:
 
         return community
     
-    # Function to add a description to a community
-    def add_description_to_community(self, communityname, communitydescription):
-        # Check if the community exists
-        community = self.get_community_by_name(communityname)
-        if not community:
+    # Function to update a community by communityname, depending on the given fields
+    def update_community(self, communityname, data):
+        community = self.db(self.db.communities.community_name == communityname).select().first()
+
+        if community:
+            if 'community_name' in data:
+                community.update_record(community_name=data['community_name'])
+            if 'community_description' in data:
+                community.update_record(community_description=data['community_description'])
+
+            self.db.commit()
+
+            return "Community updated successfully"
+        else:
             return "Community does not exist."
-
-        # Update the description of the community
-        self.db(self.db.communities.community_name == communityname).update(community_description=communitydescription)
-        self.db.commit()
-
-        return "Description added to community successfully"
+    
