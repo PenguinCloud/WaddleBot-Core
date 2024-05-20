@@ -24,7 +24,7 @@ from src.marketplace.marketplace_manager import MarketplaceManager
 connectionString = 'sqlite://src/db/test.db'
 
 # Initialize the database
-db = DAL(connectionString, pool_size=2)
+db = DAL(connectionString, pool_size=0)
 
 # Initialize the table managers
 identityManager = IdentityManager(db)
@@ -51,27 +51,35 @@ def createDatabase():
     print("Creating the database, if not exists....")
 
     # Create the user table, if it doesnt exist
+    print("Creating the identity table....")
     identityManager.create_identity_table()
 
     # Create the community table, if it doesnt exist
+    print("Creating the community table....")
     communityManager.create_community_table()
 
     # Create the community members table, if it doesnt exist
+    print("Creating the community members table....")
     communityMembersManager.create_community_members_table()
 
     # Create the community module table, if it doesnt exist
+    print("Creating the community module table....")
     communityModuleManager.create_community_module_table()
 
     # Create the roles table, if it doesnt exist
+    print("Creating the roles table....")
     rolesManager.create_roles_table()
 
     # Create the discord table, if it doesnt exist
+    print("Creating the discord table....")
     discordManager.create_discord_table()
 
     # Create the twitch table, if it doesnt exist
+    print("Creating the twitch table....")
     twitchManager.create_twitch_table()
 
     # Create the marketplace table, if it doesnt exist
+    print("Creating the marketplace table....")
     marketplaceManager.create_marketplace_table()
 
     print("Database created successfully!")
@@ -210,6 +218,27 @@ marketplace_model = api.model('Marketplace', {
         description='List of metadata. This is not required.')))
 })
 
+# Function to turn a dictionary into a message to be sent back
+def dict_to_message(data):
+    message = ""
+    for key in data:
+        message += key + ": " + str(data[key]) + "\n"
+    return message
+
+# Function to turn a list of dictionaries into a message to be sent back
+def list_to_message(data):
+    message = ""
+    for item in data:
+        message += dict_to_message(item)
+    return message
+
+# Function to create Response Payload
+def create_response_payload(data, message=None):
+    response = {}
+    response['data'] = data
+    response['msg'] = message
+    return response
+
 # ==================================
 # Identity Endpoints
 # ==================================
@@ -230,13 +259,13 @@ class identity_post(Resource):
             msg = identityManager.create_identity(data['name'], data['country'], data['ip_address'], data['browser_fingerprints'])
 
             # Generate a response to be sent back.
-            response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
 
 
 @api.route('/identity/<name>', methods=['GET'])
@@ -251,13 +280,13 @@ class identity_get_by_name(Resource):
             identity = identityManager.get_identity_by_name(name)
 
             # Generate a response to be sent back.
-            response = [identity.as_dict()]
+            response = create_response_payload(identity)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
 
 @api.route('/identity_list', methods=['GET'])
 @api.doc(parser=parser)
@@ -271,13 +300,14 @@ class identities_get(Resource):
             identities = identityManager.get_all_identities()
 
             # Generate a response to be sent back.
-            response = [identity.as_dict() for identity in identities]
+            # response = [identity.as_dict() for identity in identities]
+            response = create_response_payload(identities)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
 
 @api.route('/identity_delete/<identity_id>', methods=['DELETE'])
 @api.doc(parser=parser)
@@ -291,13 +321,14 @@ class identity_delete(Resource):
             msg = identityManager.delete_identity(identity_id)
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
 
 @api.route('/identity_update/<identity_id>', methods=['PUT'])
 @api.doc(parser=parser)
@@ -315,13 +346,14 @@ class identity_update(Resource):
             msg = identityManager.update_identity(identity_id, data)
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
 
 # ==================================
 # Community Endpoints
@@ -340,16 +372,17 @@ class community_post(Resource):
             data = request.json
 
             # Create the community
-            msg = communityManager.create_community(data['community_name'], data['community_description'])
+            msg = communityManager.create_community(data)
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/community_list', methods=['GET'])
 @api.doc(parser=parser)
@@ -362,14 +395,22 @@ class communities_list(Resource):
             # Get all communities
             communities = communityManager.get_communities()
 
+            for community in communities:
+                print(community.as_dict())
+            # print(communities)
+
+            # Create a message string from the list of communities to be sent back.
+            response_data = [community.as_dict() for community in communities]
+
+            # response = {'msg': message}
             # Generate a response to be sent back.
-            response = [community.as_dict() for community in communities]
+            response = create_response_payload(response_data, None)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/community/<community_name>', methods=['GET'])
 @api.doc(parser=parser)
@@ -377,19 +418,18 @@ class community_get_by_name(Resource):
     @api.doc(responses=apiResponses)
     def get(self, community_name):
         try:
-            print('Community Retrieval request received')
-
             # Get the community
             community = communityManager.get_community_by_name(community_name)
 
             # Generate a response to be sent back.
-            response = [community.as_dict()]
+            # response = community
+            response = create_response_payload([community])
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/community_delete/<community_name>', methods=['DELETE'])
 @api.doc(parser=parser)
@@ -403,13 +443,14 @@ class community_delete(Resource):
             msg = communityManager.delete_community(community_name)
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/community_update/<community_name>', methods=['PUT'])
 @api.doc(parser=parser)
@@ -427,13 +468,39 @@ class community_update(Resource):
             msg = communityManager.update_community(community_name, data)
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
+            
+# Function to update the descriptions of a community
+@api.route('/community_update_desc/<community_name>', methods=['PUT'])
+@api.doc(parser=parser)
+class community_update_desc(Resource):
+    @api.expect(community_model, validate=False)
+    @api.doc(responses=apiResponses)
+    def put(self, community_name):
+        try:
+            print('Community Description Update request received')
+
+            # Get the data from the request
+            data = request.json
+
+            # Update the community description
+            msg = communityManager.update_community_description(community_name, data['community_description'])
+
+            # Generate a response to be sent back.
+            response = create_response_payload(None, msg)
+
+            return response
+        except Exception as e:
+            abort(500,
+                'Could Not Retrieve Data ' + str(e),
+                status='error')
             
 # ==================================
 # Community Members Endpoints
@@ -455,13 +522,14 @@ class community_member_post(Resource):
             msg = communityMembersManager.create_community_member(data['community_id'], data['member_id'], data['role_id'], data['currency'], data['reputation'])
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/community_member_list', methods=['GET'])
 @api.doc(parser=parser)
@@ -475,13 +543,14 @@ class community_members_list(Resource):
             community_members = communityMembersManager.get_community_members()
 
             # Generate a response to be sent back.
-            response = [community_member.as_dict() for community_member in community_members]
+            # response = [community_member.as_dict() for community_member in community_members]
+            response = create_response_payload([community_member.as_dict() for community_member in community_members])
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/community_member/<community_id>/<member_id>', methods=['GET'])
 @api.doc(parser=parser)
@@ -495,13 +564,14 @@ class community_member_get_by_id(Resource):
             community_member = communityMembersManager.get_community_member_by_community_id_and_member_id(community_id, member_id)
 
             # Generate a response to be sent back.
-            response = [community_member.as_dict()]
+            # response = [community_member.as_dict()]
+            response = create_response_payload([community_member.as_dict()])
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/community_member_delete/<community_id>/<member_id>', methods=['DELETE'])
 @api.doc(parser=parser)
@@ -515,13 +585,14 @@ class community_member_delete(Resource):
             msg = communityMembersManager.remove_community_member(community_id, member_id)
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/community_member_update/<member_id>', methods=['PUT'])
 @api.doc(parser=parser)
@@ -539,13 +610,14 @@ class community_member_update(Resource):
             msg = communityMembersManager.update_community_member(member_id, data)
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 # ==================================
 # Community Modules Endpoints
@@ -567,13 +639,14 @@ class community_module_post(Resource):
             msg = communityModuleManager.create_community_module(data['module_id'], data['community_id'], data['privilages'], data['enabled'])
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/community_module_list', methods=['GET'])
 @api.doc(parser=parser)
@@ -587,13 +660,14 @@ class community_modules_list(Resource):
             community_modules = communityModuleManager.get_community_modules()
 
             # Generate a response to be sent back.
-            response = [community_module.as_dict() for community_module in community_modules]
+            # response = [community_module.as_dict() for community_module in community_modules]
+            response = create_response_payload([community_module.as_dict() for community_module in community_modules])
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/community_module/<module_id>/<community_id>', methods=['GET'])
 @api.doc(parser=parser)
@@ -607,13 +681,14 @@ class community_module_get_by_id(Resource):
             community_module = communityModuleManager.get_community_module_by_module_id_and_community_id(module_id, community_id)
 
             # Generate a response to be sent back.
-            response = [community_module.as_dict()]
+            # response = community_module
+            response = create_response_payload(community_module)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/community_module_delete/<module_id>/<community_id>', methods=['DELETE'])
 @api.doc(parser=parser)
@@ -627,13 +702,14 @@ class community_module_delete(Resource):
             msg = communityModuleManager.remove_community_module(module_id, community_id)
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/community_module_update/<module_id>/<community_id>', methods=['PUT'])
 @api.doc(parser=parser)
@@ -651,13 +727,14 @@ class community_module_update(Resource):
             msg = communityModuleManager.update_community_module(module_id, data)
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 # ==================================
 # Roles Endpoints
@@ -679,13 +756,14 @@ class role_post(Resource):
             msg = rolesManager.create_role(data['name'], data['description'], data['privilages'], data['requirements'])
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/role_list', methods=['GET'])
 @api.doc(parser=parser)
@@ -699,13 +777,14 @@ class roles_list(Resource):
             roles = rolesManager.get_roles()
 
             # Generate a response to be sent back.
-            response = [role.as_dict() for role in roles]
+            # response = [role.as_dict() for role in roles]
+            response = create_response_payload([role.as_dict() for role in roles])
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/role/<role_name>', methods=['GET'])
 @api.doc(parser=parser)
@@ -719,13 +798,14 @@ class role_get_by_name(Resource):
             role = rolesManager.get_role_by_name(role_name)
 
             # Generate a response to be sent back.
-            response = [role.as_dict()]
+            # response = role
+            response = create_response_payload(role)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/role_delete/<role_name>', methods=['DELETE'])
 @api.doc(parser=parser)
@@ -739,13 +819,14 @@ class role_delete(Resource):
             msg = rolesManager.remove_role(role_name)
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/role_update/<role_name>', methods=['PUT'])
 @api.doc(parser=parser)
@@ -763,13 +844,14 @@ class role_update(Resource):
             msg = rolesManager.update_role(role_name, data)
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
 
 # ==================================
 # Discord Endpoints
@@ -791,13 +873,14 @@ class discord_post(Resource):
             msg = discordManager.create_discord(data['channel'], data['community_id'], data['servers'], data['aliases'])
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/discord_list', methods=['GET'])
 @api.doc(parser=parser)
@@ -811,13 +894,14 @@ class discords_list(Resource):
             discords = discordManager.get_discords()
 
             # Generate a response to be sent back.
-            response = [discord.as_dict() for discord in discords]
+            # response = [discord.as_dict() for discord in discords]
+            response = create_response_payload([discord.as_dict() for discord in discords])
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/discord/<channel>', methods=['GET'])
 @api.doc(parser=parser)
@@ -831,13 +915,14 @@ class discord_get_by_channel(Resource):
             discord = discordManager.get_discord_by_channel(channel)
 
             # Generate a response to be sent back.
-            response = [discord.as_dict()]
+            # response = discord
+            response = create_response_payload(discord)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/discord_delete/<channel>', methods=['DELETE'])
 @api.doc(parser=parser)
@@ -851,13 +936,14 @@ class discord_delete(Resource):
             msg = discordManager.remove_discord(channel)
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/discord_update/<channel>', methods=['PUT'])
 @api.doc(parser=parser)
@@ -875,13 +961,14 @@ class discord_update(Resource):
             msg = discordManager.update_discord(channel, data)
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 # ==================================
 # Twitch Endpoints
@@ -903,13 +990,14 @@ class twitch_post(Resource):
             msg = twitchManager.create_twitch(data['channel'], data['community_id'], data['servers'], data['aliases'])
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/twitch_list', methods=['GET'])
 @api.doc(parser=parser)
@@ -923,13 +1011,14 @@ class twitch_list(Resource):
             twitchs = twitchManager.get_twitchs()
 
             # Generate a response to be sent back.
-            response = [twitch.as_dict() for twitch in twitchs]
+            # response = [twitch.as_dict() for twitch in twitchs]
+            response = create_response_payload([twitch.as_dict() for twitch in twitchs])
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
 
 @api.route('/twitch/<channel>', methods=['GET'])
 @api.doc(parser=parser)
@@ -943,13 +1032,14 @@ class twitch_get_by_channel(Resource):
             twitch = twitchManager.get_twitch_by_channel(channel)
 
             # Generate a response to be sent back.
-            response = [twitch.as_dict()]
+            # response = twitch
+            response = create_response_payload(twitch)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/twitch_delete/<channel>', methods=['DELETE'])
 @api.doc(parser=parser)
@@ -963,13 +1053,14 @@ class twitch_delete(Resource):
             msg = twitchManager.remove_twitch(channel)
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/twitch_update/<channel>', methods=['PUT'])
 @api.doc(parser=parser)
@@ -987,13 +1078,14 @@ class twitch_update(Resource):
             msg = twitchManager.update_twitch(channel, data)
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 # ==================================
 # Marketplace Endpoints
@@ -1015,13 +1107,14 @@ class marketplace_new(Resource):
             msg = marketplaceManager.create_marketplace(data['name'], data['description'], data['gateway_url'], data['module_type_id'], data['metadata'])
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/marketplace_list', methods=['GET'])
 @api.doc(parser=parser)
@@ -1035,13 +1128,14 @@ class marketplaces(Resource):
             marketplaces = marketplaceManager.get_marketplace_modules()
 
             # Generate a response to be sent back.
-            response = [marketplace.as_dict() for marketplace in marketplaces]
+            # response = [marketplace.as_dict() for marketplace in marketplaces]
+            response = create_response_payload([marketplace.as_dict() for marketplace in marketplaces])
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/marketplace/<name>', methods=['GET'])
 @api.doc(parser=parser)
@@ -1055,13 +1149,14 @@ class marketplace(Resource):
             marketplace = marketplaceManager.get_marketplace_by_name(name)
 
             # Generate a response to be sent back.
-            response = [marketplace.as_dict()]
+            # response = marketplace
+            response = create_response_payload(marketplace)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/marketplace_delete/<name>', methods=['DELETE'])
 @api.doc(parser=parser)
@@ -1075,13 +1170,14 @@ class marketplace_delete(Resource):
             msg = marketplaceManager.remove_marketplace(name)
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 @api.route('/marketplace_update/<name>', methods=['PUT'])
 @api.doc(parser=parser)
@@ -1099,13 +1195,14 @@ class marketplace_update(Resource):
             msg = marketplaceManager.update_marketplace(name, data)
 
             # Generate a response to be sent back.
-            response = msg
+            # response = msg
+            response = create_response_payload(None, msg)
 
             return response
         except Exception as e:
             abort(500,
                 'Could Not Retrieve Data ' + str(e),
-                status='error', uuid=str(apiutils.request_id()))
+                status='error')
             
 
 if __name__ == '__main__':

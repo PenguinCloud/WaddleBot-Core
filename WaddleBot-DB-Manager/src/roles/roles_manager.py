@@ -32,7 +32,9 @@ class RolesManager:
     def get_role_by_name(self, name):
         role = self.db(self.db.roles.name == name).select().first()
 
-        return role
+        if not role:
+            return { 'error': 'Role does not exist.'}
+        return role.as_dict()
     
     # Function to remove a role
     def remove_role(self, name):
