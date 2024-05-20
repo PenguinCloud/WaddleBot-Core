@@ -32,7 +32,9 @@ class TwitchManager:
     def get_twitch_by_channel(self, channel):
         twitch = self.db(self.db.twitch.channel == channel).select().first()
 
-        return twitch
+        if not twitch:
+            return { 'error': 'Twitch channel does not exist.'}
+        return twitch.as_dict()
     
     # Function to add a server to a twitch channel
     def add_server_to_twitch(self, channel, server):
@@ -50,9 +52,9 @@ class TwitchManager:
     
     # Function to get a list of all twitch servers
     def get_twitchs(self):
-        twitchs = self.db(self.db.twitch).select()
+        twitch = self.db(self.db.twitch).select()
 
-        return twitchs
+        return twitch
     
     # Function to update a twitch server, depending on the given fields in a data dictionary
     def update_twitch(self, channel, data):

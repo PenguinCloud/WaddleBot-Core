@@ -31,7 +31,9 @@ class IdentityManager:
     def get_identity_by_name(self, name):
         identity = self.db(self.db.identity.name == name).select().first()
 
-        return identity
+        if not identity:
+            return { 'error': 'Identity does not exist.'}
+        return [identity.as_dict()]
     
     # Function to retrieve all identities
     def get_all_identities(self):

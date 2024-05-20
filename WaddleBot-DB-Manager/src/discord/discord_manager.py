@@ -31,7 +31,9 @@ class DiscordManager:
     def get_discord_by_channel(self, channel):
         discord = self.db(self.db.discord.channel == channel).select().first()
 
-        return discord
+        if not discord:
+            return { 'error': 'Discord channel does not exist.'}
+        return discord.as_dict()
     
     # Function get discord by ID
     def get_discord_by_id(self, id):

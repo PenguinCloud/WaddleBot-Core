@@ -53,7 +53,9 @@ class MarketplaceManager:
     def get_marketplace_by_name(self, name):
         marketplace = self.db(self.db.marketplace.name == name).select().first()
 
-        return marketplace
+        if not marketplace:
+            return { 'error': 'Marketplace does not exist.'}
+        return marketplace.as_dict()
     
     # Function to get a marketplace by ID
     def get_marketplace_by_id(self, id):

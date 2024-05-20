@@ -13,17 +13,24 @@ class CommunityManager:
         self.db.commit()
 
     # Function to create a new community entry, if the community already exists, it will return an error
-    def create_community(self, community_name, community_description): 
-        # Before a new community is created, we need to check if the community already exists
-        community = self.get_community_by_name(community_name)
-        if community:
+    def create_community(self, community_data): 
+        # Check if the community already exists
+        community = self.get_community_by_name(community_data['community_name'])
+        
+        if 'error' not in community:
             return "Community already exists."
-        else:
-            self.db.communities.insert(community_name=community_name, community_description=community_description)
+        
+        description = ''
 
-            self.db.commit()
+        if 'community_description' in community_data:
+            description = community_data['community_description']
 
-            return "Community created successfully"
+        # Insert the community into the communities table
+        self.db.communities.insert(community_name=community_data['community_name'], community_description=description)
+        self.db.commit()
+
+        return "Community created successfully"
+
     
     # Function to remove a community
     def delete_community(self, communityname):
@@ -54,12 +61,14 @@ class CommunityManager:
 
         return communities
 
-    # Function to retrieve a specific community by communityname
+    # Function to retrieve a specific community by communityname. Return a message if the community does not exist.
     def get_community_by_name(self, communityname):
         community = self.db(self.db.communities.community_name == communityname).select().first()
 
-        return community
-    
+        if not community:
+            return {"error": "Community does not exist."}
+        return community.as_dict()
+
     # Function to update a community by communityname, depending on the given fields
     def update_community(self, communityname, data):
         community = self.db(self.db.communities.community_name == communityname).select().first()
@@ -73,6 +82,18 @@ class CommunityManager:
             self.db.commit()
 
             return "Community updated successfully"
+        else:
+            return "Community does not exist."
+        
+    # Function to update the description of a community
+    def update_community_description(self, communityname, description):
+        community = self.db(self.db.communities.community_name == communityname).select().first()
+
+        if community:
+            community.update_record(community_description=description)
+            self.db.commit()
+
+            return "Community description updated successfully"
         else:
             return "Community does not exist."
     
