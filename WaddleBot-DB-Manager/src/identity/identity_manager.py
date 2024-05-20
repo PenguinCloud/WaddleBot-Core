@@ -18,7 +18,7 @@ class IdentityManager:
     def create_identity(self, name, country, ip_address, browser_fingerprints): 
         # Before a new identity is created, we need to check if the identity already exists
         identity = self.get_identity_by_name(name)
-        if identity:
+        if 'error' not in identity:
             return "Identity already exists."
         else:
             self.db.identity.insert(name=name, country=country, ip_address=ip_address, browser_fingerprints=browser_fingerprints)
@@ -39,7 +39,7 @@ class IdentityManager:
     def get_all_identities(self):
         identities = self.db(self.db.identity).select()
 
-        return identities
+        return identities.as_dict()
     
     # Function to delete an identity by ID
     def delete_identity(self, identity_id):
