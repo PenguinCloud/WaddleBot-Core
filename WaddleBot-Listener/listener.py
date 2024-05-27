@@ -1,10 +1,13 @@
-from src.matterbridge.matterbridge_link import matterbridgelink
+from src.matterbridge.matterbridge_link import WaddleBotListener
 
 # Matterbridge API URL to manage messages
 matterbridgeURL = 'http://localhost:4200/api/'
 
 # User manager API URL to add users to the database
-userManagerURL = 'http://localhost:5000/identity_new'
+userManagerURL = 'http://localhost:5000/identity'
+
+# Marketplace API URL to manage the marketplace
+marketplaceURL = 'http://localhost:6300/marketplace/'
 
 # Redis parameters
 redisHost = 'localhost'
@@ -16,10 +19,10 @@ def main():
     matterbridgePostURL = matterbridgeURL + 'message'
 
     # Initialize the Matterbridge Link
-    matterbridge = matterbridgelink(matterbridgeGetURL, matterbridgePostURL, userManagerURL, redisHost, redisPort)
+    listener = WaddleBotListener(matterbridgeGetURL, matterbridgePostURL, userManagerURL, redisHost, redisPort, marketplaceURL)
 
     # Start listening for messages
-    matterbridge.listen()
+    listener.listen()
     
 
 if __name__ == '__main__':
