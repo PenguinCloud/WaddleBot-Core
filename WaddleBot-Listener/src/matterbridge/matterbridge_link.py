@@ -2,28 +2,20 @@ import requests
 import time
 import re
 from pydal import DAL, Field
+from urllib.parse import quote, urlencode, quote_plus
 
-from src.redis.redis_manager import RedisManager
+from src.redis.redis_cache import RedisCache
 
-
-# TODO: Add these commands to the REDIS cache
-# botCommands = { "!help": "Displays the list of available commands.",
-#                 "!community": "A set of commands to manage communities, if you have the right permissions.",
-#                 "!community_manage_add": "Creates a new community. Requires the community name and description. The community name must be unique. The community description is optional. Example: !community_manage_add <Test Community>",
-#                 "!community_manage_rem": "Removes a community. Requires the community name. Example: !community_manage_rem <Test Community>",
-#                 "!community_manage_ls": "Lists all communities. Example: !community_manage_ls",
-#                 "!community_manage_desc": "Sets the description of a community. Requires the community name and description. Example: !community_manage_desc <Test Community> <This is a test community>",
-# }
-
-class matterbridgelink:
-    def __init__(self, matterbridgeGetURL, matterbridgePostURL, userManagerURL, redisHost, redisPort):
+class WaddleBotListener:
+    def __init__(self, matterbridgeGetURL, matterbridgePostURL, userManagerURL, redisHost, redisPort, marketplaceURL):
         # Initialize the variables
         self.matterbridgeGetURL = matterbridgeGetURL
         self.matterbridgePostURL = matterbridgePostURL
         self.userManagerURL = userManagerURL
+        self.marketplaceURL = marketplaceURL
 
         # Initialize the Redis Manager
-        self.redisManager = RedisManager(redisHost, redisPort)
+        self.redisManager = RedisCache(redisHost, redisPort)
 
     # Function to listen for messages
     def listen(self):
@@ -45,15 +37,18 @@ class matterbridgelink:
                     print(messageData)
 
                     # Create a user if the user does not exist
-                    if 'username' in messageData[0]:
-                        self.add_identity(messageData[0]['username'])
+                    # if 'username' in messageData[0]:
+                    #     self.add_identity(messageData[0]['username'])
 
                     if 'text' in messageData[0] and 'gateway' in messageData[0]:
                         gateway = messageData[0]['gateway']
                         message = messageData[0]['text']
 
                         if "!" in message and message[0] == "!":
-                            command = self.get_command(message)
+                            commands = self.get_commands(message)
+
+                            # print("The list of commands are:")
+                            # print(commands)
 
                             # Execute the command
                             # commandResult = self.execute_command(command)
@@ -70,46 +65,43 @@ class matterbridgelink:
                             cmdResult += f"{username}, "
 
                             # If the command is !help, display the help message
-                            if command == "!help":
+                            if commands[0] == "!help":
                                 cmdResult += self.display_help()
                             # Else, check if the command is in the Redis cache
                             else:
                                 # Remove the '!' from the command
-                                command = command[1:]
+                                redisCommand = commands[0]
 
                                 # Get the command data from the Redis cache
-                                commandData = self.redisManager.get_command(command)
-                                if commandData is not None:
+                                commandURL = self.redisManager.get_command(redisCommand)
+                                if commandURL is not None:
                                     print("Command found in Redis cache.")
-                                    # print(commandData)
+                                    print(commandURL)
                                     
+                                    # Get command metadata from the marketplace
+                                    metadata = self.get_marketplace_metadata(commandURL)
+
+                                    if metadata is None:
+                                        print("Error occured while trying to get the metadata from the marketplace.")
+                                        cmdResult += "The command could not be found. Ensure that the command is typed correctly."
+                                        self.send_bot_message(gateway, cmdResult)
+                                        continue
+
+                                    # Get the command properties from the metadata
+                                    commandData = self.get_command_properties(commands, metadata)
+
+                                    print("The command data is:")
+                                    print(commandData)
+
+                                    # print("I GOT SOMETHING FROM THE MARKETPLACE!!!!")
+                                    # print(metadata)
+
                                     # Execute the command
-                                    cmdResult += self.execute_command(message, commandData)
+                                    cmdResult += self.execute_command(message, commandData, commandURL)
                                 else:
                                     print("Command not found in Redis cache.")
                                     cmdResult += "Command not found. Please use !help to see the list of available commands."
 
-                            # if command in botCommands:
-                            #     if command == "!help":
-                            #         cmdResult = self.display_help()
-                            #     if command == "!community":
-                            #         cmdResult = self.display_community_commands()
-                            #     if command == "!community_manage_add":
-                            #         comName = self.get_community_name(message)
-                            #         cmdResult = self.create_community(comName)
-                            #     if  command == "!community_manage_rem":
-                            #         comName = self.get_community_name(message)
-                            #         cmdResult = self.remove_community(comName)
-                            #     if command == "!community_manage_ls":
-                            #         cmdResult = self.get_communities()
-                            #     if command == "!community_manage_desc":
-                            #         comParams = self.get_community_params(message)
-                            #         cmdResult = self.add_description_to_community(comParams[0], comParams[1])  
-
-                            #     self.send_bot_message(gateway, cmdResult) 
-                            # else:
-                            #     print("Command not found in the botCommands dictionary.")
-                            #     self.send_bot_message(gateway, "Command not found. Please use !help to see the list of available commands.")
                             self.send_bot_message(gateway, cmdResult) 
                             
                         else:
@@ -122,15 +114,31 @@ class matterbridgelink:
             time.sleep(1)
 
     # Function to get the command from the message
-    def get_command(self, message):
+    def get_commands(self, message):
         print("Getting the command from the message....")
 
-        command = ""
+        commands = []
+
+        # Remove all strings from the message that fall between the [ ] brackets or the < > brackets
+        message = re.sub(r'\[.*?\]', '', message)
+        message = re.sub(r'\<.*?\>', '', message)
 
         # Get the first word from the message
-        command = message.split(" ")[0]
+        commands = message.split(" ")
 
-        return command
+        # Remove all strings from the list that fall between the [ ] brackets or the < > brackets
+        commands = [x for x in commands if "[" not in x and "]" not in x and "<" not in x and ">" not in x]
+
+        filteredCommands = []
+        if len(commands) > 0:
+            for command in commands:
+                if command != "":
+                    filteredCommands.append(command)
+
+        print(f"The command list is:")
+        print(filteredCommands)
+
+        return filteredCommands
     
     # Function to get the command parameters from the message, that fall between the < > brackets
     def get_command_params(self, message):
@@ -154,16 +162,20 @@ class matterbridgelink:
 
         # If the values are is empty, return a list with only a singular empty string
         if len(values) == 0:
-            values = ['']
+            values = []
 
         return values
     
     # Function to get the payload keys from a command retrieved from redis
-    def get_payload_keys(self, command):
+    def get_payload_keys(self, commandData):
         print("Getting the payload keys from the command....")
 
+        keys = []
         # Get the payload keys from the command
-        keys = command['payload_keys'].split(",")
+        if commandData is not None and 'payload_keys' in commandData:
+            keys = commandData['payload_keys']
+        else:
+            keys = None
 
         return keys
     
@@ -191,11 +203,16 @@ class matterbridgelink:
         return payload
 
     # Function to execute a command from the Redis cache, given the message command and the command data
-    def execute_command(self, message, commandData):
+    def execute_command(self, message, commandData, commandURL):
         print("Executing the command....")
 
         # Get the payload keys from the command data
         keys = self.get_payload_keys(commandData)
+
+        if keys is None:
+            msg = "The command does not exist. Ensure that you typed it correctly."
+            print(msg)
+            return msg
 
         # Get the command parameters from the message
         params = self.get_command_params(message)
@@ -215,7 +232,7 @@ class matterbridgelink:
             return msg
 
         # Create the function URL
-        url = self.create_function_url(commandData['url'], params)
+        url = self.create_function_url(commandURL, params)
 
         # Create the function payload
         payload = self.create_function_payload(keys, values)
@@ -317,7 +334,53 @@ class matterbridgelink:
 
         # Loop through the commands and display the command and its description.
         for command in commands:
-            helpMessage += f"Command: {command['command']}\nDescription: {command['description']}\n\n"
+            helpMessage += f"{command}\n"
 
 
         return helpMessage
+    
+    # Function to retrieve the metadata json object from a given marketplace module URL
+    def get_marketplace_metadata(self, marketplaceModuleURL):
+        print("Getting Marketplace Metadata....")
+
+        callURL = self.marketplaceURL + 'url?url=' + quote_plus(marketplaceModuleURL, safe='', encoding='utf-8')
+
+        print(f"Call URL: {callURL}")
+
+        resp = requests.get(url=callURL)
+
+        if resp.ok:
+            response = resp.json()
+
+            if 'metadata' in response:
+                metadata = response['metadata']
+                print("The metadata is:")
+                print(metadata)
+
+                return metadata
+
+            else:
+                return None
+        else:
+            return None
+        
+    # A function that accepts a string list, loops through each string and checks if they are present within one another in a given metadata object, and returns the command properties
+    def get_command_properties(self, commandlist, metadata):
+        print("Getting Command Properties....")
+
+        # TODO: Find a way to dynamically generate a metadata key path, dependant on the length of the commandlist
+        if metadata is not None and len(commandlist) > 0:
+            if len(commandlist) == 1 and commandlist[0] in metadata and 'description' in metadata[commandlist[0]]:
+                return metadata[commandlist[0]]
+            elif len(commandlist) == 2 and commandlist[0] in metadata and commandlist[1] in metadata[commandlist[0]] and 'description' in metadata[commandlist[0]][commandlist[1]]:
+                return metadata[commandlist[0]][commandlist[1]]
+            elif len(commandlist) == 3 and commandlist[0] in metadata and commandlist[1] in metadata[commandlist[0]] and commandlist[2] in metadata[commandlist[0]][commandlist[1]] and 'description' in metadata[commandlist[0]][commandlist[1]][commandlist[2]]:
+                return metadata[commandlist[0]][commandlist[1]][commandlist[2]]
+            else:
+                return None
+                
+            
+        
+
+    
+
