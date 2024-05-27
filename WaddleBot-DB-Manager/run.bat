@@ -1,5 +1,2 @@
-set FLASK_APP=dbmanager.py
-set FLASK_DEBUG=1
-
-echo "running app"
-flask run
+SET db_conn_string=sqlite://src/db/test.db
+py dbmanager.py
