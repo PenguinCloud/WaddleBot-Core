@@ -4,9 +4,12 @@ from pydal import DAL, Field
 class IdentityManager:
     def __init__(self, db):
         self.db = db
+
+        self.create_identity_table()
         
     # Function to create the user table
     def create_identity_table(self):
+        print("Creating identity table")
         self.db.define_table('identity', 
                             Field('name', 'string'),
                             Field('country', 'string'),
@@ -15,13 +18,22 @@ class IdentityManager:
         self.db.commit()
 
     # Function to create a new identity entry, if the identity already exists, it will return an error
-    def create_identity(self, name, country, ip_address, browser_fingerprints): 
+    def create_identity(self, data): 
         # Before a new identity is created, we need to check if the identity already exists
-        identity = self.get_identity_by_name(name)
-        if 'error' not in identity:
+        identity = self.db(self.db.identity.name == data['name']).select().first()
+        if identity:
             return "Identity already exists."
         else:
-            self.db.identity.insert(name=name, country=country, ip_address=ip_address, browser_fingerprints=browser_fingerprints)
+            self.db.identity.insert(name=data['name'])
+
+            identity = self.db(self.db.identity.name == data['name']).select().first()
+
+            if 'country' in data:
+                identity.update_record(country=data['country'])
+            if 'ip_address' in data:
+                identity.update_record(ip_address=data['ip_address'])
+            if 'browser_fingerprints' in data:
+                identity.update_record(browser_fingerprints=data['browser_fingerprints'])
 
             self.db.commit()
 
@@ -33,25 +45,29 @@ class IdentityManager:
 
         if not identity:
             return { 'error': 'Identity does not exist.'}
-        return [identity.as_dict()]
+        return identity.as_dict()
     
     # Function to retrieve all identities
     def get_all_identities(self):
         identities = self.db(self.db.identity).select()
 
-        return identities.as_dict()
+        return identities.as_list()
     
-    # Function to delete an identity by ID
-    def delete_identity(self, identity_id):
-        self.db(self.db.identity.id == identity_id).delete()
+    # Function to delete an identity by Name. If the identity does not exist, it will return an error
+    def delete_identity(self, name):
+        identity = self.db(self.db.identity.name == name).select().first()
 
-        self.db.commit()
+        if identity:
+            self.db(self.db.identity.name == name).delete()
+            self.db.commit()
 
-        return "Identity deleted successfully"
+            return "Identity deleted successfully"
+        else:
+            return "Identity does not exist."
     
     # Function to update an identity by ID, depending on the given fields
-    def update_identity(self, identity_id, data):
-        identity = self.db(self.db.identity.id == identity_id).select().first()
+    def update_identity(self, name, data):
+        identity = self.db(self.db.identity.name == name).select().first()
 
         if identity:
             if 'name' in data:

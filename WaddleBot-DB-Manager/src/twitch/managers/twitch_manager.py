@@ -5,8 +5,11 @@ class TwitchManager:
     def __init__(self, db):
         self.db = db
 
+        self.create_twitch_table()
+
     # Function to create the twitch table
     def create_twitch_table(self):
+        print("Creating twitch table")
         self.db.define_table('twitch', 
                             Field('channel', 'string'),
                             Field('community_id', 'integer'),
@@ -16,13 +19,22 @@ class TwitchManager:
         self.db.commit()
 
     # Function to add a new twitch channel community entry, if the community already exists, it will return an error
-    def create_twitch(self, channel, community_id, servers=[], aliases=[]): 
+    def create_twitch(self, data): 
         # Before a new twitch channel is created, we need to check if the channel already exists
-        twitch = self.get_twitch_by_channel(channel)
+        twitch = self.db(self.db.twitch.channel == data['channel']).select().first()
         if twitch:
             return "Twitch channel already exists."
         else:
-            self.db.twitch.insert(channel=channel, community_id=community_id, servers=servers, aliases=aliases)
+            self.db.twitch.insert(channel=data['channel'])
+
+            twitch = self.db(self.db.twitch.channel == data['channel']).select().first()
+
+            if 'community_id' in data:
+                twitch.update_record(community_id=data['community_id'])
+            if 'servers' in data:
+                twitch.update_record(servers=data['servers'])
+            if 'aliases' in data:
+                twitch.update_record(aliases=data['aliases'])
 
             self.db.commit()
 
@@ -39,7 +51,7 @@ class TwitchManager:
     # Function to add a server to a twitch channel
     def add_server_to_twitch(self, channel, server):
         # Check if the twitch channel exists
-        twitch = self.get_twitch_by_channel(channel)
+        twitch = self.db(self.db.twitch.channel == channel).select().first()
         if not twitch:
             return "Twitch channel does not exist."
 
@@ -51,27 +63,27 @@ class TwitchManager:
         return "Server added to twitch channel successfully"
     
     # Function to get a list of all twitch servers
-    def get_twitchs(self):
+    def get_twitch_channels(self):
         twitch = self.db(self.db.twitch).select()
 
-        return twitch
+        return twitch.as_list()
     
     # Function to update a twitch server, depending on the given fields in a data dictionary
     def update_twitch(self, channel, data):
         # Check if the twitch server exists
-        twitch = self.get_twitch_by_channel(channel)
+        twitch = self.db(self.db.twitch.channel == channel).select().first()
         if not twitch:
             return "Twitch channel does not exist."
         
         # Update the twitch server
         if 'channel' in data:
-            twitch.channel = data['channel']
+            twitch.update_record(channel=data['channel'])
         if 'community_id' in data:
-            twitch.community_id = data['community_id']
+            twitch.update_record(community_id=data['community_id'])
         if 'servers' in data:
-            twitch.servers = data['servers']
+            twitch.update_record(servers=data['servers'])
         if 'aliases' in data:
-            twitch.aliases = data['aliases']
+            twitch.update_record(aliases=data['aliases'])
 
         self.db.commit()
 
@@ -80,7 +92,7 @@ class TwitchManager:
     # Function to remove a twitch channel
     def remove_twitch(self, channel):
         # Check if the twitch channel exists
-        twitch = self.get_twitch_by_channel(channel)
+        twitch = self.db(self.db.twitch.channel == channel).select().first()
         if not twitch:
             return "Twitch channel does not exist."
 
@@ -95,6 +107,6 @@ class TwitchManager:
     def get_twitchs_by_community_id(self, community_id):
         twitchs = self.db(self.db.twitch.community_id == community_id).select()
 
-        return twitchs
+        return twitchs.as_list()
     
     

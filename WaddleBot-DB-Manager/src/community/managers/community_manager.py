@@ -4,9 +4,12 @@ from pydal import DAL, Field
 class CommunityManager:
     def __init__(self, db):
         self.db = db
+
+        self.create_community_table()
         
     # Function to create the user table
     def create_community_table(self):
+        print("Creating the communities table....")
         self.db.define_table('communities', 
                             Field('community_name'),
                             Field('community_description'))
@@ -32,34 +35,23 @@ class CommunityManager:
         return "Community created successfully"
 
     
-    # Function to remove a community
+    # Function to remove a community by community name, if it exists
     def delete_community(self, communityname):
-        # Check if the community exists
-        community = self.get_community_by_name(communityname)
-        if not community:
+        community = self.db(self.db.communities.community_name == communityname).select().first()
+
+        if community:
+            self.db(self.db.communities.community_name == communityname).delete()
+            self.db.commit()
+
+            return "Community removed successfully"
+        else:
             return "Community does not exist."
-
-        # Remove the community
-        # self.db(self.db.communities.communityname == communityname).delete()
-
-        # Remove the community record from the communities table
-        self.db(self.db.communities.community_name == communityname).delete()
-
-        print(f"Community removed successfully from the communities table. Deleting the {communityname} table....")
-
-        # # Remove spaces from the community name
-        # communityname = communityname.replace(" ", "")
-        # self.db['users'].drop()
-
-        self.db.commit()
-
-        return "Community removed successfully"
     
-    # Function to retrieve a list of all communities
+    # Function to retrieve a list of all communities. Return an empty list if no communities exist.
     def get_communities(self):
         communities = self.db(self.db.communities).select()
 
-        return communities
+        return communities.as_list()
 
     # Function to retrieve a specific community by communityname. Return a message if the community does not exist.
     def get_community_by_name(self, communityname):
