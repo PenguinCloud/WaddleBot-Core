@@ -4,10 +4,10 @@ from src.matterbridge.matterbridge_link import WaddleBotListener
 matterbridgeURL = 'http://localhost:4200/api/'
 
 # User manager API URL to add users to the database
-userManagerURL = 'http://localhost:5000/identity'
+userManagerURL = 'http://localhost:8000/waddlebot_db_manager/identities/create.json/'
 
 # Marketplace API URL to manage the marketplace
-marketplaceURL = 'http://localhost:6300/marketplace/'
+marketplaceURL = 'http://localhost:8000/marketplace_manager/marketplace/get_by_url.json'
 
 # Redis parameters
 redisHost = 'localhost'
