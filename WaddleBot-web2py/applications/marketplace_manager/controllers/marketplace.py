@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+from urllib.parse import unquote
 
 
 # try something like
@@ -29,7 +30,7 @@ def create():
 
 # Get a marketplace module by name. Throws an error if no name is given, or the marketplace module does not exist.
 def get():
-    name = decode_name(request.vars.name)
+    name = decode_name(request.args(0))
     if not name:
         return dict(msg="No name given.")
     marketplace_module = db(db.marketplace_modules.name == name).select().first()
@@ -40,21 +41,29 @@ def get():
 # Get all marketplace modules.
 def get_all():
     marketplace_modules = db(db.marketplace_modules).select()
-    return dict(marketplace_modules=marketplace_modules)
+    return dict(data=marketplace_modules)
 
 # Get a marketplace module by URL. Throws an error if no URL is given, or the marketplace module does not exist.
 def get_by_url():
     url = request.vars.url
+
     if not url:
         return dict(msg="No URL given.")
+    
+    print("THE URL IS: ", url)
+
+    url = unquote(url)
+
+    print("THE UNQOUTED URL IS: ", url)
+
     marketplace_module = db(db.marketplace_modules.gateway_url == url).select().first()
     if not marketplace_module:
         return dict(msg="Marketplace Module does not exist.")
-    return dict(marketplace_module=marketplace_module)
+    return marketplace_module.as_dict()
 
 # Remove a marketplace module by name. Throws an error if no name is given, or the marketplace module does not exist.
 def remove():
-    name = decode_name(request.vars.name)
+    name = decode_name(request.args(0))
     if not name:
         return dict(msg="No name given.")
     marketplace_module = db(db.marketplace_modules.name == name).select().first()
@@ -65,7 +74,7 @@ def remove():
 
 # Update a marketplace module by name. Throws an error if no name is given, or the marketplace module does not exist.
 def update():
-    name = decode_name(request.vars.name)
+    name = decode_name(request.args(0))
     if not name:
         return dict(msg="No name given.")
     marketplace_module = db(db.marketplace_modules.name == name).select().first()
@@ -78,3 +87,4 @@ def update():
     marketplace_module.update_record(**payload)
     return dict(msg="Marketplace Module updated.")
 
+ 
