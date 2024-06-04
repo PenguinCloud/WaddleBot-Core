@@ -179,9 +179,22 @@ class WaddleBotListener:
 
         return keys
     
+    # Function to get the action from the command data
+    def get_action(self, commandData):
+        print("Getting the action from the command data....")
+
+        action = ""
+        # Get the action from the command data
+        if commandData is not None and 'action' in commandData:
+            action = commandData['action']
+
+        return action
+    
     # Function to create a function URL with parameters by adding the parameters to the URL
-    def create_function_url(self, url, params):
+    def create_function_url(self, url, action, params):
         print("Creating the function URL....")
+
+        url = url + f"{action}"
 
         # Add the parameters to the URL
         for param in params:
@@ -214,6 +227,9 @@ class WaddleBotListener:
             print(msg)
             return msg
 
+        # Get the action value from the metadata
+        action = commandData['action']
+
         # Get the command parameters from the message
         params = self.get_command_params(message)
 
@@ -232,7 +248,7 @@ class WaddleBotListener:
             return msg
 
         # Create the function URL
-        url = self.create_function_url(commandURL, params)
+        url = self.create_function_url(commandURL, action, params)
 
         # Create the function payload
         payload = self.create_function_payload(keys, values)
@@ -343,7 +359,7 @@ class WaddleBotListener:
     def get_marketplace_metadata(self, marketplaceModuleURL):
         print("Getting Marketplace Metadata....")
 
-        callURL = self.marketplaceURL + 'url?url=' + quote_plus(marketplaceModuleURL, safe='', encoding='utf-8')
+        callURL = self.marketplaceURL + "?url=" + quote_plus(marketplaceModuleURL, safe='', encoding='utf-8')
 
         print(f"Call URL: {callURL}")
 
@@ -354,8 +370,8 @@ class WaddleBotListener:
 
             if 'metadata' in response:
                 metadata = response['metadata']
-                print("The metadata is:")
-                print(metadata)
+                # print("The metadata is:")
+                # print(metadata)
 
                 return metadata
 
@@ -367,6 +383,9 @@ class WaddleBotListener:
     # A function that accepts a string list, loops through each string and checks if they are present within one another in a given metadata object, and returns the command properties
     def get_command_properties(self, commandlist, metadata):
         print("Getting Command Properties....")
+
+        print(f"Command List: {commandlist}")
+        print(f"Metadata: {metadata}")
 
         # TODO: Find a way to dynamically generate a metadata key path, dependant on the length of the commandlist
         if metadata is not None and len(commandlist) > 0:
