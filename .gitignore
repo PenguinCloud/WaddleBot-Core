@@ -7,7 +7,19 @@ venv/
 *.log
 
 test.db
+
 __pycahce__/
 *.cpython-312.pyc
 *.table
+
+WaddleBot-web2py/*
+
+
+!WaddleBot-web2py/applications/waddlebot_db_manager
+!WaddleBot-web2py/applications/marketplace_manager
+
+WaddleBot-web2py/applications/*/databases/
+
+storage.sqlite
+
 
