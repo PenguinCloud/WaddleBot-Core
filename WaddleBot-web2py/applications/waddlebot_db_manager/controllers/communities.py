@@ -27,6 +27,19 @@ def create():
     db.communities.insert(community_name=payload['community_name'], community_description=payload['community_description'])
     return dict(msg="Community created.")
 
+# Create a new community with a payload only containing the community name. Throws an error if no payload is given, or the community already exists.
+def create_by_name():
+    payload = request.body.read()
+    if not payload:
+        return dict(msg="No payload given.")
+    payload = json.loads(payload)
+    if 'community_name' not in payload:
+        return dict(msg="Payload missing required fields.")
+    if db(db.communities.community_name == payload['community_name']).count() > 0:
+        return dict(msg="Community already exists.")
+    db.communities.insert(community_name=payload['community_name'], community_description="")
+    return dict(msg="Community created.")
+
 # Get all communities.
 def get_all():
     communities = db(db.communities).select()
@@ -59,6 +72,24 @@ def update_by_name():
     if not community:
         return dict(msg="Community does not exist.")
     community.update_record(community_name=payload['community_name'], community_description=payload['community_description'])
+    return dict(msg="Community updated.")
+
+# Update a community's description by its name. If the community does not exist, return an error.
+def update_desc_by_name():
+    community_name = request.args(0)
+    community_name = decode_name(community_name)
+    if not community_name:
+        return dict(msg="No community name given.")
+    payload = request.body.read()
+    if not payload:
+        return dict(msg="No payload given.")
+    payload = json.loads(payload)
+    if 'community_description' not in payload:
+        return dict(msg="Payload missing required fields.")
+    community = db(db.communities.community_name == community_name).select().first()
+    if not community:
+        return dict(msg="Community does not exist.")
+    community.update_record(community_description=payload['community_description'])
     return dict(msg="Community updated.")
 
 # Delete a community by its name. If the community does not exist, return an error.
