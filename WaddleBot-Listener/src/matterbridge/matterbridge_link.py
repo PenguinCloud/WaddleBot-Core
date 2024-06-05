@@ -36,9 +36,12 @@ class WaddleBotListener:
                     print("FOUND MESSAGE!!")
                     print(messageData)
 
+                    username = None
+
                     # Create a user if the user does not exist
-                    # if 'username' in messageData[0]:
-                    #     self.add_identity(messageData[0]['username'])
+                    if 'username' in messageData[0]:
+                        username = messageData[0]['username']
+                        self.add_identity(username)
 
                     if 'text' in messageData[0] and 'gateway' in messageData[0]:
                         gateway = messageData[0]['gateway']
@@ -59,18 +62,18 @@ class WaddleBotListener:
                             cmdResult = ""
 
                             # Get the userid from the message
-                            username = "<@" + messageData[0]['userid'] + ">"
+                            pingUsername = "<@" + messageData[0]['userid'] + ">"
 
                             # Add the username to the response message
-                            cmdResult += f"{username}, "
+                            cmdResult += f"{pingUsername}, "
 
                             # If the command is !help, display the help message
                             if commands[0] == "!help":
                                 cmdResult += self.display_help()
                             # Else, check if the command is in the Redis cache
                             else:
-                                # Remove the '!' from the command
-                                redisCommand = commands[0]
+                                # Set the command as a Redis key
+                                redisCommand = self.set_redis_command(commands)
 
                                 # Get the command data from the Redis cache
                                 commandURL = self.redisManager.get_command(redisCommand)
@@ -97,7 +100,7 @@ class WaddleBotListener:
                                     # print(metadata)
 
                                     # Execute the command
-                                    cmdResult += self.execute_command(message, commandData, commandURL)
+                                    cmdResult += self.execute_command(username, message, commandData, commandURL)
                                 else:
                                     print("Command not found in Redis cache.")
                                     cmdResult += "Command not found. Please use !help to see the list of available commands."
@@ -112,6 +115,14 @@ class WaddleBotListener:
                 print("An error has occurred while trying to communicate with the API.")
 
             time.sleep(1)
+
+    # Function to set the list of commands as a singular redis key string by concatenating the commands with the underscore character
+    def set_redis_command(self, commands):
+        print("Setting the Redis command....")
+
+        command = "_".join(commands)
+
+        return command
 
     # Function to get the command from the message
     def get_commands(self, message):
@@ -164,7 +175,12 @@ class WaddleBotListener:
         if len(values) == 0:
             values = []
 
-        return values
+            return values
+        
+        # Turn the values list into a dictionary list where each dictionary contains the value and a flag to check if it is an identity
+        outputValues = [dict(value=value, isidentity=False) for value in values]
+
+        return outputValues
     
     # Function to get the payload keys from a command retrieved from redis
     def get_payload_keys(self, commandData):
@@ -211,12 +227,20 @@ class WaddleBotListener:
 
         # Add the keys and values to the payload
         for i in range(len(keys)):
-            payload[keys[i]] = values[i]
+            # If the key is identity_name, set the value of that key in the payload as the dictionary value with the isidentity flag set to True
+            if keys[i] == "identity_name":
+                # Find the dictionary with the isidentity flag set to True
+                for value in values:
+                    if value['isidentity']:
+                        payload[keys[i]] = value['value']
+            # Else if the isidentity flag is False, set the value of the key in the payload as the value of the dictionary
+            elif(not values[i]['isidentity']):
+                payload[keys[i]] = values[i]['value']
 
         return payload
 
     # Function to execute a command from the Redis cache, given the message command and the command data
-    def execute_command(self, message, commandData, commandURL):
+    def execute_command(self, username, message, commandData, commandURL):
         print("Executing the command....")
 
         # Get the payload keys from the command data
@@ -235,6 +259,11 @@ class WaddleBotListener:
 
         # Get the payload values from the message
         values = self.get_payload_values(message)
+
+        # If the key identity_name is in the keys, add the username to the values as a dictionary with the isidentity flag set to True
+        for key in keys:
+            if key == "identity_name":
+                values.append(dict(value=username, isidentity=True))
 
         print(f"Keys: {keys}")
         print(f"Values: {values}")
