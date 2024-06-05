@@ -2,8 +2,16 @@ import redis
 
 # TODO: Remove these test commands when the cache is officially deployed
 testCommands = {
-    "!community": "http://127.0.0.1:8000/waddlebot_db_manager/communities/",
-    "!marketplace": "http://127.0.0.1:8000/marketplace_manager/marketplace/",
+    # Community related commands
+    "!community_manage_add": "http://127.0.0.1:8000/waddlebot_db_manager/communities/",
+    "!community_manage_desc": "http://127.0.0.1:8000/waddlebot_db_manager/communities/",
+    "!community_manage_rem": "http://127.0.0.1:8000/waddlebot_db_manager/communities/",
+    "!community_manage_ls": "http://127.0.0.1:8000/waddlebot_db_manager/communities/",
+    # Community Member related commands
+    "!community_join": "http://127.0.0.1:8000/waddlebot_db_manager/community_members/",
+    "!community_leave": "http://127.0.0.1:8000/waddlebot_db_manager/community_members/",
+    # Marketplace Related Commands
+    "!marketplace_ls": "http://127.0.0.1:8000/marketplace_manager/marketplace/",
 }
 
 class RedisCache:
