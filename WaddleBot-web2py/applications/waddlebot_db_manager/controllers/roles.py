@@ -15,7 +15,7 @@ def decode_name(name):
     return name
 
 # Create a new role from a given payload. Throws an error if no payload is given, or the role already exists.
-def create():
+def create_role():
     payload = request.body.read()
     if not payload:
         return dict(msg="No payload given.")
@@ -71,4 +71,4 @@ def delete_by_name():
     if not role:
         return dict(msg="Role does not exist.")
     role.delete_record()
-    return dict(msg="Role deleted.")
+    return dict(msg="Role deleted.") 
