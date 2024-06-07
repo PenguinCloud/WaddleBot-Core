@@ -177,7 +177,7 @@ db.define_table('community_members',
 # Define table for community modules
 db.define_table('community_modules', 
                 Field('module_id', 'integer'),
-                Field('community_id', 'integer'),
+                Field('community_id', db.communities),
                 Field('enabled', 'boolean', default=True),
                 Field('privilages', 'list:string'))
 

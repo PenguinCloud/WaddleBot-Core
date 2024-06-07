@@ -41,9 +41,19 @@ def get():
 # Get all marketplace modules.
 def get_all():
     marketplace_modules = db(db.marketplace_modules).select()
+    # Add the module type name to each marketplace module
+    for marketplace_module in marketplace_modules:
+        module_type = db(db.module_types.id == marketplace_module.module_type_id).select().first()
+        marketplace_module.module_type_name = module_type.name
     return dict(data=marketplace_modules)
 
-# Get a marketplace module by URL. Throws an error if no URL is given, or the marketplace module does not exist.
+# Get all the marketplace modules, as only the name and the id. Only modules that fall under the Community module type are returned.
+def get_all_community_modules():
+    community_module_type = db(db.module_types.name == "Community").select().first()
+    marketplace_modules = db(db.marketplace_modules.module_type_id == community_module_type.id).select(db.marketplace_modules.id, db.marketplace_modules.name)
+    return dict(data=marketplace_modules)
+
+# Get a marketplace module by URL. Throws an error if no URL is given, or the marketplace module does not exist. Also returns the module type name.
 def get_by_url():
     url = request.vars.url
 
@@ -59,7 +69,13 @@ def get_by_url():
     marketplace_module = db(db.marketplace_modules.gateway_url == url).select().first()
     if not marketplace_module:
         return dict(msg="Marketplace Module does not exist.")
-    return marketplace_module.as_dict()
+    
+    # Also return the marketplace module type name part of the response
+    module_type = db(db.module_types.id == marketplace_module.module_type_id).select().first()
+    marketplace_module = marketplace_module.as_dict()
+    marketplace_module['module_type_name'] = module_type.name
+
+    return marketplace_module
 
 # Remove a marketplace module by name. Throws an error if no name is given, or the marketplace module does not exist.
 def remove():
@@ -87,4 +103,4 @@ def update():
     marketplace_module.update_record(**payload)
     return dict(msg="Marketplace Module updated.")
 
- 
+

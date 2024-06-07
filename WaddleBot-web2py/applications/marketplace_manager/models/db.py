@@ -154,11 +154,16 @@ if configuration.get('scheduler.enabled'):
 # -------------------------------------------------------------------------
 # auth.enable_record_versioning(db)
 
+# Define the module types table
+db.define_table('module_types',
+                Field('name', 'string'),
+                Field('description', 'string'))
+
 # Define the marketplace table
 db.define_table('marketplace_modules', 
                 Field('name', 'string'),
                 Field('description', 'string'),
                 Field('gateway_url', 'string'),
-                Field('module_type_id', 'integer'),
+                Field('module_type_id', 'reference module_types'),
                 Field('metadata', 'json'))
         

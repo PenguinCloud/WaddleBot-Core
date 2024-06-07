@@ -33,12 +33,21 @@ def create_by_name():
     if not payload:
         return dict(msg="No payload given.")
     payload = json.loads(payload)
-    if 'community_name' not in payload:
-        return dict(msg="Payload missing required fields.")
+
+    # Check if the community name and identity name fields are in the payload.
+    if 'community_name' not in payload or 'identity_name' not in payload:
+        return dict(msg="Payload missing required fields. Need community_name and identity_name.")
     if db(db.communities.community_name == payload['community_name']).count() > 0:
         return dict(msg="Community already exists.")
     db.communities.insert(community_name=payload['community_name'], community_description="")
-    return dict(msg="Community created.")
+
+    # After a community is created, add the identity as a member of the community with the Owner role from the roles table.
+    community = db(db.communities.community_name == payload['community_name']).select().first()
+    identity = db(db.identities.name == payload['identity_name']).select().first()
+    role = db(db.roles.name == "Owner").select().first()
+    db.community_members.insert(community_id=community.id, identity_id=identity.id, role_id=role.id, currency=0)
+
+    return dict(msg="Community created. You have been granted the Owner role of this community.")
 
 # Get all communities.
 def get_all():
