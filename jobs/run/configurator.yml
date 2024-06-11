@@ -1,4 +1,12 @@
 ---
+- name: Generate general matterbridge config fragment
+  ansible.builtin.template:
+    src: "/opt/manager/templates/matterbridge.j2"
+    dest: "/opt/matconf/0-matterbridge-general"
+    owner: "{{ run.user }}"
+    group: "{{ run.user }}"
+  when: discord.enable == "1"
+
 - name: Generate discord config fragment
   ansible.builtin.template:
     src: "/opt/manager/templates/matconfig/discord.j2"
