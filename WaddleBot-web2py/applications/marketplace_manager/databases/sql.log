@@ -63,3 +63,11 @@ CREATE TABLE "marketplace_modules"(
     "metadata" TEXT
 );
 success!
+timestamp: 2024-06-06T11:09:17.410123
+CREATE TABLE "module_types"(
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "name" CHAR(512),
+    "description" CHAR(512)
+);
+success!
+success!
