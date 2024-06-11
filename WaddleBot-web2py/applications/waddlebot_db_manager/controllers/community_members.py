@@ -128,7 +128,7 @@ def remove_member():
     # If there is only one member left of the community and the last member does not have the Owner role, give the last member the Owner role. Include a message that the Owner role has been given to the last member.
     msg = f"{payload['identity_name']} has left the community {payload['community_name']}."
     community_members = db(db.community_members.community_id == community.id).select()
-    if len(community_members) == 1:
+    if len(community_members) > 0:
         owner_role = db(db.roles.name == "Owner").select().first()
         if owner_role:
             community_members[0].update_record(role_id=owner_role.id)

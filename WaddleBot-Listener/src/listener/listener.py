@@ -28,8 +28,18 @@ class WaddleBotListener:
         print("Listening for messages....")
 
         while True:
-            resp = requests.get(self.matterbridgeGetURL)
-            if resp.ok:
+            # Check if the matterbridge API is reachable
+            resp = None
+
+            try: 
+                resp = requests.get(self.matterbridgeGetURL)
+            except requests.exceptions.RequestException as e:
+                print(e)
+                print("An error has occurred while trying to communicate with the API. Retrying in 1 second....")
+                time.sleep(1)
+                continue
+
+            if resp is not None and resp.ok:
                 messageData = resp.json()
 
                 # Check if the message data is not empty
@@ -248,9 +258,15 @@ class WaddleBotListener:
         # Create the function URL
         url = f"{self.communityModulesURL}{community_id}/{module_id}"
 
-        resp = requests.get(url=url)
+        resp = None
 
-        if resp.ok:
+        try:
+            resp = requests.get(url=url)
+        except requests.exceptions.RequestException as e:
+            print(e)
+            return False
+
+        if resp is not None and resp.ok:
             respJson = resp.json()
 
             if 'msg' in respJson and respJson['msg'] is not None:
@@ -277,9 +293,15 @@ class WaddleBotListener:
         url = f"{self.communityModulesURL}{community_id}/{module_id}"
         print(f"THE URL TO GET THE MODULE IS: {url}")
 
-        resp = requests.get(url=url)
+        resp = None
 
-        if resp.ok:
+        try:
+            resp = requests.get(url=url)
+        except requests.exceptions.RequestException as e:
+            print(e)
+            return False
+
+        if resp is not None and  resp.ok:
             respJson = resp.json()
 
             if 'msg' in respJson and respJson['msg'] is not None:
@@ -312,12 +334,13 @@ class WaddleBotListener:
         # then execute the command. If it is not a core module, check if the module exists in the community. If it does, execute the command.
         # If it does not, return a message saying that the module does not exist in the community.
         if moduleTypeName is not None:
-            if len(params) == 0:
-                return "Please provide the community as a parameter."
             if self.check_core_module(moduleTypeName):
                 print("The module is a core module.")
             else:
                 print("The module is not a core module.")
+
+                if len(params) == 0:
+                    return "Please provide the community as a parameter."
 
                 # Check if the module exists in the community
                 community_name = params[0]
@@ -377,21 +400,39 @@ class WaddleBotListener:
         print(f"URL: {url}")
         print(f"Payload: {payload}")
 
+        resp = None
+
         # Execute the function, depending on the method
         if commandData['method'] == "GET":
             print("Executing GET Method")
-            resp = requests.get(url=url, json=payload)
+            try:
+                resp = requests.get(url=url, json=payload)
+            except requests.exceptions.RequestException as e:
+                print(e)
+                return "An error has occurred while trying to execute the command."
         elif commandData['method'] == "POST":
             print("Executing POST Method")
-            resp = requests.post(url=url, json=payload)
+            try:
+                resp = requests.post(url=url, json=payload)
+            except requests.exceptions.RequestException as e:
+                print(e)
+                return "An error has occurred while trying to execute the command."
         elif commandData['method'] == "PUT":
             print("Executing PUT Method")
-            resp = requests.put(url=url, json=payload)
+            try:
+                resp = requests.put(url=url, json=payload)
+            except requests.exceptions.RequestException as e:
+                print(e)
+                return "An error has occurred while trying to execute the command."
         elif commandData['method'] == "DELETE":
             print("Executing DELETE Method")
-            resp = requests.delete(url=url, json=payload)
+            try:
+                resp = requests.delete(url=url, json=payload)
+            except requests.exceptions.RequestException as e:
+                print(e)
+                return "An error has occurred while trying to execute the command."
 
-        if resp.ok:
+        if resp is not None and resp.ok:
             respJson = resp.json()
 
             msg = ""
@@ -460,8 +501,8 @@ class WaddleBotListener:
     def display_help(self):
         print("Displaying Help Message....")
 
-        # keys = self.redisManager.get_all_keys()
-        commands = self.redisManager.get_all_commands()
+        keys = self.redisManager.get_all_keys()
+        # commands = self.redisManager.get_all_commands()
 
         # Print the commands
         # print("The commands are:")
@@ -470,7 +511,9 @@ class WaddleBotListener:
         helpMessage = "Available Commands:\n"
 
         # Loop through the commands and display the command and its description.
-        for command in commands:
+        for key in keys:
+            # Remove the _ character from the command key
+            command = key.replace("_", " ")
             helpMessage += f"{command}\n"
 
 

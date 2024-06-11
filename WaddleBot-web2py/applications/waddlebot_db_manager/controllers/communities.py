@@ -83,7 +83,7 @@ def update_by_name():
     community.update_record(community_name=payload['community_name'], community_description=payload['community_description'])
     return dict(msg="Community updated.")
 
-# Update a community's description by its name. If the community does not exist, return an error.
+# Update a community's description by its name. This can only be done by an identity_name that is part of the community with the Owner role. If the community does not exist, return an error.
 def update_desc_by_name():
     community_name = request.args(0)
     community_name = decode_name(community_name)
@@ -93,24 +93,49 @@ def update_desc_by_name():
     if not payload:
         return dict(msg="No payload given.")
     payload = json.loads(payload)
-    if 'community_description' not in payload:
+    if 'identity_name' not in payload or 'community_description' not in payload:
         return dict(msg="Payload missing required fields.")
     community = db(db.communities.community_name == community_name).select().first()
     if not community:
         return dict(msg="Community does not exist.")
+    identity = db(db.identities.name == payload['identity_name']).select().first()
+    if not identity:
+        return dict(msg="Identity does not exist.")
+    member = db((db.community_members.community_id == community.id) & (db.community_members.identity_id == identity.id)).select().first()
+    if not member:
+        return dict(msg="You are not a member of this community.")
+    role = db(db.roles.id == member.role_id).select().first()
+    if role.name != "Owner":
+        return dict(msg="You do not have permission to update this community's description.")
     community.update_record(community_description=payload['community_description'])
-    return dict(msg="Community updated.")
+    return dict(msg="Community description updated.")
+    
 
-# Delete a community by its name. If the community does not exist, return an error.
+# Delete a community by its name. This can only be done by an identity_name that is part of the community with the Owner role. If the community does not exist, return an error. 
 def delete_by_name():
     community_name = request.args(0)
     community_name = decode_name(community_name)
     if not community_name:
         return dict(msg="No community name given.")
+    payload = request.body.read()
+    if not payload:
+        return dict(msg="No payload given.")
+    payload = json.loads(payload)
+    if 'identity_name' not in payload:
+        return dict(msg="Payload missing required fields.")
     community = db(db.communities.community_name == community_name).select().first()
     if not community:
         return dict(msg="Community does not exist.")
-    community.delete_record()
+    identity = db(db.identities.name == payload['identity_name']).select().first()
+    if not identity:
+        return dict(msg="Identity does not exist.")
+    member = db((db.community_members.community_id == community.id) & (db.community_members.identity_id == identity.id)).select().first()
+    if not member:
+        return dict(msg="You are not a member of this community.")
+    role = db(db.roles.id == member.role_id).select().first()
+    if role.name != "Owner":
+        return dict(msg="You do not have permission to delete this community.")
+    db(db.communities.community_name == community_name).delete()
     return dict(msg="Community deleted.")
 
     
