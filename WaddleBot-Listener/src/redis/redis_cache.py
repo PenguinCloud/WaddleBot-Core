@@ -10,13 +10,16 @@ testCommands = {
     # Community Member related commands
     "!community_join": "http://127.0.0.1:8000/waddlebot_db_manager/community_members/",
     "!community_leave": "http://127.0.0.1:8000/waddlebot_db_manager/community_members/",
+    "!community_members_ls": "http://127.0.0.1:8000/waddlebot_db_manager/community_members/",
     "!community_update_role": "http://127.0.0.1:8000/waddlebot_db_manager/community_members/",
+    # Context related commands
+    "!namespace_switch":"http://127.0.0.1:8000/waddlebot_db_manager/context/",
     # Marketplace Related Commands
     "!marketplace_ls": "http://127.0.0.1:8000/marketplace_manager/marketplace/",
     "!marketplace_install": "http://127.0.0.1:8000/waddlebot_db_manager/community_modules/",
     "!marketplace_uninstall": "http://127.0.0.1:8000/waddlebot_db_manager/community_modules/",
     # Test script related commands
-    "!test_script": "http://127.0.0.1:8000/waddlebot_db_manager/test_script/"
+    "#test_script": "http://127.0.0.1:8000/waddlebot_db_manager/test_script/"
 }
 
 class RedisCache:

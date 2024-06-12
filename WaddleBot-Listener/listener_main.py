@@ -12,6 +12,9 @@ marketplaceURL = 'http://localhost:8000/marketplace_manager/marketplace/get_by_u
 # Community Modules API URL to manage community modules to get the community modules
 communityModulesURL = 'http://localhost:8000/waddlebot_db_manager/community_modules/get_by_community_name_and_module_id.json/'
 
+# Initial context API URL to set the initial context of new users to the database.
+contextURL = 'http://localhost:8000/waddlebot_db_manager/context/'
+
 # Redis parameters
 redisHost = 'localhost'
 redisPort = 6379
@@ -22,7 +25,7 @@ def main():
     matterbridgePostURL = matterbridgeURL + 'message'
 
     # Initialize the Matterbridge Link
-    listener = WaddleBotListener(matterbridgeGetURL, matterbridgePostURL, userManagerURL, redisHost, redisPort, marketplaceURL, communityModulesURL)
+    listener = WaddleBotListener(matterbridgeGetURL, matterbridgePostURL, contextURL, redisHost, redisPort, marketplaceURL, communityModulesURL)
 
     # Start listening for messages
     listener.listen()

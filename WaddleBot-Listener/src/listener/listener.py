@@ -7,13 +7,15 @@ from urllib.parse import quote, urlencode, quote_plus
 from src.redis.redis_cache import RedisCache
 
 class WaddleBotListener:
-    def __init__(self, matterbridgeGetURL, matterbridgePostURL, userManagerURL, redisHost, redisPort, marketplaceURL, communityModulesURL):
+    def __init__(self, matterbridgeGetURL, matterbridgePostURL, contextURL, redisHost, redisPort, marketplaceURL, communityModulesURL):
         # Initialize the variables
         self.matterbridgeGetURL = matterbridgeGetURL
         self.matterbridgePostURL = matterbridgePostURL
-        self.userManagerURL = userManagerURL
         self.marketplaceURL = marketplaceURL
         self.communityModulesURL = communityModulesURL
+
+        self.initialContextURL = contextURL + "initialize_user.json/"
+        self.getContextURL = contextURL + "get_by_identity_name.json/"
 
         # Initialize the Redis Manager
         self.redisManager = RedisCache(redisHost, redisPort)
@@ -58,7 +60,7 @@ class WaddleBotListener:
                         gateway = messageData[0]['gateway']
                         message = messageData[0]['text']
 
-                        if "!" in message and message[0] == "!":
+                        if "!" in message and message[0] == "!" or "#" in message and message[0] == "#":
                             commands = self.get_commands(message)
 
                             # print("The list of commands are:")
@@ -167,7 +169,7 @@ class WaddleBotListener:
         return filteredCommands
     
     # Function to get the command parameters from the message, that fall between the < > brackets
-    def get_command_params(self, message):
+    def get_message_params(self, message):
         print("Getting the command parameters from the message....")
 
         # Get the command parameters from the message
@@ -197,6 +199,19 @@ class WaddleBotListener:
 
         return values
     
+    # Function to get the function parameters from a command retrieved from redis
+    def get_function_params(self, commandData):
+        print("Getting the function parameters from the command....")
+
+        params = []
+        # Get the function parameters from the command
+        if commandData is not None and 'parameters' in commandData and len(commandData['parameters']) > 0:
+            params = commandData['parameters']
+        else:
+            params = None
+
+        return params
+
     # Function to get the payload keys from a command retrieved from redis
     def get_payload_keys(self, commandData):
         print("Getting the payload keys from the command....")
@@ -311,6 +326,31 @@ class WaddleBotListener:
         else:
             return False
 
+    # Function to get the context of the current user
+    def get_context(self, username):
+        print("Getting the context....")
+
+        # Create the function URL
+        url = f"{self.getContextURL}{username}"
+
+        resp = None
+
+        try:
+            resp = requests.get(url=url)
+        except requests.exceptions.RequestException as e:
+            print(e)
+            return None
+
+        if resp is not None and resp.ok:
+            respJson = resp.json()
+
+            if 'msg' in respJson and respJson['msg'] is not None:
+                return None
+            elif "data" in respJson and "community_name" in respJson["data"]:
+                return respJson["data"]["community_name"]
+        else:
+            return None
+
 
     # Function to execute a command from the Redis cache, given the message command and the command data
     def execute_command(self, username, message, commandData, commandURL, moduleId, moduleTypeName):
@@ -318,6 +358,9 @@ class WaddleBotListener:
 
         # Get the payload keys from the command data
         keys = self.get_payload_keys(commandData)
+        
+        # Get the function parameters from the command data
+        funcParams = self.get_function_params(commandData)
 
         if keys is None:
             msg = "The command does not exist. Ensure that you typed it correctly."
@@ -327,9 +370,15 @@ class WaddleBotListener:
         # Get the action value from the metadata
         action = commandData['action']
 
-        # Get the command parameters from the message
-        params = self.get_command_params(message)
+        community_name = self.get_context(username)
 
+        # Get the command parameters from the message
+        params = self.get_message_params(message)
+
+        # Check if 'community_name' is in the function parameters. If it is, add the community name to the parameters at the beginning of the list
+        if funcParams is not None and "community_name" in funcParams:
+            params.insert(0, community_name)
+        
         # Check if the module_type_name is in the command data. After that, check if the module is a core module. If it is a core module
         # then execute the command. If it is not a core module, check if the module exists in the community. If it does, execute the command.
         # If it does not, return a message saying that the module does not exist in the community.
@@ -338,14 +387,8 @@ class WaddleBotListener:
                 print("The module is a core module.")
             else:
                 print("The module is not a core module.")
-
-                if len(params) == 0:
-                    return "Please provide the community as a parameter."
-
-                # Check if the module exists in the community
-                community_name = params[0]
                 
-
+                # Check if the module exists in the current community context of the user
                 if self.check_module_exists(community_name, moduleId):
                     print("The module exists in the community.")
                 else:
@@ -469,17 +512,17 @@ class WaddleBotListener:
         print("Adding Identity....")
 
         payload = {
-            "name": username,
-            "country": "Unknown",
-            "ip_address": "Unknown",
-            "browser_fingerprints": []
+            "identity_name": username
         }
 
-        resp = requests.post(url=self.userManagerURL, json=payload)
+        resp = requests.post(url=self.initialContextURL, json=payload)
 
         if resp.ok:
-            print('response:', resp.json())
-            print("Identity Successfully Added!") 
+            # print('response:', resp.json())
+            msg = ""
+            if 'msg' in resp.json():
+                msg = resp.json()['msg']
+            print(msg) 
         
 
     # Function to turn a data dictionary response from a request into a string
