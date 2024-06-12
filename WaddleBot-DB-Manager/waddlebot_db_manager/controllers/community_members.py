@@ -68,6 +68,18 @@ def get_by_community_id():
     community_members = db(db.community_members.community_id == community_id).select()
     return dict(data=community_members)
 
+# Get community members by a given community name. Return the member names, as well as their roles. If the community does not exist, return an error.
+def get_names_by_community_name():
+    community_name = request.args(0)
+    if not community_name:
+        return dict(msg="No community name given.")
+    community = db(db.communities.community_name == community_name).select().first()
+    if not community:
+        return dict(msg="Community does not exist.")
+    community_members = db(db.community_members.community_id == community.id).select()
+    community_members = [{"name": member.identity_id.name, "role": member.role_id.name} for member in community_members]
+    return dict(data=community_members)
+
 # Update a community member by its community id and member id. If the community member does not exist, return an error.
 def update_by_community_id_and_identity_id():
     community_id = request.args(0)
@@ -121,6 +133,10 @@ def remove_member():
     community_member = db((db.community_members.community_id == community.id) & (db.community_members.identity_id == identity.id)).select().first()
     if not community_member:
         return dict(msg="Community member does not exist.")
+
+    # If the given community is Global, return an error, because no member can leave the Global community.
+    if community.community_name == "Global":
+        return dict(msg="Cannot leave the Global community.")
 
     # Remove the community member.
     community_member.delete_record()

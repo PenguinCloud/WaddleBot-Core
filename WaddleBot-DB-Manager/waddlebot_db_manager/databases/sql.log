@@ -519,3 +519,84 @@ success!
 success!
 success!
 success!
+success!
+timestamp: 2024-06-12T11:55:40.167654
+CREATE TABLE "routing"(
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "channel" CHAR(512),
+    "community_id" INTEGER REFERENCES "communities" ("id") ON DELETE CASCADE ON UPDATE CASCADE  ,
+    "gateways" TEXT,
+    "aliases" TEXT
+);
+success!
+timestamp: 2024-06-12T11:55:40.171654
+CREATE TABLE "context"(
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "identity_id" INTEGER REFERENCES "identities" ("id") ON DELETE CASCADE ON UPDATE CASCADE  ,
+    "community_id" INTEGER REFERENCES "communities" ("id") ON DELETE CASCADE ON UPDATE CASCADE  
+);
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!

@@ -111,6 +111,11 @@ def install_by_community_name():
     community_module = db((db.community_modules.community_id == community.id) & (db.community_modules.module_id == payload['module_id'])).select().first()
     if community_module:
         return dict(msg="Community module already exists.")
+    
+    # If the community is "Global", return an error, as community modules cannot be installed in the global community.
+    if community.community_name == "Global":
+        return dict(msg="Cannot install community module in Global community.")
+
     payload['community_id'] = community.id
 
     # Check if enabled is in the payload, if not, add it with a default value of True
@@ -141,5 +146,10 @@ def uninstall_by_community_name():
     community_module = db((db.community_modules.community_id == community.id) & (db.community_modules.module_id == payload['module_id'])).select().first()
     if not community_module:
         return dict(msg="Community module does not exist.")
+    
+    # If the community is "Global", return an error, as community modules cannot be uninstalled from the global community.
+    if community.community_name == "Global":
+        return dict(msg="Cannot uninstall module from Global community.")
+
     community_module.delete_record()
     return dict(msg="Community module uninstalled.")

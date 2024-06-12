@@ -166,14 +166,6 @@ db.define_table('communities',
                 Field('community_name'),
                 Field('community_description'))
 
-# Define a table for community members table
-db.define_table('community_members', 
-                Field('community_id', db.communities),
-                Field('identity_id', db.identities),
-                Field('role_id', 'integer'),
-                Field('currency', 'integer', default=0),
-                Field('reputation', 'integer', default=0))
-
 # Define table for community modules
 db.define_table('community_modules', 
                 Field('module_id', 'integer'),
@@ -188,17 +180,25 @@ db.define_table('roles',
                 Field('privilages', 'list:string'),
                 Field('requirements', 'list:string'))
 
-# Define a table for discord servers
-db.define_table('discord', 
+# Define a table for community members table
+db.define_table('community_members', 
+                Field('community_id', db.communities),
+                Field('identity_id', db.identities),
+                Field('role_id', db.roles),
+                Field('currency', 'integer', default=0),
+                Field('reputation', 'integer', default=0))
+
+# Define a table that maps specific gateways to a community through an ID
+db.define_table('routing', 
                 Field('channel', 'string'),
-                Field('community_id', 'integer'),
-                Field('servers', 'list:string'),
+                Field('community_id', db.communities),
+                Field('gateways', 'list:string'),
                 Field('aliases', 'list:string'))
 
-# Define a table for Twitch channels
-db.define_table('twitch', 
-                Field('channel', 'string'),
-                Field('community_id', 'integer'),
-                Field('servers', 'list:string'),
-                Field('aliases', 'list:string'),)
+# Define a table that binds an identity to a community namespace through an ID, as a context. Every identity can only be in one community namespace at a time
+db.define_table('context', 
+                Field('identity_id', db.identities),
+                Field('community_id', db.communities))
+
+
         
