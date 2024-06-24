@@ -29,21 +29,7 @@ class Rep_Manager:
     
     def twitch(self):
         readscore = self.__queryscore("twitch") 
-        return self.score + 250.0
-
-    def follow(self):
-        return self.score + 100.0
-
-    def timeout(self):
-        return self.score + -50.0
-
-    def ban(self):
-        return self.score + -1000.0
-
-    def rank(self):
-        good = self.score <= 700.0
-        ok = self.score == 400.0-699.99
-        bad = self.score >= 399.99
+        self.score += readscore["score"]
     def __readdb(self,dbc: dbconnect,collumns = ["score"]):
 
         if dbc.dbmethod == "csv":
