@@ -23,9 +23,13 @@ class Rep_Manager:
         dbc = dbconnect()
         dbc.dbname = platform+"-scores"
         return self.__readdb(dbc, ["score"])
-    
-      
-      
+    def youtube(self):
+        readscore = self.__queryscore("youtube") 
+        self.score += readscore["score"]
+
+    def discord(self):
+        readscore = self.__queryscore("discord") 
+        self.score += readscore["score"]  
     
     def twitch(self):
         readscore = self.__queryscore("twitch") 

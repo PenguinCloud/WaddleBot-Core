@@ -1,10 +1,9 @@
 activity,score
-follow,50
+join,50
+post,1
+nitroboost,100
 subscription,200
-chat,1
-donation,1 *$0.01
-bits,1 *$0.01
-raffleentry,-1.5
 giveawayentry,-6
+raffleentry,-1.5
 timeout,-.25 *10sec
 ban,-1000000

@@ -1,10 +1,10 @@
 activity,score
-follow,50
-subscription,200
+subscribe,50
 chat,1
 donation,1 *$0.01
-bits,1 *$0.01
-raffleentry,-1.5
+superchat,1 *$0.01
+membership,200
 giveawayentry,-6
+raffleentry,-1.5
 timeout,-.25 *10sec
 ban,-1000000
