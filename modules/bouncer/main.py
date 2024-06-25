@@ -1,6 +1,7 @@
 import csv
 from dataclasses import dataclass
 
+
 @dataclass
 class dbconnect:
     """Class for keeping track of an item in inventory."""
@@ -8,12 +9,18 @@ class dbconnect:
     dbport: str
     dbmethod: str
     dbname: str
+   
+   
     def __init__(self, dbhost = "localhost", dbport = "", dbmethod= "csv", dbname = "reputation"):
         self.dbhost = dbhost
         self.dbport = dbport
         self.dbmethod = dbmethod
         self.dbname = dbname    
+
+
 class Rep_Manager:
+   
+   
     def __init__(self, userid):
         self.userid = userid
         self.score = 600.0
@@ -23,17 +30,23 @@ class Rep_Manager:
         dbc = dbconnect()
         dbc.dbname = platform+"-scores"
         return self.__readdb(dbc, ["score"])
+   
+   
     def youtube(self):
         readscore = self.__queryscore("youtube") 
         self.score += readscore["score"]
 
+   
     def discord(self):
         readscore = self.__queryscore("discord") 
         self.score += readscore["score"]  
     
+   
     def twitch(self):
         readscore = self.__queryscore("twitch") 
         self.score += readscore["score"]
+    
+   
     def __readdb(self,dbc: dbconnect,collumns = ["score"]):
 
         if dbc.dbmethod == "csv":
@@ -48,6 +61,8 @@ class Rep_Manager:
         else:
             print("Database method not supported")
             return None
+   
+   
     def querybyid(self):
         x = dbconnect()
         results = self.__readdb(x, ["score"])
