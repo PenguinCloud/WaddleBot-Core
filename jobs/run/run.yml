@@ -1,1 +1,12 @@
 ---
+- name: Run the WaddleBot-Configurator
+  command: python3 /opt/manager/WaddleBot-Configurator/app/configurator.py
+  become: false
+
+- name: Copy the newly created matterbridge.toml to the /opt/etc directory
+  become: false
+  ansible.builtin.copy:
+    src: "/opt/manager/WaddleBot-Configurator/app/matterbridge.toml"
+    dest: "/etc/matterbridge/matterbridge.toml"
+    owner: "{{ run.user }}"
+    group: "{{ run.user }}"
