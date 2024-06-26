@@ -61,16 +61,30 @@
     group: "{{ run.user }}"
     mode: '0755'
 
-- name: Make sure the pyhon script is executable by the run user
-  ansible.builtin.file:
-    dest: "/opt/manager/WaddleBot-Configurator/app/configurator.py"
-    owner: "{{ run.user }}"
-    group: "{{ run.user }}"
-    mode: '0755'
-
 - name: Make sure the matterbridge toml file can be accessed by the run user
   ansible.builtin.file:
     dest: "/opt/manager/WaddleBot-Configurator/app/matterbridge.toml"
     owner: "{{ run.user }}"
     group: "{{ run.user }}"
     state: touch
+
+- name: Make sure the test sh file can be accessed by the run user
+  ansible.builtin.file:
+    dest: "/opt/manager/WaddleBot-Configurator/app/test.sh"
+    owner: "{{ run.user }}"
+    group: "{{ run.user }}"
+    state: touch
+
+- name: Make sure the configurator pyhon script is executable by the run user
+  ansible.builtin.file:
+    dest: "/opt/manager/WaddleBot-Configurator/app/configurator.py"
+    owner: "{{ run.user }}"
+    group: "{{ run.user }}"
+    mode: '0755'
+
+- name: Make sure the restart python script is executable by the run user
+  ansible.builtin.file:
+    dest: "/opt/manager/WaddleBot-Configurator/app/restart.py"
+    owner: "{{ run.user }}"
+    group: "{{ run.user }}"
+    mode: '0755'
