@@ -3,19 +3,17 @@ import requests
 import os
 from dotenv import load_dotenv
 
-# GATEWAYS_GET_URL="http://host.docker.internal:8000/waddlebot_db_manager/routing_gateways/get_all.json"
-
 # The main function that will be called when the script is run
 def main():
     # Check if the .env file exists
     try:
-        load_dotenv() 
+        # load_dotenv() 
 
         # If the .env file exists, get the values of the environment variables
         # and store them in variables
         mat_url = os.getenv('GATEWAYS_GET_URL')
-        discord_name = os.getenv('DISCORD_NAME')
-        discord_server_id = os.getenv('DISCORD_SERVER_ID')
+        discord_name = os.getenv('USER_DISCORD_NAME')
+        discord_server_id = os.getenv('USER_DISCORD_ID')
         discord_token = os.getenv('DISCORD_TOKEN')
         twitch_name = os.getenv('TWITCH_NAME')
         twitch_nick = os.getenv('TWITCH_NICK')
