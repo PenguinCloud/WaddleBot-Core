@@ -81,6 +81,6 @@
 - name: Assemble from fragment configs from a directory
   ansible.builtin.assemble:
     src: "/opt/matconf"
-    dest: "/etc/matterbridge.toml"
+    dest: "/etc/old/matterbridge.toml"
     owner: "{{ run.user }}"
     group: "{{ run.user }}"

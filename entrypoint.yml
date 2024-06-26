@@ -31,4 +31,4 @@
         apply:
           tags: configure
       loop:
-        - configurator
+        - run

@@ -18,8 +18,12 @@ testCommands = {
     "!marketplace_ls": "http://127.0.0.1:8000/marketplace_manager/marketplace/",
     "!marketplace_install": "http://127.0.0.1:8000/waddlebot_db_manager/community_modules/",
     "!marketplace_uninstall": "http://127.0.0.1:8000/waddlebot_db_manager/community_modules/",
+    # Gateway route related commands
+    "!route_add": "http://127.0.0.1:5000/gateway-creator/",
+    "!route_rem": "http://127.0.0.1:5000/gateway-creator/",
     # Test script related commands
     "#test_script": "http://127.0.0.1:8000/waddlebot_db_manager/test_script/"
+    
 }
 
 class RedisCache:
