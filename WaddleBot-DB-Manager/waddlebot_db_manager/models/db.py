@@ -195,10 +195,52 @@ db.define_table('routing',
                 Field('gateways', 'list:string'),
                 Field('aliases', 'list:string'))
 
+
 # Define a table that binds an identity to a community namespace through an ID, as a context. Every identity can only be in one community namespace at a time
 db.define_table('context', 
                 Field('identity_id', db.identities),
                 Field('community_id', db.communities))
+
+# Define a table that stores matterbridge account types
+db.define_table('account_types',
+                Field('type_name', 'string'),
+                Field('description', 'string'))
+
+# Define a table that stores matterbridge gateway accounts
+db.define_table('gateway_accounts',
+                Field('account_name', 'string'),
+                Field('account_type', db.account_types),
+                Field('is_default', 'boolean', default=False))
+
+# Define a table that stores routing gateway types
+db.define_table('gateway_types',
+                Field('type_name', 'string'),
+                Field('description', 'string'))
+
+# Define a table that keeps track of routing gateways for the creation of the matterbridge configuration file
+db.define_table('routing_gateways',
+                Field('account', db.gateway_accounts),
+                Field('channel_id', 'string'),
+                Field('gateway_type', db.gateway_types))
+
+
+# After defining the tables, create the "Global" community, if it does not exist
+if db(db.communities.community_name == "Global").count() == 0:
+    db.communities.insert(community_name="Global", community_description="The global community.")
+
+# After the Global community is created, create a routing entry for the Global community, if it does not exist
+global_community = db(db.communities.community_name == "Global").select().first()
+if db(db.routing.community_id == global_community.id).count() == 0:
+    db.routing.insert(channel="Global", community_id=global_community.id, gateways=[], aliases=[])
+
+# Also create the "member" and "owner" roles, if they do not exist
+if db(db.roles.name == "member").count() == 0:
+    db.roles.insert(name="member", description="A member of a community.", privilages=["read", "write"], requirements=["reputation >= 0"])
+
+if db(db.roles.name == "owner").count() == 0:
+    db.roles.insert(name="owner", description="The owner of a community.", privilages=["read", "write", "admin"], requirements=["reputation >= 0"])
+
+
 
 
         

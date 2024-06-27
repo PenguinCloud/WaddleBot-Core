@@ -14,6 +14,13 @@ def decode_name(name):
 
     return name   
 
+#Function to replace the first character of a string with a hash if it is an underscore.
+def replace_first_char(name):
+    if name[0] == "_":
+        name = "#" + name[1:]
+    return name
+
+
 # Create the initial context of a identity_name, by adding the given identity_name to the "Global" community and then setting the context to the "Global" community. 
 # If the identity_name already exists in the community, as well as the context, return an error. If the identity_name does not exist, return an error.
 # If the community does not exist, return an error. If the identity_name is already in the community, return an error.  
@@ -60,24 +67,46 @@ def initialize_user():
 # Throws an error if no payload is given, or the context already exists. The payload 
 # must contain the identity name and community name to get their respective ID's
 def set_context():
+    channel = replace_first_char(request.args(0))
     payload = request.body.read()
     if not payload:
         return dict(msg="No payload given.")
     payload = json.loads(payload)
+
+    # Check if the channel exists.
+    if not channel:
+        return dict(msg="No channel given.")
+
     if 'identity_name' not in payload or 'community_name' not in payload:
-        return dict(msg="Payload missing required fields.")
+        return dict(msg="Payload missing required fields. Please provide the identity name and community name.")
     identity_name = decode_name(payload['identity_name'])
     community_name = decode_name(payload['community_name'])
+
     identity = db(db.identities.name == identity_name).select().first()
     community = db(db.communities.community_name == community_name).select().first()
+
     if not identity or not community:
         return dict(msg="Identity or community does not exist.")
-    context = db(db.context.identity_id == identity.id).select().first()
+    
+
+    # Check if the channel exists in the given community routing, by checking the gateways column of the routing table for the given community. If it doesnt exist, create it.
+    routing = db(db.routing.community_id == community.id).select().first()
+    if not routing:
+        routing = db.routing.insert(channel=community_name, community_id=community.id, gateways=[], aliases=[])
+    
+    # Check if the given community is the Global or Default community. If it isnt, check if the channel exists in the community routing.
+    if community.community_name != "Global" and community.community_name != "Default":
+        # Get the gateways from the routing record.
+        gateways = routing.gateways
+        if channel not in gateways:
+            return dict(msg="Your current channel does not exist in the community. Please add the channel to the community routing first.")
 
     # If the identity is not in the community, return an error.
     community_member = db((db.community_members.identity_id == identity.id) & (db.community_members.community_id == community.id)).select().first()
     if not community_member:
         return dict(msg="You are not a member of the community. Please join the community first.")
+
+    context = db(db.context.identity_id == identity.id).select().first()
 
     # If the context already exists, update it.
     if context:
