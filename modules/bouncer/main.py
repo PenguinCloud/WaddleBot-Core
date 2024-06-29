@@ -9,13 +9,23 @@ class dbconnect:
     dbport: str
     dbmethod: str
     dbname: str
-   
-   
     def __init__(self, dbhost = "localhost", dbport = "", dbmethod= "csv", dbname = "reputation"):
         self.dbhost = dbhost
         self.dbport = dbport
         self.dbmethod = dbmethod
         self.dbname = dbname    
+
+@dataclass
+class dbquery:
+    """Class for keeping"""
+    collumns: list
+    qcollumns: str
+    rowselector: str
+    def __init__(self, collumns = ["*"],qcollumns = "*", rowselector = "*"):
+        self.collumns = collumns
+        self.rowselector = rowselector
+        self.qcollumns = qcollumns
+
 
 
 class Rep_Manager:
@@ -26,10 +36,10 @@ class Rep_Manager:
         self.score = 600.0
     
 
-    def __queryscore(self,platfom: str):
+    def __queryscore(self,platfom: str,activity:str):
         dbc = dbconnect()
         dbc.dbname = platform+"-scores"
-        return self.__readdb(dbc, ["score"])
+        return self.__readdb(dbc, ["score"],activity)
    
    
     def youtube(self):
@@ -42,21 +52,19 @@ class Rep_Manager:
         self.score += readscore["score"]  
     
    
-    def twitch(self):
-        readscore = self.__queryscore("twitch") 
+    def twitch(self,activity:str = "follow", amount:float = 0.0):
+        if activity is in ["bits","sub","donate"]:
+            readscore = self.__queryscore("twitch") 
+        else:
+            readscore = self.__queryscore("twitch") 
         self.score += readscore["score"]
     
    
-    def __readdb(self,dbc: dbconnect,collumns = ["score"]):
+    def __readdb(self,dbc: dbconnect,dbq: dbquery):
 
         if dbc.dbmethod == "csv":
-            results = {}
-            with open(dbc.dbmethod["dbname"] + ".csv") as csvfile:
-                reader = csv.DictReader(csvfile)
-                for row in reader:
-                    if row["userid"] == self.userid:
-                       for  col in collumns:
-                            results[col] = row[col]
+            df = pandas.read_csv(dbc.dbname+".csv")
+            results = df.query(dbq.rowselector)
             return results
         else:
             print("Database method not supported")
@@ -67,6 +75,7 @@ class Rep_Manager:
         x = dbconnect()
         results = self.__readdb(x, ["score"])
         return results
+    
 
     
 

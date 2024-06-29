@@ -1,10 +1,8 @@
 activity,score
 subscribe,50
 chat,1
-donation,1 *$0.01
-superchat,1 *$0.01
-membership,200
+monetaryvalue,.01
 giveawayentry,-6
 raffleentry,-1.5
-timeout,-.25 *10sec
-ban,-1000000
+timeout,-.25
+ban,-50

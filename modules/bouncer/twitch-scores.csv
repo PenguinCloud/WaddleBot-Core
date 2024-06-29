@@ -1,10 +1,8 @@
 activity,score
 follow,50
-subscription,200
+monetaryvalue,.01
 chat,1
-donation,1 *$0.01
-bits,1 *$0.01
 raffleentry,-1.5
 giveawayentry,-6
-timeout,-.25 *10sec
-ban,-1000000
+timeout,-.25
+ban,-50

@@ -1,9 +1,9 @@
 activity,score
 join,50
 post,1
-nitroboost,100
-subscription,200
+nitroboost,50
+monetaryvalue,.01
 giveawayentry,-6
 raffleentry,-1.5
-timeout,-.25 *10sec
-ban,-1000000
+timeout,-.25
+ban,-50
