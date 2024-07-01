@@ -21,7 +21,15 @@ DebugLevel=1
 UseTLS=true
 RemoteNickFormat="[{PROTOCOL}] <{NICK}> "
 
+[[gateway]]
+name="{{gateway_name}}"
+enable=true
+
 [api.{{api_gateway_name}}]
 BindAddress="{{api_address}}"
 Buffer=1000
 RemoteNickFormat="{NICK}"
+
+[[gateway.inout]]
+account="api.{{api_gateway_name}}"
+channel="api"
