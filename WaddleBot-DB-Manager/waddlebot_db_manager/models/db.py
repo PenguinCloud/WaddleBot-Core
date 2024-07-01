@@ -188,6 +188,20 @@ db.define_table('community_members',
                 Field('currency', 'integer', default=0),
                 Field('reputation', 'integer', default=0))
 
+# Define a table that contains different gateway server types
+db.define_table('gateway_server_types',
+                Field('type_name', 'string'),
+                Field('description', 'string'))
+
+
+# Define a table that keeps track of gateway servers
+db.define_table('gateway_servers', 
+                Field('name', 'string'),
+                Field('server_id', 'string'),
+                Field('server_nick', 'string'),
+                Field('server_type', db.gateway_server_types))
+
+
 # Define a table that maps specific gateways to a community through an ID
 db.define_table('routing', 
                 Field('channel', 'string'),
@@ -206,12 +220,6 @@ db.define_table('account_types',
                 Field('type_name', 'string'),
                 Field('description', 'string'))
 
-# Define a table that stores matterbridge gateway accounts
-db.define_table('gateway_accounts',
-                Field('account_name', 'string'),
-                Field('account_type', db.account_types),
-                Field('is_default', 'boolean', default=False))
-
 # Define a table that stores routing gateway types
 db.define_table('gateway_types',
                 Field('type_name', 'string'),
@@ -219,7 +227,7 @@ db.define_table('gateway_types',
 
 # Define a table that keeps track of routing gateways for the creation of the matterbridge configuration file
 db.define_table('routing_gateways',
-                Field('account', db.gateway_accounts),
+                Field('gateway_server', db.gateway_servers),
                 Field('channel_id', 'string'),
                 Field('gateway_type', db.gateway_types))
 

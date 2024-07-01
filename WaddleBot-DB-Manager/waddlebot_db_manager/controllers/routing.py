@@ -38,6 +38,14 @@ def get_all():
     routings = db(db.routing).select()
     return dict(data=routings)
 
+# Function to get all routes that also have a community name.
+def get_all_community_routes():
+    routings = db(db.routing).select()
+    for routing in routings:
+        community = db(db.communities.id == routing.community_id).select().first()
+        routing.community_name = community.community_name
+    return dict(data=routings)
+
 # Get a routing by its name. If the routing does not exist, return an error.
 def get_by_name():
     name = request.args(0)
