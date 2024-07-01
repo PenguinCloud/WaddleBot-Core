@@ -60,6 +60,7 @@ class WaddleBotListener:
                         gateway = messageData[0]['gateway']
                         message = messageData[0]['text']
                         channel = messageData[0]['channel']
+                        account = messageData[0]['account']
 
                         if "!" in message and message[0] == "!" or "#" in message and message[0] == "#":
                             commands = self.get_commands(message)
@@ -101,7 +102,7 @@ class WaddleBotListener:
                                     if module is None:
                                         print("Error occured while trying to get the metadata from the marketplace.")
                                         cmdResult += "The command could not be found. Ensure that the command is typed correctly."
-                                        self.send_bot_message(gateway, cmdResult)
+                                        self.send_bot_message(gateway, cmdResult, account)
                                         continue
 
                                     metadata = module['metadata']
@@ -123,7 +124,7 @@ class WaddleBotListener:
                                     print("Command not found in Redis cache.")
                                     cmdResult += "Command not found. Please use !help to see the list of available commands."
 
-                            self.send_bot_message(gateway, cmdResult) 
+                            self.send_bot_message(gateway, cmdResult, account) 
                             
                         else:
                             print("No command tag found in message.")
@@ -505,13 +506,14 @@ class WaddleBotListener:
             return msg
 
     # Function to send a bot message
-    def send_bot_message(self, gateway, command):
+    def send_bot_message(self, gateway, command, account):
         print("Sending Bot Message....")
 
         payload = {
             "text": f"{command}",
             "username": "Waddle Bot",
-            "gateway": gateway
+            "gateway": gateway,
+            "account": account,
         }
 
         resp = requests.post(url=self.matterbridgePostURL, json=payload)
