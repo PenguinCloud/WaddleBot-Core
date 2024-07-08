@@ -1,6 +1,6 @@
-# WaddleBot Listener
+# WaddleBot Gateway Manager
 
-This listener is responsible for the handling commands that are read through the Matterbridge component of the core system. Its also responsible for the connection to the Redis Cache for command retrieval. (WIP: Main redis cache still needs to be implemented. Currently uses a local Redis cache)
+The WaddleBot Gateway manager is a REST API that is responsible for the creation/deletion of new gateways to the waddlebot DB that will get added to the matterbridge configuration file upon container startup.
 
 # Basic Setup
 
@@ -30,6 +30,8 @@ If its installed correctly, you will see this output:
 
 `pip install -r requirements.txt`
 
-5. Run the app by running the following command while having the virtual env active:
+5. Ensure that the .env file with the correct environmental variables are present in the "app" folder.
 
-`py listener.py`
+6. Run the app by running the following command while having the virtual env active:
+
+`py app.py`
