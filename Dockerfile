@@ -43,7 +43,7 @@ RUN apt-get update
 RUN apt-get install -y python3
 
 # Set the working directory to the WaddleBot-Configurator directory
-WORKDIR /opt/manager/WaddleBot-Configurator
+WORKDIR /opt/manager/modules/WaddleBot-Configurator
 
 # # Install the dependencies in the virtual environment, located in the WaddleBot-Configurator directory
 RUN pip install -r requirements.txt
