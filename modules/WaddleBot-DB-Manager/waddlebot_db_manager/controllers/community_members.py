@@ -202,3 +202,194 @@ def update_member_role():
     community_member.update_record(role_id=role.id)
 
     return dict(msg=f"{payload['member_name']}'s role has been updated to {payload['role_name']}.")
+
+#################################
+## Currency Management Section ##
+#################################
+
+# Using a community name and a member name, get the currency of the member in the community. If the community or member does not exist, return an error.
+def get_currency():
+    community_name = request.args(0)
+    payload = request.body.read()
+    if not payload:
+        return dict(msg="No payload given. Please provide a community_name and identity_name between [] characters.")
+    payload = json.loads(payload)
+    if 'identity_name' not in payload:
+        return dict(msg="Missing the required fields. Need community_name and identity_name between [] characters.")
+    
+    # Get the community_id from the communities table, using the community_name, if it exists.
+    community = db(db.communities.community_name == community_name).select().first()
+    if not community:
+        return dict(msg="Community does not exist.")
+    
+    # Get the member_id from the identities table, using the identity_name, if it exists.
+    member = db(db.identities.name == payload['identity_name']).select().first()
+    if not member:
+        return dict(msg="Member does not exist.")
+
+    # Check if the member is a member of the community.
+    community_member = db((db.community_members.community_id == community.id) & (db.community_members.identity_id == member.id)).select().first()
+    if not community_member:
+        return dict(msg="Member is not a member of the community.")
+
+    return dict(msg=f"{payload['identity_name']} has {community_member.currency} currency in the community {community_name}.")
+
+# Using a community name, member name, and amount, add the amount to the member's currency in the community. If the community or member does not exist, return an error.
+def add_currency():
+    community_name = request.args(0)
+    payload = request.body.read()
+    if not payload:
+        return dict(msg="No payload given. Please provide a community_name, identity_name, and amount between [] characters.")
+    payload = json.loads(payload)
+    if 'identity_name' not in payload or 'amount' not in payload:
+        return dict(msg="Missing the required fields. Need community_name, identity_name, and amount between [] characters.")
+    
+    # Get the community_id from the communities table, using the community_name, if it exists.
+    community = db(db.communities.community_name == community_name).select().first()
+    if not community:
+        return dict(msg="Community does not exist.")
+    
+    # Get the member_id from the identities table, using the identity_name, if it exists.
+    member = db(db.identities.name == payload['identity_name']).select().first()
+    if not member:
+        return dict(msg="Member does not exist.")
+
+    # Check if the member is a member of the community.
+    community_member = db((db.community_members.community_id == community.id) & (db.community_members.identity_id == member.id)).select().first()
+    if not community_member:
+        return dict(msg="Member is not a member of the community.")
+
+    # Try to convert the amount to an integer. If it fails, return an error.
+    try:
+        payload['amount'] = int(payload['amount'])
+    except:
+        return dict(msg="Amount must be an integer.")
+
+    # Add the amount to the member's currency.
+    community_member.update_record(currency=community_member.currency + payload['amount'])
+
+    return dict(msg=f"{payload['identity_name']} has received {payload['amount']} currency.")
+
+# Using a community name, member name, and amount, subtract the amount from the member's currency in the community. If the community or member does not exist, return an error.
+def subtract_currency():
+    community_name = request.args(0)
+    payload = request.body.read()
+    if not payload:
+        return dict(msg="No payload given. Please provide a community_name, identity_name, and amount between [] characters.")
+    payload = json.loads(payload)
+    if 'identity_name' not in payload or 'amount' not in payload:
+        return dict(msg="Missing the required fields. Need community_name, identity_name, and amount between [] characters.")
+    
+    # Get the community_id from the communities table, using the community_name, if it exists.
+    community = db(db.communities.community_name == community_name).select().first()
+    if not community:
+        return dict(msg="Community does not exist.")
+    
+    # Get the member_id from the identities table, using the identity_name, if it exists.
+    member = db(db.identities.name == payload['identity_name']).select().first()
+    if not member:
+        return dict(msg="Member does not exist.")
+
+    # Check if the member is a member of the community.
+    community_member = db((db.community_members.community_id == community.id) & (db.community_members.identity_id == member.id)).select().first()
+    if not community_member:
+        return dict(msg="Member is not a member of the community.")
+
+    # Try to convert the amount to an integer. If it fails, return an error.
+    try:
+        payload['amount'] = int(payload['amount'])
+    except:
+        return dict(msg="Amount must be an integer.")
+
+    # Subtract the amount from the member's currency.
+    community_member.update_record(currency=community_member.currency - payload['amount'])
+
+    return dict(msg=f"{payload['identity_name']} has lost {payload['amount']} currency.")
+
+# Using a community name, member name, and amount, set the member's currency in the community to the amount. If the community or member does not exist, return an error.
+def set_currency():
+    community_name = request.args(0)
+    payload = request.body.read()
+    if not payload:
+        return dict(msg="No payload given. Please provide a community_name, identity_name, and amount between [] characters.")
+    payload = json.loads(payload)
+    if 'identity_name' not in payload or 'amount' not in payload:
+        return dict(msg="Missing the required fields. Need community_name, identity_name, and amount between [] characters.")
+    
+    # Get the community_id from the communities table, using the community_name, if it exists.
+    community = db(db.communities.community_name == community_name).select().first()
+    if not community:
+        return dict(msg="Community does not exist.")
+    
+    # Get the member_id from the identities table, using the identity_name, if it exists.
+    member = db(db.identities.name == payload['identity_name']).select().first()
+    if not member:
+        return dict(msg="Member does not exist.")
+
+    # Check if the member is a member of the community.
+    community_member = db((db.community_members.community_id == community.id) & (db.community_members.identity_id == member.id)).select().first()
+    if not community_member:
+        return dict(msg="Member is not a member of the community.")
+
+    # Try to convert the amount to an integer. If it fails, return an error.
+    try:
+        payload['amount'] = int(payload['amount'])
+    except:
+        return dict(msg="Amount must be an integer.")
+
+    # Set the member's currency to the amount.
+    community_member.update_record(currency=payload['amount'])
+
+    return dict(msg=f"{payload['identity_name']}'s currency has been set to {payload['amount']}.")
+
+# Using a community name, a sender member name, a receiver member name, and an amount, transfer the amount from the sender to the receiver. 
+# If the community, sender, or receiver does not exist, return an error. If the sender does not have enough currency, return an error.
+def transfer_currency():
+    community_name = request.args(0)
+    payload = request.body.read()
+    if not payload:
+        return dict(msg="No payload given. Please provide a community_name, identity_name, receiver_name, and amount between [] characters.")
+    payload = json.loads(payload)
+    if 'identity_name' not in payload or 'receiver_name' not in payload or 'amount' not in payload:
+        return dict(msg="Missing the required fields. Need community_name, identity_name, receiver_name, and amount between [] characters.")
+    
+    # Get the community_id from the communities table, using the community_name, if it exists.
+    community = db(db.communities.community_name == community_name).select().first()
+    if not community:
+        return dict(msg="Community does not exist.")
+    
+    # Get the sender_id from the identities table, using the identity_name, if it exists.
+    sender = db(db.identities.name == payload['identity_name']).select().first()
+    if not sender:
+        return dict(msg="Sender does not exist.")
+
+    # Get the receiver_id from the identities table, using the receiver_name, if it exists.
+    receiver = db(db.identities.name == payload['receiver_name']).select().first()
+    if not receiver:
+        return dict(msg="Receiver does not exist.")
+
+    # Check if the sender is a member of the community.
+    sender_member = db((db.community_members.community_id == community.id) & (db.community_members.identity_id == sender.id)).select().first()
+    if not sender_member:
+        return dict(msg="Sender is not a member of the community.")
+
+    # Check if the receiver is a member of the community.
+    receiver_member = db((db.community_members.community_id == community.id) & (db.community_members.identity_id == receiver.id)).select().first()
+    if not receiver_member:
+        return dict(msg="Receiver is not a member of the community.")
+
+    # Try to convert the amount to an integer. If it fails, return an error.
+    try:
+        payload['amount'] = int(payload['amount'])
+    except:
+        return dict(msg="Amount must be an integer.")
+
+    # Check if the sender has enough currency to transfer.
+    if sender_member.currency < payload['amount']:
+        return dict(msg="Sender does not have enough currency to transfer.")
+
+    # Transfer the amount from the sender to the receiver.
+    sender_member.update_record(currency=sender_member.currency - payload['amount'])
+    receiver_member.update_record(currency=receiver_member.currency + payload['amount'])
+
+    return dict(msg=f"{payload['identity_name']} has transferred {payload['amount']} currency to {payload['receiver_name']}.")
