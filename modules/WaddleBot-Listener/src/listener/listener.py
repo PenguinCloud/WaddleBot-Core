@@ -68,7 +68,7 @@ class WaddleBotListener:
 
                             mainCommand = msgCommands[0]
 
-                            commands = self.get_commands(mainCommand)
+                            commands = self.get_commands(message)
 
                             # commands = self.get_commands(msgCommand)
 
@@ -112,14 +112,14 @@ class WaddleBotListener:
                                         self.send_bot_message(gateway, cmdResult, account)
                                         continue
 
-                                    print("The module is:")
-                                    print(module)
+                                    # print("The module is:")
+                                    # print(module)
                                     metadata = module['metadata']
                                     moduleTypeName = module['module_type_name']
                                     moduleID = module['id']
 
                                     # Get the command properties from the metadata
-                                    commandData = self.get_command_properties(msgCommands, metadata)
+                                    commandData = self.get_command_properties(commands, metadata)
 
                                     print("The command data is:")
                                     print(commandData)
@@ -226,6 +226,9 @@ class WaddleBotListener:
     # Function to get the payload keys from a command retrieved from redis
     def get_payload_keys(self, commandData):
         print("Getting the payload keys from the command....")
+
+        # print("The command data is:")
+        # print(commandData)
 
         keys = []
         # Get the payload keys from the command
