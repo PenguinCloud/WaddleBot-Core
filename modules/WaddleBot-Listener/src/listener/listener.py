@@ -63,7 +63,14 @@ class WaddleBotListener:
                         account = messageData[0]['account']
 
                         if "!" in message and message[0] == "!" or "#" in message and message[0] == "#":
-                            commands = self.get_commands(message)
+                            # Seperate the command from the message as the first item in the list
+                            msgCommands = message.split(" ")
+
+                            mainCommand = msgCommands[0]
+
+                            commands = self.get_commands(mainCommand)
+
+                            # commands = self.get_commands(msgCommand)
 
                             # print("The list of commands are:")
                             # print(commands)
@@ -83,21 +90,21 @@ class WaddleBotListener:
                             cmdResult += f"{pingUsername}, "
 
                             # If the command is !help, display the help message
-                            if commands[0] == "!help":
+                            if mainCommand == "!help":
                                 cmdResult += self.display_help()
                             # Else, check if the command is in the Redis cache
                             else:
                                 # Set the command as a Redis key
-                                redisCommand = self.set_redis_command(commands)
+                                # redisCommand = self.set_redis_command(mainCommand)
 
                                 # Get the command data from the Redis cache
-                                commandURL = self.redisManager.get_command(redisCommand)
-                                if commandURL is not None:
+                                commandName = self.redisManager.get_command(mainCommand)
+                                if commandName is not None:
                                     print("Command found in Redis cache.")
-                                    print(commandURL)
+                                    print(commandName)
                                     
                                     # Get marketplace module from the marketplace
-                                    module = self.get_marketplace_module_by_url(commandURL)
+                                    module = self.get_marketplace_module_by_name(commandName)
 
                                     if module is None:
                                         print("Error occured while trying to get the metadata from the marketplace.")
@@ -105,12 +112,14 @@ class WaddleBotListener:
                                         self.send_bot_message(gateway, cmdResult, account)
                                         continue
 
+                                    print("The module is:")
+                                    print(module)
                                     metadata = module['metadata']
                                     moduleTypeName = module['module_type_name']
                                     moduleID = module['id']
 
                                     # Get the command properties from the metadata
-                                    commandData = self.get_command_properties(commands, metadata)
+                                    commandData = self.get_command_properties(msgCommands, metadata)
 
                                     print("The command data is:")
                                     print(commandData)
@@ -119,7 +128,7 @@ class WaddleBotListener:
                                     # print(metadata)
 
                                     # Execute the command
-                                    cmdResult += self.execute_command(username, message, commandData, commandURL, moduleID, moduleTypeName, channel)
+                                    cmdResult += self.execute_command(username, message, commandData, moduleID, moduleTypeName, channel)
                                 else:
                                     print("Command not found in Redis cache.")
                                     cmdResult += "Command not found. Please use !help to see the list of available commands."
@@ -239,10 +248,10 @@ class WaddleBotListener:
         return action
     
     # Function to create a function URL with parameters by adding the parameters to the URL
-    def create_function_url(self, url, action, params):
+    def create_function_url(self, action, params):
         print("Creating the function URL....")
 
-        url = url + f"{action}"
+        url = f"{action}"
 
         # Add the parameters to the URL
         for param in params:
@@ -359,7 +368,7 @@ class WaddleBotListener:
 
 
     # Function to execute a command from the Redis cache, given the message command and the command data
-    def execute_command(self, username, message, commandData, commandURL, moduleId, moduleTypeName, channel):
+    def execute_command(self, username, message, commandData, moduleId, moduleTypeName, channel):
         print("Executing the command....")
 
         # Get the payload keys from the command data
@@ -448,7 +457,7 @@ class WaddleBotListener:
         # Check if the number 
 
         # Create the function URL
-        url = self.create_function_url(commandURL, action, params)
+        url = self.create_function_url(action, params)
 
         # Create the function payload
         payload = self.create_function_payload(keys, values, payloadUsername)
@@ -577,10 +586,12 @@ class WaddleBotListener:
         return helpMessage
     
     # Function to retrieve a marketplace module entry by its URL
-    def get_marketplace_module_by_url(self, url):
+    def get_marketplace_module_by_name(self, moduleName):
         print("Getting Marketplace Module by URL....")
 
-        callURL = self.marketplaceURL + "?url=" + quote_plus(url, safe='', encoding='utf-8')
+        # Old call
+        # callURL = self.marketplaceURL + "?url=" + quote_plus(url, safe='', encoding='utf-8')
+        callURL = self.marketplaceURL + "/" + moduleName
 
         print(f"Call URL: {callURL}")
 
