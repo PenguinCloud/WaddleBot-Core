@@ -12,6 +12,8 @@ testCommands = {
     "!gateway": "Gateway Manager",
     # Routing related commands
     "!route": "Routing Manager",
+    # Currency related commands
+    "!currency": "Currency",
     # Test script related commands
     "#test": "Test Module"
     
