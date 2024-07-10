@@ -7,7 +7,7 @@ matterbridgeURL = 'http://localhost:4200/api/'
 userManagerURL = 'http://localhost:8000/waddlebot_db_manager/identities/create.json/'
 
 # Marketplace API URL to manage the marketplace
-marketplaceURL = 'http://localhost:8000/marketplace_manager/marketplace/get_by_url.json'
+marketplaceURL = 'http://localhost:8000/marketplace_manager/marketplace/get.json'
 
 # Community Modules API URL to manage community modules to get the community modules
 communityModulesURL = 'http://localhost:8000/waddlebot_db_manager/community_modules/get_by_community_name_and_module_id.json/'
