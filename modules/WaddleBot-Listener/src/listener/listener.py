@@ -3,6 +3,8 @@ import time
 import re
 from pydal import DAL, Field
 from urllib.parse import quote, urlencode, quote_plus
+import asyncio
+import threading
 
 from src.redis.redis_cache import RedisCache
 
@@ -41,6 +43,8 @@ class WaddleBotListener:
                 time.sleep(1)
                 continue
 
+            
+
             if resp is not None and resp.ok:
                 messageData = resp.json()
 
@@ -63,86 +67,120 @@ class WaddleBotListener:
                         account = messageData[0]['account']
 
                         if "!" in message and message[0] == "!" or "#" in message and message[0] == "#":
-                            # Seperate the command from the message as the first item in the list
-                            msgCommands = message.split(" ")
+                            # If a command is found in the message, execute the command in its own thread
+                            print("Starting thread....")
 
-                            mainCommand = msgCommands[0]
-
-                            commands = self.get_commands(message)
-
-                            # commands = self.get_commands(msgCommand)
-
-                            # print("The list of commands are:")
-                            # print(commands)
-
-                            # Execute the command
-                            # commandResult = self.execute_command(command)
-
-                            print("Command found in text. Looking up command....")
-
-                            # Check if the command is in the botCommands dictionary
-                            cmdResult = ""
-
-                            # Get the userid from the message
-                            pingUsername = "<@" + messageData[0]['userid'] + ">"
-
-                            # Add the username to the response message
-                            cmdResult += f"{pingUsername}, "
-
-                            # If the command is !help, display the help message
-                            if mainCommand == "!help":
-                                cmdResult += self.display_help()
-                            # Else, check if the command is in the Redis cache
-                            else:
-                                # Set the command as a Redis key
-                                # redisCommand = self.set_redis_command(mainCommand)
-
-                                # Get the command data from the Redis cache
-                                commandName = self.redisManager.get_command(mainCommand)
-                                if commandName is not None:
-                                    print("Command found in Redis cache.")
-                                    print(commandName)
-                                    
-                                    # Get marketplace module from the marketplace
-                                    module = self.get_marketplace_module_by_name(commandName)
-
-                                    if module is None:
-                                        print("Error occured while trying to get the metadata from the marketplace.")
-                                        cmdResult += "The command could not be found. Ensure that the command is typed correctly."
-                                        self.send_bot_message(gateway, cmdResult, account)
-                                        continue
-
-                                    # print("The module is:")
-                                    # print(module)
-                                    metadata = module['metadata']
-                                    moduleTypeName = module['module_type_name']
-                                    moduleID = module['id']
-
-                                    # Get the command properties from the metadata
-                                    commandData = self.get_command_properties(commands, metadata)
-
-                                    print("The command data is:")
-                                    print(commandData)
-
-                                    # print("I GOT SOMETHING FROM THE MARKETPLACE!!!!")
-                                    # print(metadata)
-
-                                    # Execute the command
-                                    cmdResult += self.execute_command(username, message, commandData, moduleID, moduleTypeName, channel)
-                                else:
-                                    print("Command not found in Redis cache.")
-                                    cmdResult += "Command not found. Please use !help to see the list of available commands."
-
-                            self.send_bot_message(gateway, cmdResult, account) 
-                            
+                            t = threading.Thread(target=self.execute_command_from_message, args=(username, message, channel, gateway, account, messageData), daemon=True).start()
                         else:
                             print("No command tag found in message.")
                     else:
                         print("Error occured while processing the message. Either the 'gateway' or the 'text' attributes are missing.")
+
+                    print("Message processed. Waiting for next message....")
             else:
                 print("An error has occurred while trying to communicate with the API.")
 
+
             time.sleep(1)
+
+    # Function that executes the command from the message
+    def execute_command_from_message(self, username, message, channel, gateway, account, messageData):
+        # Seperate the command from the message as the first item in the list
+        msgCommands = message.split(" ")
+
+        mainCommand = msgCommands[0]
+
+        # If the command "timeout" is in the commandlist, run a timeout. Ensure that the timeout command is 
+        # written as "timeout:<time in seconds>". There should be no spaces between the colon and the time.
+        matching = [s for s in msgCommands if "timeout" in s]
+        if len(matching) > 0:
+            timeoutTime = 0
+            timeoutValues = matching[0].split(":")
+
+            print(f"Timeout values: {timeoutValues}")
+
+            if len(timeoutValues) > 1 and timeoutValues[1] != "":
+                timeoutTime = timeoutValues[1]
+
+                print(f"Timeout command found. Timeout time: {timeoutTime} seconds.")
+
+                time.sleep(int(timeoutTime))
+
+                print("Timeout completed. Executing the command....")
+            else:
+                # If the timeout time is not specified, set the timeout time to 0 and send a message to the user, stating
+                # that the timeout time was not specified correctly.
+                self.send_bot_message(gateway, 'The timeout time was not specified correctly. Please specify the timeout time in seconds. Example: "!command timeout:5"', account)
+
+                return
+            # After the timeout, remove the timeout command from the message
+            message = message.replace(matching[0], "")
+
+        commands = self.get_commands(message)
+
+        # commands = self.get_commands(msgCommand)
+
+        # print("The list of commands are:")
+        # print(commands)
+
+        # Execute the command
+        # commandResult = self.execute_command(command)
+
+        print("Command found in text. Looking up command....")
+
+        # Check if the command is in the botCommands dictionary
+        cmdResult = ""
+
+        # Get the userid from the message
+        pingUsername = "<@" + messageData[0]['userid'] + ">"
+
+        # Add the username to the response message
+        cmdResult += f"{pingUsername}, "
+
+        # If the command is !help, display the help message
+        if mainCommand == "!help":
+            cmdResult += self.display_help()
+        # Else, check if the command is in the Redis cache
+        else:
+            # Set the command as a Redis key
+            # redisCommand = self.set_redis_command(mainCommand)
+
+            # Get the command data from the Redis cache
+            commandName = self.redisManager.get_command(mainCommand)
+            if commandName is not None:
+                print("Command found in Redis cache.")
+                print(commandName)
+                
+                # Get marketplace module from the marketplace
+                module = self.get_marketplace_module_by_name(commandName)
+
+                if module is None:
+                    print("Error occured while trying to get the metadata from the marketplace.")
+                    cmdResult += "The command could not be found. Ensure that the command is typed correctly."
+                    self.send_bot_message(gateway, cmdResult, account)
+
+                # print("The module is:")
+                # print(module)
+                metadata = module['metadata']
+                moduleTypeName = module['module_type_name']
+                moduleID = module['id']
+
+                # Get the command properties from the metadata
+                commandData = self.get_command_properties(commands, metadata)
+
+                print("The command data is:")
+                print(commandData)
+
+                # print("I GOT SOMETHING FROM THE MARKETPLACE!!!!")
+                # print(metadata)
+
+                # Execute the command
+                cmdResult += self.execute_command(username, message, commandData, moduleID, moduleTypeName, channel)
+            else:
+                print("Command not found in Redis cache.")
+                cmdResult += "Command not found. Please use !help to see the list of available commands."
+
+        self.send_bot_message(gateway, cmdResult, account) 
 
     # Function to set the list of commands as a singular redis key string by concatenating the commands with the underscore character
     def set_redis_command(self, commands):
