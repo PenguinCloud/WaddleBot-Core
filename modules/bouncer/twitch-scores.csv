@@ -1,8 +1,9 @@
 activity,score
-follow,50
+follow,50.0
 monetaryvalue,.01
-chat,1
+chat,1.0
 raffleentry,-1.5
-giveawayentry,-6
+giveawayentry,-6.0
 timeout,-.25
-ban,-50
+ban,-50.0
+raid,5.0

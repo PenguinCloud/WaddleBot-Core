@@ -1,10 +1,11 @@
+from regex import match
 import csv
 from dataclasses import dataclass
 
 
 @dataclass
 class dbconnect:
-    """Class for keeping track of an item in inventory."""
+    #Class for keeping track of an item in inventory.
     dbhost: str
     dbport: str
     dbmethod: str
@@ -17,7 +18,7 @@ class dbconnect:
 
 @dataclass
 class dbquery:
-    """Class for keeping"""
+    
     collumns: list
     qcollumns: str
     rowselector: str
@@ -52,13 +53,34 @@ class Rep_Manager:
         self.score += readscore["score"]  
     
    
-    def twitch(self,activity:str = "follow", amount:float = 0.0):
-        if activity is in ["bits","sub","donate"]:
+    def twitch(self, text:str, userid:str):
+        activity = "none"
+        amount = 1.0
+        if userid == "system":
+            if match(r"now banned from this channel\.$", text):
+                activity = "ban"
+                amount = -50.0
+            elif match (r"has just (re)?subscribed\!$", text):
+                activity = "moneyevent"
+                amount = 5.0
+            #elif match(r"has just donated \$\d+\.\d+\!", text):
+                #activity = "moneyevent"
+                #amount = 10.0
+            elif match(r"timed out for () seconds\.$", text):
+                activity = "timeout"
+                amount = -0.25
+            elif match(r"has just cheered \d+ bits\!$", text):
+                activity = "moneyevent"
+                amount = 0.01
+            elif match(r"has just followed\!$", text):
+                activity = "follow"
+                amount = 50.0
+            elif match(r"has just raided with \d+ viewers\!$", text):
+                activity = "raid"
+                amount = 5.0
+            
             readscore = self.__queryscore("twitch") 
-        else:
-            readscore = self.__queryscore("twitch") 
-        self.score += readscore["score"]
-    
+            self.score += readscore["score"]        
    
     def __readdb(self,dbc: dbconnect,dbq: dbquery):
 
@@ -77,7 +99,19 @@ class Rep_Manager:
         return results
     
 
-    
+
+def onevent(platform,userid,text):
+    x = Rep_Manager(userid)
+    if platform == "youtube":
+        x.youtube()
+    elif platform == "discord":
+        x.discord()
+    elif platform == "twitch":
+        x.twitch()
+    else:
+        return 0
+    return 1
+
 
 if name == "main":
   x = Rep_Manager("1")
