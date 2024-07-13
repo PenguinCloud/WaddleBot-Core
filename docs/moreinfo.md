@@ -29,6 +29,9 @@ send:
  
 receive:
 * msg: text
-* stdout: (chat, dm, browser)
+* media: url to media (gif, video, sound, etc.) 
+* stdout: (chat, dm, ticker, browser)
+
+media will only be played on browser.
 
 MJ is awesome, so is the fish of J
