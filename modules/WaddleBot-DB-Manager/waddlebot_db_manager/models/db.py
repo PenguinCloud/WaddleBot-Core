@@ -184,9 +184,21 @@ db.define_table('roles',
 db.define_table('community_members', 
                 Field('community_id', db.communities),
                 Field('identity_id', db.identities),
-                Field('role_id', db.roles),
-                Field('currency', 'integer', default=0),
-                Field('reputation', 'integer', default=0))
+                Field('role_id', db.roles))
+                # Field('currency', 'integer', default=0),
+                # Field('reputation', 'integer', default=0))
+
+# Define a table to store the reputation of a user, per community
+db.define_table('reputation',
+                Field('community_id', db.communities),
+                Field('identity_id', db.identities),
+                Field('amount', 'integer', default=0))
+
+# Define a table that stores the currency of a user, per community
+db.define_table('currency',
+                Field('community_id', db.communities),
+                Field('identity_id', db.identities),
+                Field('amount', 'integer', default=0))
 
 # Define a table that contains different gateway server types
 db.define_table('gateway_server_types',

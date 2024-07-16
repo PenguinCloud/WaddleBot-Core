@@ -42,7 +42,7 @@ def create_member():
         return dict(msg="Community member already exists.")
 
     # Create the community member.
-    db.community_members.insert(community_id=community.id, identity_id=identity.id, role_id=role_id, currency=0)
+    db.community_members.insert(community_id=community.id, identity_id=identity.id, role_id=role_id)
 
     return dict(msg=f"{payload['identity_name']} has joined the community {payload['community_name']}.")
 
@@ -90,7 +90,7 @@ def update_by_community_id_and_identity_id():
     if not payload:
         return dict(msg="No payload given.")
     payload = json.loads(payload)
-    if 'community_id' not in payload or 'identity_id' not in payload or 'role_id' not in payload or 'currency' not in payload:
+    if 'community_id' not in payload or 'identity_id' not in payload or 'role_id' not in payload:
         return dict(msg="Payload missing required fields.")
     community_member = db((db.community_members.community_id == community_id) & (db.community_members.identity_id == identity_id)).select().first()
     if not community_member:
