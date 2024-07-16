@@ -42,12 +42,22 @@ def initialize_user():
     # Set the new identity.
     identity = db(db.identities.name == identity_name).select().first()
 
-    community = db(db.communities.community_name == "Global").select().first()
-    if not community:
-        return dict(msg="Community does not exist.")
+    # Check if the identity is currently in a context. If it is, set the current community variable to the community the identity is currently in.
+    # Else, set the current community variable to the "Global" community.
+    community = None
+
+    context = db(db.context.identity_id == identity.id).select().first()
+    if context:
+        community = db(db.communities.id == context.community_id).select().first()
+    else:
+        community = db(db.communities.community_name == "Global").select().first()
+    
+    # For all the below return values, a new payload is returned, along with the message, detailing the current the current context of the identity.
+    return_payload = {"identity_id": identity.id, "identity_name": identity_name, "namespace_id": community.id, "namespace_name": community.community_name}
+
     community_member = db((db.community_members.identity_id == identity.id) & (db.community_members.community_id == community.id)).select().first()
     if community_member:
-        return dict(msg="Identity is already in the community.")
+        return dict(msg="Identity is already in the community.", data=return_payload)
     
     # Get the role id for the 'member' role.
     role = db(db.roles.name == "Member").select().first()
@@ -57,9 +67,9 @@ def initialize_user():
     # If the context already exists, update it.
     if context:
         db(db.context.identity_id == identity.id).update(community_id=community.id)
-        return dict(msg="Your context has been set to the Global community.")
+        return dict(msg=f"Your context has been set to the {community.community_name} community.", data=return_payload)
     db.context.insert(identity_id=identity.id, community_id=community.id)
-    return dict(msg="Your context has been set to the Global community.")
+    return dict(msg=f"Your context has been set to the {community.community_name} community.", data=return_payload)
 
     
 
