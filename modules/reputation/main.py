@@ -1,8 +1,8 @@
 #!/usr/bin/python3
-from dataclasses.py import dbc, webdb
+from repclasses import *
 
-class reputation:
-    def __init__(self) -> None:
+class twitch:
+    def __init__(self, event: str, eventEntity: entity, eventRoute: route ) -> None:
         self.score = 0
         self.userid = None
         self.platform = None
@@ -10,3 +10,8 @@ class reputation:
         self.subinterface = None
         self.database = dbc
         self.webdb = webdb
+        self.eventEntity = eventEntity
+        self.eventRoute = eventRoute
+        self.event = event
+
+
