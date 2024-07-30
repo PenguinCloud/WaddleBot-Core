@@ -7,7 +7,6 @@ class dbc:
     dbuser: str
     dbpassword: str
 
-
 @dataclass
 class webdb:
     webhost: str
@@ -21,10 +20,15 @@ class entity:
     identity: str
     platform: list
     reputation: float
+    
+@dataclass
+class event:
+    type: str
+    amount: float   
 
 @dataclass
 class route:
-    community: str
+    namespace: str
     platform: str
     interface: str
     subInterface: str

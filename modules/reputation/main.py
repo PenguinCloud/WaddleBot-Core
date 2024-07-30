@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from repclasses import *
+from libs.botclasses import *
 
 class twitch:
     def __init__(self, event: str, eventEntity: entity, eventRoute: route ) -> None:
@@ -13,6 +13,7 @@ class twitch:
         self.eventEntity = eventEntity
         self.eventRoute = eventRoute
         self.event = event
+    def query():
 
 class discord:
     def __init__(self, event: str, eventEntity: entity, eventRoute: route ) -> None:
@@ -27,3 +28,4 @@ class discord:
         self.eventRoute = eventRoute
         self.event = event
 
+class queryDB():
