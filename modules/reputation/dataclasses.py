@@ -15,3 +15,4 @@ class webdb:
     webuser: str
     webpassword: str
     database: str
+
