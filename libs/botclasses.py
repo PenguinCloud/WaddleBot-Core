@@ -1,11 +1,11 @@
 from dataclasses import dataclass
-@dataclass
+'''@dataclass
 class dbc:
     database: str
     dbhost: str
     dbport: int
     dbuser: str
-    dbpassword: str
+    dbpassword: str '''
 
 @dataclass
 class webdb:
@@ -16,19 +16,24 @@ class webdb:
     database: str
 
 @dataclass
-class entity:
-    identity: str
-    platform: list
+class identity:
+    id: str
     reputation: float
     
 @dataclass
 class event:
-    type: str
+    activity: str
     amount: float   
-
-@dataclass
-class route:
     namespace: str
     platform: str
     interface: str
     subInterface: str
+    rawText: str
+
+
+@dataclass
+class column:
+    name: str
+    datatype: str
+    foreignKeyTable: str
+    foreignKeyColumn: str
