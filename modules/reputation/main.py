@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from libs.botclasses import *
+from libs.botClasses import *
 import pathlib
 import re
 from libs.botDBC import botDb as dbc
