@@ -1,19 +1,15 @@
 from dataclasses import dataclass
-'''@dataclass
-class dbc:
-    database: str
-    dbhost: str
-    dbport: int
-    dbuser: str
-    dbpassword: str '''
 
+
+# Use the below for any database (web or direct) info being passed around
 @dataclass
-class webdb:
-    webhost: str
-    webport: int
-    webuser: str
-    webpassword: str
+class dbinfo:
+    host: str
+    port: int
+    user: str
+    password: str
     database: str
+    table: str
 
 @dataclass
 class identity:
@@ -30,19 +26,14 @@ class event:
     subInterface: str
     rawText: str
 
-@dataclass
-class column:
-    name: str
-    datatype: str
-    foreignKeyTable: str
-    foreignKeyColumn: str
-
+# The following are the standard return values which a module kicks back to the WaddleBot router
 @dataclass
 class retvars:
     msg: str
     media: str
     stdout: str
 
+# Standard Database Query setup
 @dataclass
 class dbquery:
     columns: list

@@ -1,10 +1,14 @@
 #!/usr/bin/python3
 from libs.botclasses import *
-import logging
+import pathlib
 import re
+from libs.botDBC import botDb as dbc
+from libs.botConfig import botConfig as bc
+from updater import update
 
+#Const
+CONFIG_FILE = pathlib.Path(__file__).parent.resolve() + "config.yml"
 
-configfile = "config.yml"
 #TODO - setup the logger
 
 def receiving(activity, userid, platform, interface, text: str = None, namespace:str ="global", subinterface: str = None, amount: float = 0):
@@ -37,7 +41,6 @@ def receiving(activity, userid, platform, interface, text: str = None, namespace
             case "twitch":
                 x = update
                 x.twitch()
-                x.ms
     
     return msg, media, stdout
 
@@ -46,110 +49,12 @@ class query:
         self.score = 0
         self.id = userid
         self.retvars = retvars
+        self.config = bc(configPath=CONFIG_FILE)
+        self.config
+        self.dbc = dbc(config=self.config)
     def idLookup(self):
         lookCol = "userid"
         database = "waddlebot"
-
-class update:
-    def __init__(self, id: identity, events: event, dbc: webdb) -> None:
-        self.score = 0
-        self.id = id
-        self.event = events
-        self.retvars = retvars
-    def twitch(self):
-        match self.event.activity:
-            case re.match(r"^(re-)?subscription, self.event.activity"):
-                pass
-            case "follow":
-                pass
-            case "bits":
-                pass
-            case "raffle":
-                pass
-            case "giveaway":
-                pass
-            case "donation":
-                pass
-    def discord(self):
-        match self.event.activity:
-            case re.match(r"^(re-)?subscription, self.event.activity"):
-                pass
-            case "join":
-                pass
-            case "boost":
-                pass
-            case "raffle":
-                pass
-            case "giveaway":
-                pass
-            case "donation":
-                pass
-
-    def youtube(self):
-        match self.event.activity:
-            case re.match(r"^(re-)?subscription, self.event.activity"):
-                pass
-            case "join":
-                pass
-            case "super-text":
-                pass
-            case "raffle":
-                pass
-            case "giveaway":
-                pass
-            case "donation":
-                pass
-
-    def slack(self):
-        match self.event.activity:
-            case re.match(r"^(re-)?subscription, self.event.activity"):
-                pass
-            case "join":
-                pass
-            case "raffle":
-                pass
-            case "giveaway":
-                pass
-            case "donation":
-                pass
-
-    def mattermost(self):
-        match self.event.activity:
-            case re.match(r"^(re-)?subscription, self.event.activity"):
-                pass
-            case "join":
-                pass
-            case "raffle":
-                pass
-            case "giveaway":
-                pass
-            case "donation":
-                pass
-
-class __botDb:
-    def __init__(self):
-        self.db = webdb
-        self.columns = None
-        self.config = None
-    def importDBC(self):
-        try:
-            import yaml
-            with open(configfile,'r') as thefile:
-                c = yaml.load(thefile)
-                thefile.close
-        except Exception as err:
-            logging.error(err)
-        self.config = c
-        return c
-    def importColumns(self):
-        c = self.importDBC()
-        self.columns = c["columns"]
-        self.columns.update(c["foreignKeys"])
-    def dbc2DBMgrQ(self):
-        import requests
-        import json
-        req = requests.get()
-    def dbc2DBMgrU(self):
-        import requests
-        import json
+    def repAlias(self, score:float=600):
         pass
+
