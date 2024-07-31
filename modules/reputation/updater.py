@@ -87,4 +87,3 @@ class update:
                 pass
             case "donation":
                 pass
-
