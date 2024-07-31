@@ -30,10 +30,22 @@ class event:
     subInterface: str
     rawText: str
 
-
 @dataclass
 class column:
     name: str
     datatype: str
     foreignKeyTable: str
     foreignKeyColumn: str
+
+@dataclass
+class retvars:
+    msg: str
+    media: str
+    stdout: str
+
+@dataclass
+class dbquery:
+    columns: list
+    table: str
+    queryColumn: str
+    queryValue: str
