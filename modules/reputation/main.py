@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 from libs.botClasses import *
 import pathlib
-import re
 from libs.botDBC import botDb as dbc
 from libs.botConfig import botConfig as bc
 from updater import update
