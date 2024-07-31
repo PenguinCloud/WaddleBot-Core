@@ -44,17 +44,5 @@ def receiving(activity, userid, platform, interface, text: str = None, namespace
     
     return msg, media, stdout
 
-class query:
-    def __init__(self, userid: identity) -> None:
-        self.score = 0
-        self.id = userid
-        self.retvars = retvars
-        self.config = bc(configPath=CONFIG_FILE)
-        self.config
-        self.dbc = dbc(config=self.config)
-    def idLookup(self):
-        lookCol = "userid"
-        database = "waddlebot"
-    def repAlias(self, score:float=600):
-        pass
+
 

@@ -2,6 +2,7 @@ from libs.botClasses import *
 from botConfig import botConfig as bc
 import inspect
 import os
+import requests
 
 #const
 DEFAULT_CFG_FILENAME="config.yml"
@@ -29,15 +30,15 @@ class botDb:
         return columns
 
     def webdbRead(self, query: dbquery):
-        import requests
         requrl = "https://"+self.db.webhost+":"+self.db.webport+"/"+self.db.database+"/"+self.db.table+"/read"
         reqquery = {'columns': ','.join(query.columns), 'queryColumn': query.queryColumn, 'queryValue': query.queryValue}
         response = requests.get(requrl, data=reqquery, auth=self.auth)
         return response.json
     
     def webdbUpdate(self, query: dbquery):
-        import requests
         requrl = "https://"+self.db.webhost+":"+self.db.webport+"/"+self.db.database+"/"+self.db.table+"/update"
         reqquery = {'columns': ','.join(query.columns), 'queryColumn': query.queryColumn, 'queryValue': query.queryValue}
         response = requests.get(requrl, data=reqquery)
-        return response.json
+        responseJSON = response.json
+        # logging.debug(responseJSON)
+        return responseJSON['response']

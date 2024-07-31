@@ -1,27 +1,29 @@
 from libs.botClasses import *
 import re
-from libs.botDBC import botDb as dbc
-from libs.botConfig import botConfig as bc
-from updater import update
-
+from libs.botDBC import botDb as db
+from libs.botConfig import botConfig as cfg
 
 #Const
 CONFIG_FILE = pathlib.Path(__file__).parent.resolve() + "config.yml"
 
 class update:
-    def __init__(self, id: identity, events: event, db: dbinfo) -> None:
+    def __init__(self, id: identity, events: event, dbc: dbinfo) -> None:
         self.score = 0
         self.id = id
         self.event = events
         self.retvars = retvars
-        self.config = bc(configPath=CONFIG_FILE)
-        self.dbc = dbc(configfile=self.config)
-        self.db = db
+        self.config = cfg(configPath=CONFIG_FILE)
+        self.dbc = db(configfile=self.config)
     def twitch(self):
+        dbScore = dbquery
+        dbScore.columns = ["score"]
+        dbScore.queryColumn = "event"
         match self.event.activity:
             case re.match(r"(re-)?subscription, self.event.activity"):
                 if re.match(r"^tier 1"):
-                    self.dbc.webdbUpdate()
+                    
+                    dbq.queryValue = "supporter"
+                    value = self.dbc.webdbUpdate(query=dbq)
             case "follow":
                 pass
             case "bits":
@@ -87,3 +89,4 @@ class update:
                 pass
             case "donation":
                 pass
+
