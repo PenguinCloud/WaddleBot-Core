@@ -1,0 +1,9 @@
+---
+columns:
+  userid: int
+  score: float
+  namespace: str
+foreignKeys:
+  userid:
+    tableName: identities
+    columnName: id
