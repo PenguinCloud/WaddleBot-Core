@@ -1,7 +1,10 @@
 from twitchAPI.twitch import Twitch
+from twitchAPI.helper import first
+from twitchAPI.eventsub.webhook import EventSubWebhook
+from twitchAPI.object.eventsub import ChannelFollowEvent, ChannelSubscribeEvent, ChannelSubscriptionGiftEvent
 from twitchAPI.oauth import UserAuthenticator
 from twitchAPI.type import AuthScope, ChatEvent
-from twitchAPI.chat import Chat, EventData, ChatMessage, ChatSub, ChatCommand, ClearChatEvent
+from twitchAPI.chat import Chat, EventData, ChatMessage, ChatSub, ChatCommand, ClearChatEvent, NoticeEvent, RoomStateChangeEvent
 import asyncio
 from dotenv import load_dotenv
 import os
@@ -30,16 +33,19 @@ activities = [
     {"name": "follow", "amount": 10},
     {"name": "sub", "amount": 50},
     {"name": "raid", "amount": 30},
-    {"name": "ban", "amount": -10}
+    {"name": "ban", "amount": -10},
+    {"name": "subgift", "amount": 60},
 ]
 
 # Setup the twitch api listener as a class
 class TwitchAPIListener:
-    def __init__(self, app_id, app_secret, user_scope, target_channels, context_url):
+    def __init__(self, app_id, app_secret, user_scope, target_channels, context_url, eventsub_url, target_user):
         self.app_id = app_id
         self.app_secret = app_secret
         self.user_scope = user_scope
         self.context_url = context_url
+        self.eventsub_url = eventsub_url
+        self.target_user = target_user
 
         self.target_channels = target_channels
 
@@ -164,6 +170,36 @@ class TwitchAPIListener:
         # Process the ban activity
         self.process_activity(activities[4], ban.user_name)
 
+    # this will be called whenever someone follows a channel
+    async def on_follow(self, data: ChannelFollowEvent):
+        # our event happend, lets do things with the data we got!
+        print(f'{data.event.user_name} now follows {data.event.broadcaster_user_name}!')
+
+        userName = data.event.user_name
+
+        # Process the follow activity
+        self.process_activity(activities[1], userName)
+
+    # this will be called whenever someone subscribes to a channel
+    async def on_sub(self, data: ChannelSubscribeEvent):
+        # our event happend, lets do things with the data we got!
+        print(f'{data.event.user_name} just subscribed to {data.event.broadcaster_user_name}!')
+
+        userName = data.event.user_name
+
+        # Process the sub activity
+        self.process_activity(activities[2], userName)
+
+    # this will be called whenever someone gifts a subscription to a channel
+    async def on_subgift(self, data: ChannelSubscriptionGiftEvent):
+        # our event happend, lets do things with the data we got!
+        print(f'{data.event.user_name} just gifted a subscription to {data.event.broadcaster_user_name}!')
+
+        userName = data.event.user_name
+
+        # Process the subgift activity
+        self.process_activity(activities[5], userName)
+
     # this will be called whenever the !reply command is issued
     async def test_command(self, cmd: ChatCommand):
         if len(cmd.parameter) == 0:
@@ -171,50 +207,146 @@ class TwitchAPIListener:
         else:
             await cmd.reply(f'{cmd.user.name}: {cmd.parameter}')
 
+    # this will be called when a notice event is triggered
+    async def on_notice(self, notice: NoticeEvent):
+        print(f'Notice event: {notice}')
+
+    # thsi will be called when a room state change event is triggered
+    async def on_room_state_change(self, room_state: RoomStateChangeEvent):
+        print(f'Room state change: {room_state}')
 
     # this is where we set up the bot
     async def run(self):
         print(f'Target channels: {self.target_channels}')
 
         # set up twitch api instance and add user authentication with some scopes
-        twitch = await Twitch(self.app_id, self.app_secret)
-        
-        auth = UserAuthenticator(twitch, self.user_scope)
-        token, refresh_token = await auth.authenticate()
-        print("The token is: ", token)
+        try:
+            twitch = await Twitch(self.app_id, self.app_secret)
+            # user = await first(twitch.get_users(logins=self.target_user))
+            
+            auth = UserAuthenticator(twitch, self.user_scope)
 
-        await twitch.set_user_authentication(token, self.user_scope, refresh_token)
+            token, refresh_token = await auth.authenticate()
+            print("The token is: ", token)
+
+            await twitch.set_user_authentication(token, self.user_scope, refresh_token)
+        except Exception as e:
+            print(f"An error ocurred setting up the Twitch API: {e}")
 
         # create chat instance
-        chat = await Chat(twitch)
+        try:
+            chat = await Chat(twitch)
 
-        # register the handlers for the events you want
+            # register the handlers for the events you want
 
-        # listen to when the bot is done starting up and ready to join channels
-        chat.register_event(ChatEvent.READY, self.on_ready)
-        # listen to chat messages
-        chat.register_event(ChatEvent.MESSAGE, self.on_message)
-        # listen to channel subscriptions
-        chat.register_event(ChatEvent.SUB, self.on_sub)
-        # Listen to raids
-        chat.register_event(ChatEvent.RAID, self.on_raid)
-        # Listen to bans
-        chat.register_event(ChatEvent.CHAT_CLEARED, self.on_ban)
+            # listen to when the bot is done starting up and ready to join channels
+            chat.register_event(ChatEvent.READY, self.on_ready)
+            # listen to chat messages
+            chat.register_event(ChatEvent.MESSAGE, self.on_message)
+            # listen to channel subscriptions
+            chat.register_event(ChatEvent.SUB, self.on_sub)
+            # Listen to raids
+            chat.register_event(ChatEvent.RAID, self.on_raid)
+            # Listen to bans
+            chat.register_event(ChatEvent.CHAT_CLEARED, self.on_ban)
+            # Listen for notices
+            chat.register_event(ChatEvent.NOTICE, self.on_notice)
+            # Listen for room state changes
+            chat.register_event(ChatEvent.ROOM_STATE_CHANGE, self.on_room_state_change)
 
-        # you can directly register commands and their handlers, this will register the !reply command
-        chat.register_command('reply', self.test_command)
+            # you can directly register commands and their handlers, this will register the !reply command
+            chat.register_command('reply', self.test_command)
 
 
-        # we are done with our setup, lets start this bot up!
-        chat.start()
+            # we are done with our setup, lets start this bot up!
+            chat.start()
+        except Exception as e:
+            print(f"An error ocurred setting up the chat bot: {e}")
+
+        # # register the eventsub webhook
+        # # basic setup, will run on port 8080 and a reverse proxy takes care of the https and certificate
+        try:
+            eventsub = EventSubWebhook(self.eventsub_url, 8080, twitch)
+
+            # unsubscribe from all old events that might still be there
+            # this will ensure we have a clean slate
+            await eventsub.unsubscribe_all()
+            # start the eventsub client
+            eventsub.start()
+
+            # Get the usernames from the list of gateways
+            user_list = self.get_usernames(self.target_channels)
+
+            # Subscribe to events for the list of users
+            await self.subscribe_to_events(eventsub, twitch, user_list)
+        except Exception as e:
+            print(f"An error ocurred setting up the webhook events: {e}")
 
         # lets run till we press enter in the console
         try:
             input('press ENTER to stop\n')
         finally:
             # now we can close the chat bot and the twitch api client
+            # stopping both eventsub as well as gracefully closing the connection to the API
+            await eventsub.stop()
+
             chat.stop()
             await twitch.close()
+
+    # A function to return a list of usernames from a list of users retrieved from the Waddlebot's DB
+    def get_usernames(self, users):
+        user_list = []
+        if len(users) > 0:
+            for user in users:
+                # Check if the first character of the string is a "#" symbol
+                if user[0] == "#":
+                    # Remove the "#" symbol from the string
+                    user = user[1:]
+                user_list.append(user)
+        
+        return user_list
+
+    # A function to return a list of user objects from a list of user names
+    async def get_user_objects(self, twitch, user_list):
+        users = []
+        if len(user_list) > 0:
+            for user in user_list:
+                user = await first(twitch.get_users(logins=user))
+                users.append(user)
+        
+        return users
+
+    # Function to subscribe to events for a list of users
+    async def subscribe_to_events(self, eventsub, twitch, user_list):
+
+        print("Getting user data")
+        # users = []
+        # users.append(await first(twitch.get_users(logins=user)))
+        # From the list of users, get all the twitch user objects and store them in a list
+        # users = await get_user_objects(twitch, USER_LIST)
+        users = await self.get_user_objects(twitch, user_list)
+
+        # print(f'subscribing to follow events for user {user.id}')
+        # From the list of users, subscribe to the follow event for each user
+        for user in users:
+            print(f'subscribing to follow events for user {user.id}')
+            await eventsub.listen_channel_follow_v2(user.id, user.id, self.on_follow)
+        
+        # From the list of users, subscribe to the sub event for each user
+        for user in users:
+            print(f'subscribing to sub events for user {user.id}')
+            await eventsub.listen_channel_subscribe(user.id, self.on_sub)
+
+        # From the list of users, subscribe to the subgift event for each user
+        for user in users:
+            print(f'subscribing to subgift events for user {user.id}')
+            await eventsub.listen_channel_subscription_gift(user.id, self.on_subgift)
+
+        print("Listening to events")
+
+    
+
+TARGET_SCOPES = [AuthScope.MODERATOR_READ_FOLLOWERS, AuthScope.USER_READ_FOLLOWS, AuthScope.USER_EDIT_FOLLOWS, AuthScope.MODERATOR_MANAGE_AUTOMOD]
 
 # The main function to run the bot
 def main():
@@ -225,9 +357,11 @@ def main():
     listener = TwitchAPIListener(
         os.getenv('TWITCH_APP_ID'),
         os.getenv('TWITCH_APP_SECRET'),
-        [AuthScope.CHAT_READ, AuthScope.CHAT_EDIT, AuthScope.MODERATOR_READ_FOLLOWERS],
+        TARGET_SCOPES,
         gateways,
-        os.getenv('CONTEXT_URL')
+        os.getenv('CONTEXT_URL'),
+        os.getenv('EVENTSUB_URL'),
+        os.getenv('TARGET_USERNAME')
     )
 
     # Run the bot
