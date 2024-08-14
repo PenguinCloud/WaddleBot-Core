@@ -4,16 +4,16 @@ from src.listener.listener import WaddleBotListener
 matterbridgeURL = 'http://localhost:4200/api/'
 
 # User manager API URL to add users to the database
-userManagerURL = 'http://localhost:8000/waddlebot_db_manager/identities/create.json/'
+userManagerURL = 'http://localhost:8000/WaddleDBM/identities/create.json/'
 
 # Marketplace API URL to manage the marketplace
 marketplaceURL = 'http://localhost:8000/marketplace_manager/marketplace/get.json'
 
 # Community Modules API URL to manage community modules to get the community modules
-communityModulesURL = 'http://localhost:8000/waddlebot_db_manager/community_modules/get_by_community_name_and_module_id.json/'
+communityModulesURL = 'http://localhost:8000/WaddleDBM/community_modules/get_by_community_name_and_module_id.json/'
 
 # Initial context API URL to set the initial context of new users to the database.
-contextURL = 'http://localhost:8000/waddlebot_db_manager/context/'
+contextURL = 'http://localhost:8000/WaddleDBM/context/'
 
 # Redis parameters
 redisHost = 'localhost'
