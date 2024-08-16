@@ -10,6 +10,9 @@ CONFIG_FILE = pathlib.Path(__file__).parent.resolve() + "config.yml"
 
 #TODO - setup the logger
 
+#--------
+# This is the function which lambda will call
+#--------
 def receiving(activity, userid, platform, interface, text: str = None, namespace:str ="global", subinterface: str = None, amount: float = 0):
     # Why are we even here bruh?
     ee = event
@@ -40,6 +43,14 @@ def receiving(activity, userid, platform, interface, text: str = None, namespace
             case "twitch":
                 x = update
                 x.twitch()
+            case "discord":
+                x = update
+                x.discord()
+            case "youtube":
+                x = update
+                x.youtube()
+            case _:
+                msg = "I am not programmed to handle this platform
     
     return msg, media, stdout
 
