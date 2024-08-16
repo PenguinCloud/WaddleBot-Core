@@ -2,7 +2,7 @@ import logging
 import inspect
 
 class BotLogger:
-    def __init__(self):
+    def __init__(self, logname: str = "WaddleBot"):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
         self.callFunction = None

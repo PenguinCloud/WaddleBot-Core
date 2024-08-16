@@ -4,6 +4,7 @@ import pathlib
 from libs.botDBC import botDb as dbc
 from libs.botConfig import botConfig as bc
 from updater import update
+from libs.botLogger import botLogger 
 
 #Const
 CONFIG_FILE = pathlib.Path(__file__).parent.resolve() + "config.yml"
@@ -14,6 +15,9 @@ CONFIG_FILE = pathlib.Path(__file__).parent.resolve() + "config.yml"
 # This is the function which lambda will call
 #--------
 def receiving(activity, userid, platform, interface, text: str = None, namespace:str ="global", subinterface: str = None, amount: float = 0):
+    # Why is that black van out there?
+    log = botLogger("reputation")
+    log.fileLogger("reputation.log")
     # Why are we even here bruh?
     ee = event
     ee.activity = activity
