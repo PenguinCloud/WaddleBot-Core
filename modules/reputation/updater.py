@@ -29,34 +29,37 @@ class update:
         dbScore.queryColumn = "event"
         match self.event.activity:
             case re.match(r"(re-)?subscription, self.event.activity"):
+                amount = 1
                 if re.match(r"^tier 1"):
-                    dbq.queryValue = "supporter"
-                    value = self.dbc.webdbUpdate(query=dbq)
-                    x = self.updateScore()
-            case "follow":
-                pass
-            case "bits":
-                pass
-            case "raffle":
-                pass
-            case "giveaway":
-                pass
-            case "donation":
-                pass
+                    amount = 5
+                if re.match(r"^tier 2"):
+                    amount = 10
+                if re.match(r"^tier 3"):
+                    amount = 20
+                scoreChange = self.__scoreAdjust(eventType="subscription", eventAmount=amount)
+            case _:
+                scoreChange = self.__scoreAdjust(eventType=self.event.activity)
+        return self.__updateScores(scoreChange)
     def discord(self):
+        eventType = ""
+        amount = 1.0
         match self.event.activity:
             case re.match(r"^(re-)?subscription, self.event.activity"):
-                pass
+                eventType = "supporter"
             case "join":
-                pass
+                eventType = "follower"
             case "boost":
-                pass
+                eventType = "supporter"
+                amount =  3.5
             case "raffle":
-                pass
+                eventType = "raffle"
             case "giveaway":
-                pass
+                eventType = "giveaway"
             case "donation":
-                pass
+                eventType = "donation"
+                amount = self.event.amount
+        scoreChange = self.__scoreAdjust(eventType=eventType, eventAmount=amount)
+        return self.__updateScores(scoreChange)
 
     def youtube(self):
         match self.event.activity:
@@ -99,21 +102,22 @@ class update:
             case "donation":
                 pass
 
-    def updateScore(self, scoreChange: float):
-        dbScore = dbquery
-        dbScore.columns = ["score"]
-        dbScore.queryColumn = "event"
-        dbScore.queryValue = self.event.activity
-        dbScore.database = "waddlebot"
-        dbScore.table = "reputation"
-        dbScore.whereColumn = "userid"
-        dbScore.whereValue = self.id.id
-        dbScore.updateColumn = "score"
-        dbScore.updateValue = scoreChange
-        dbu = db.webdbUpdate(query=dbScore)
-        if dbu == None:
-            log.error("Failed to update score")
-            return False
-        else:
-            log.debug(f"Score updated for {self.id.id}")
-            return True
+    # Check what the adjustment based on general type should be
+    def __scoreAdjust(self, eventType: str, eventAmount: float = 1.0):
+        scoreDBQ = dbquery
+        scoreDBQ.columns = "adjustment"
+        scoreDBQ.queryColumn = "event"
+        scoreDBQ.queryValue = eventType
+        y = self.dbc.webdbRead(query=scoreDBQ)
+        log.debug(f"Adjustment for {eventType} is {y[0][0]}")
+        return y[0][0] * eventAmount
+    
+    # Update the score in the database
+    def __updateScore(self, score: float):
+        scoreDBQ = dbquery
+        scoreDBQ.columns = "score"
+        scoreDBQ.queryColumn = "userid"
+        scoreDBQ.queryValue = self.id.id
+        y = self.dbc.webdbUpdate(query=scoreDBQ)
+        log.debug(f"Score for {self.id.id} updated to {score}")
+        return y

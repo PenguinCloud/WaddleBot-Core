@@ -44,13 +44,3 @@ class query:
         log.error(f"No alias found for {score}")
         return "no alias found!"
     
-    # Check what the adjustment based on general type should be
-    def scoreAdjust(self, eventType: str, eventAmount: float = 1.0):
-        scoreDBQ = dbquery
-        scoreDBQ.columns = "adjustment"
-        scoreDBQ.queryColumn = "event"
-        scoreDBQ.queryValue = eventType
-        x = dbc
-        y = x.webdbRead(query=scoreDBQ)
-        log.debug(f"Adjustment for {eventType} is {y[0][0]}")
-        return y[0][0] * eventAmount
