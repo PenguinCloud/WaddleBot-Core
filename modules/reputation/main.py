@@ -47,15 +47,15 @@ def receiving(activity, userid, platform, interface, text: str = None, namespace
         match platform:
             case "twitch":
                 log.debug("Twitch platform detected")
-                x = update
+                x = update(id,ee,CONFIG_FILE=CONFIG_FILE)
                 x.twitch()
             case "discord":
                 log.debug("Discord platform detected")
-                x = update
+                x = update(id,ee,CONFIG_FILE=CONFIG_FILE)
                 x.discord()
             case "youtube":
                 log.debug("Youtube platform detected")
-                x = update
+                x = update(id,ee,CONFIG_FILE=CONFIG_FILE)
                 x.youtube()
             case _:
                 log.error("I am not programmed to handle this platform")
