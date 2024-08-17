@@ -51,7 +51,7 @@ except ValueError as err:
         return None
     
     def webdbUpdate(self, query: dbquery):
-        requrl = "https://"+self.db.webhost+":"+self.db.webport+"/"+self.db.database+"/"+self.db.table+"/update"
+        requrl = f"https://{self.db.webhost}:{self.db.webport}/{self.db.database}/{self.db.table}/update"
         reqquery = {'columns': ','.join(query.columns), 'queryColumn': query.queryColumn, 'queryValue': query.queryValue}
         try:
             response = requests.get(requrl, data=reqquery)
