@@ -2,6 +2,11 @@ from libs.botClasses import *
 import re
 from libs.botDBC import botDb as db
 from libs.botConfig import botConfig as cfg
+from libs.botLogger import botLogger
+
+# Why is that black van out there?
+log = botLogger("reputation-updater")
+log.fileLogger("reputation.log")
 
 #Const
 CONFIG_FILE = pathlib.Path(__file__).parent.resolve() + "config.yml"
@@ -21,7 +26,6 @@ class update:
         match self.event.activity:
             case re.match(r"(re-)?subscription, self.event.activity"):
                 if re.match(r"^tier 1"):
-                    
                     dbq.queryValue = "supporter"
                     value = self.dbc.webdbUpdate(query=dbq)
             case "follow":
@@ -90,3 +94,14 @@ class update:
             case "donation":
                 pass
 
+    def updateScore(self):
+        dbScore = dbquery
+        dbScore.columns = ["score"]
+        dbScore.queryColumn = "event"
+        dbScore.queryValue = self.event.activity
+        dbScore.database = "waddlebot"
+        dbScore.table = "reputation"
+        dbScore.whereColumn = "userid"
+        dbScore.whereValue = self.id.id
+        dbScore.updateColumn = "score"
+        dbu = db.webdbUpdate(query=dbScore)

@@ -1,6 +1,11 @@
 import inspect
 import os
 from libs.botClasses import *
+from libs.botLogger import botLogger
+
+# Why is that black van out there?
+log = botLogger("waddlebot-dbc")
+log.fileLogger("waddlebot-dbc.log")
 
 abs_path = os.path.abspath((inspect.stack()[0])[1])
 directory_of_1py = os.path.dirname(abs_path)
@@ -11,6 +16,7 @@ class botConfig:
         match configType:
             case "yaml":
                 self.config = self.__importyaml()
+                log.debug("Config type is yaml")
             case _:
                 self.config = self.__importyaml()
 
@@ -18,8 +24,9 @@ class botConfig:
         try:
             import yaml
             with open(self.cpath,'r') as thefile:
+                log.debug(f"Importing {self.cpath}")
                 c = yaml.load(thefile)
                 thefile.close
         except Exception as err:
-            print(err)
+            log.error(err)
         return c

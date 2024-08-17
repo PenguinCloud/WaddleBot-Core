@@ -9,15 +9,16 @@ from libs.botLogger import botLogger
 #Const
 CONFIG_FILE = pathlib.Path(__file__).parent.resolve() + "config.yml"
 
-#TODO - setup the logger
+
+# Why is that black van out there?
+log = botLogger("reputation-main")
+log.fileLogger("reputation.log")
 
 #--------
 # This is the function which lambda will call
 #--------
 def receiving(activity, userid, platform, interface, text: str = None, namespace:str ="global", subinterface: str = None, amount: float = 0):
-    # Why is that black van out there?
-    log = botLogger("reputation")
-    log.fileLogger("reputation.log")
+    # Initiate the logger    
     # Why are we even here bruh?
     ee = event
     ee.activity = activity
@@ -45,16 +46,19 @@ def receiving(activity, userid, platform, interface, text: str = None, namespace
     else:
         match platform:
             case "twitch":
+                log.debug("Twitch platform detected")
                 x = update
                 x.twitch()
             case "discord":
+                log.debug("Discord platform detected")
                 x = update
                 x.discord()
             case "youtube":
+                log.debug("Youtube platform detected")
                 x = update
                 x.youtube()
             case _:
-                msg = "I am not programmed to handle this platform
+                log.error("I am not programmed to handle this platform")
     
     return msg, media, stdout
 
