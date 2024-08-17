@@ -25,7 +25,7 @@ class botConfig:
             import yaml
             with open(self.cpath,'r') as thefile:
                 log.debug(f"Importing {self.cpath}")
-                c = yaml.load(thefile)
+                c = yaml.safe_load(thefile)
                 thefile.close
         except Exception as err:
             log.error(err)
