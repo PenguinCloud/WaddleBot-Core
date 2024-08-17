@@ -12,8 +12,9 @@ log.fileLogger("waddlebot-dbc.log")
 #const
 DEFAULT_CFG_FILENAME="config.yml"
 
-#gitr done function classes
-
+#---------------------
+# This is the class which will handle all database interactions
+#---------------------
 class botDb:
     def __init__(self, config: dict = None, dbc: dbinfo = None ):
         # our input
@@ -25,34 +26,43 @@ class botDb:
         if self.dbc is None:
             log.debug("No dbinfo object given, trying to find config file based on default")
             call_abspath = os.path.abspath((inspect.stack()[0])[1])
-            path = os.path.dirname(call_abspath) + DEFAULT_CFG_FILENAME
+            path = f"{os.path.dirname(call_abspath)}{DEFAULT_CFG_FILENAME}"
             self.dbc = bc(configPath=path).config["database"]
         # set the below to whatever request auth method you want before calling dbConnect functions
         self.auth = None
 
+    #---------------------
+    # This is a helper function will import the database config and select the columns / foreign keys
+    #---------------------
     def __importColumns(self):
         columns = self.config["columns"]
         columns.update(self.config["foreignKeys"])
         return columns
 
+    #---------------------
+    # Function which calls out to a DB via API and returns a response
+    #---------------------
     def webdbRead(self, query: dbquery):
         requrl = f"https://{self.db.webhost}:{self.db.webport}/{self.db.database}/{self.db.table}/read"
         reqquery = {'columns': ','.join(query.columns), 'queryColumn': query.queryColumn, 'queryValue': query.queryValue}
-try:
-    response = requests.get(requrl, data=reqquery, auth=self.auth)
-    response.raise_for_status()
-    return response.json()
-except requests.RequestException as err:
-    log.error(f"Request failed: {err}")
-    raise
-except ValueError as err:
-    log.error(f"JSON decoding failed: {err}")
-    raise
-        return None
+        try:
+            response = requests.get(requrl, data=reqquery, auth=self.auth)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as err:
+            log.error(f"Request failed: {err}")
+            return None
+        except ValueError as err:
+            log.error(f"JSON decoding failed: {err}")
+            return None
     
+    #---------------------
+    # Function which calls out to a DB via API to update DB records
+    #---------------------
     def webdbUpdate(self, query: dbquery):
         requrl = f"https://{self.db.webhost}:{self.db.webport}/{self.db.database}/{self.db.table}/update"
         reqquery = {'columns': ','.join(query.columns), 'queryColumn': query.queryColumn, 'queryValue': query.queryValue}
+        log.debug(f"Requesting update to {requrl}")
         try:
             response = requests.get(requrl, data=reqquery)
             responseJSON = response.json

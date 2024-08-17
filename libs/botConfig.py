@@ -21,11 +21,11 @@ class botConfig:
                 self.config = self.__importyaml()
 
     def __importyaml(self):
+        from yaml import safe_load
         try:
-            import yaml
             with open(self.cpath,'r') as thefile:
                 log.debug(f"Importing {self.cpath}")
-                c = yaml.safe_load(thefile)
+                c = safe_load(thefile)
                 thefile.close
         except Exception as err:
             log.error(err)
