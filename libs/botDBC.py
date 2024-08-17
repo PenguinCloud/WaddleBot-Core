@@ -22,7 +22,7 @@ class botDb:
         self.config = self.__importDBC()
         self.columns = self.__importColumns()
         # if you dont give me the goods, ill try to find them myself
-        if self.dbc == None:
+        if self.dbc is None:
             log.debug("No dbinfo object given, trying to find config file based on default")
             call_abspath = os.path.abspath((inspect.stack()[0])[1])
             path = os.path.dirname(call_abspath) + DEFAULT_CFG_FILENAME
