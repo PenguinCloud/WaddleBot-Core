@@ -36,7 +36,7 @@ class botDb:
         return columns
 
     def webdbRead(self, query: dbquery):
-        requrl = "https://"+self.db.webhost+":"+self.db.webport+"/"+self.db.database+"/"+self.db.table+"/read"
+        requrl = f"https://{self.db.webhost}:{self.db.webport}/{self.db.database}/{self.db.table}/read"
         reqquery = {'columns': ','.join(query.columns), 'queryColumn': query.queryColumn, 'queryValue': query.queryValue}
 try:
     response = requests.get(requrl, data=reqquery, auth=self.auth)
