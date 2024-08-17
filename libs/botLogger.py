@@ -9,7 +9,7 @@ class BotLogger:
     def caller(self):
         try:
             self.callFunction = inspect.stack()[2][3]
-        except:
+        except Exception:
             self.logger.debug("Unable to get the caller function 2 levels up, tryin 1 level up!")
         if len(self.callFunction) < 2:
             self.callFunction = inspect.stack()[1][3]
