@@ -38,11 +38,16 @@ class botDb:
     def webdbRead(self, query: dbquery):
         requrl = "https://"+self.db.webhost+":"+self.db.webport+"/"+self.db.database+"/"+self.db.table+"/read"
         reqquery = {'columns': ','.join(query.columns), 'queryColumn': query.queryColumn, 'queryValue': query.queryValue}
-        try:
-            response = requests.get(requrl, data=reqquery, auth=self.auth)
-            return response.json
-        except Exception as err:
-            log.error(err)
+try:
+    response = requests.get(requrl, data=reqquery, auth=self.auth)
+    response.raise_for_status()
+    return response.json()
+except requests.RequestException as err:
+    log.error(f"Request failed: {err}")
+    raise
+except ValueError as err:
+    log.error(f"JSON decoding failed: {err}")
+    raise
         return None
     
     def webdbUpdate(self, query: dbquery):
