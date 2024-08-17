@@ -11,7 +11,7 @@ log.fileLogger("reputation.log")
 # This is the function which will query current rep and rep modifiers
 #--------
 class query:
-    def __init__(self, userid: identity) -> None:
+    def __init__(self, userid: identity, CONFIG_FILE) -> None:
         self.score = 0
         self.id = userid
         self.retvars = retvars

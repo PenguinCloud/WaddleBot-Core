@@ -1,10 +1,9 @@
 #!/usr/bin/python3
 from libs.botClasses import *
 import pathlib
-from libs.botDBC import botDb as dbc
-from libs.botConfig import botConfig as bc
 from updater import update
 from libs.botLogger import botLogger 
+from query import query
 
 #Const
 CONFIG_FILE = pathlib.Path(__file__).parent.resolve() + "config.yml"
@@ -41,7 +40,8 @@ def receiving(activity, userid, platform, interface, text: str = None, namespace
 
     # Do we seek truth?
     if platform == "query":
-        x = query(id)
+        log.debug("Query platform detected")    
+        x = query(id, CONFIG_FILE=CONFIG_FILE)
         msg = x.idLookup()
     else:
         match platform:

@@ -3,6 +3,8 @@ import re
 from libs.botDBC import botDb as db
 from libs.botConfig import botConfig as cfg
 from libs.botLogger import botLogger
+from query import dbquery as dbq
+import pathlib
 
 # Why is that black van out there?
 log = botLogger("reputation-updater")
