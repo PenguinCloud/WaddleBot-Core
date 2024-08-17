@@ -28,16 +28,12 @@ class event:
     subInterface: str
     rawText: str
 
-# The following are the standard return values which a module kicks back to the WaddleBot router
-
 
 @dataclass
 class retvars:
     msg: str
     media: str
     stdout: str
-
-# Standard Database Query setup
 
 
 @dataclass
