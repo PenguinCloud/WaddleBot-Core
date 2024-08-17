@@ -7,9 +7,9 @@ from libs.botLogger import botLogger
 log = botLogger("reputation-query")
 log.fileLogger("reputation.log")
 
-#--------
+# ---------------------
 # This is the function which will query current rep and rep modifiers
-#--------
+# ---------------------
 class query:
     def __init__(self, userid: identity, CONFIG_FILE) -> None:
         self.score = 0
@@ -18,7 +18,10 @@ class query:
         self.config = bc(configPath=CONFIG_FILE)
         self.dbc = dbc(config=self.config)
         log.debug(f"Query object initiated for {self.id.id}")
+        
+    # ---------------------
     # Lookup an ID's reputation
+    # ---------------------
     def idRep(self):
         lookCol = "userid"
         database = "waddlebot"
@@ -35,7 +38,9 @@ class query:
         log.debug(f"Score for {self.id.id} is {self.score}")
         return self.score
     
+    # ---------------------
     # Return the alias name for the current score
+    # ---------------------
     def repAlias(self, score:float=600):
         for alias, range in self.config["reputation-alias"]:
             if score > range[0] and score < range[1]:
@@ -43,4 +48,3 @@ class query:
                 return alias
         log.error(f"No alias found for {score}")
         return "no alias found!"
-    

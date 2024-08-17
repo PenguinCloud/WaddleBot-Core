@@ -11,15 +11,17 @@ class dbinfo:
     database: str
     table: str
 
+
 @dataclass
 class identity:
     id: str
     reputation: float
-    
+
+
 @dataclass
 class event:
     activity: str
-    amount: float   
+    amount: float
     namespace: str
     platform: str
     interface: str
@@ -27,6 +29,8 @@ class event:
     rawText: str
 
 # The following are the standard return values which a module kicks back to the WaddleBot router
+
+
 @dataclass
 class retvars:
     msg: str
@@ -34,6 +38,8 @@ class retvars:
     stdout: str
 
 # Standard Database Query setup
+
+
 @dataclass
 class dbquery:
     columns: list

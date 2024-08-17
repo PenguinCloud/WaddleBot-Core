@@ -10,6 +10,9 @@ log.fileLogger("waddlebot-dbc.log")
 abs_path = os.path.abspath((inspect.stack()[0])[1])
 directory_of_1py = os.path.dirname(abs_path)
 
+# ---------------------
+# Dataclass for botconfig   
+# ---------------------
 class botConfig:
     def __init__(self, configType:str = "yaml", configPath:str = "config.yml"):
         self.cpath = configPath
@@ -20,6 +23,9 @@ class botConfig:
             case _:
                 self.config = self.__importyaml()
 
+    # ---------------------
+    # This is a helper function will import the config file in yaml format
+    # ---------------------
     def __importyaml(self):
         from yaml import safe_load
         try:

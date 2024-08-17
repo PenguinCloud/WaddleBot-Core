@@ -23,6 +23,9 @@ class update:
         self.dbc = db(configfile=self.config)
         log.debug(f"Update object initiated for {self.id.id}")
 
+    # ---------------------
+    # Take the event and adjust the score based on the event for Twitch
+    # ---------------------
     def twitch(self):
         dbScore = dbquery
         dbScore.columns = ["score"]
@@ -40,6 +43,10 @@ class update:
             case _:
                 scoreChange = self.__scoreAdjust(eventType=self.event.activity)
         return self.__updateScores(scoreChange)
+    
+    # ---------------------
+    # Take the event and adjust the score based on the event for Discord
+    # ---------------------
     def discord(self):
         eventType = ""
         amount = 1.0
@@ -61,6 +68,10 @@ class update:
         scoreChange = self.__scoreAdjust(eventType=eventType, eventAmount=amount)
         return self.__updateScores(scoreChange)
 
+    '''
+    # ---------------------
+    # Take the event and adjust the score based on the event for Youtube
+    # ---------------------
     def youtube(self):
         match self.event.activity:
             case re.match(r"^(re-)?subscription, self.event.activity"):
@@ -75,7 +86,10 @@ class update:
                 pass
             case "donation":
                 pass
-
+    
+    # ---------------------
+    # Take the event and adjust the score based on the event for Slack
+    # ---------------------
     def slack(self):
         match self.event.activity:
             case re.match(r"^(re-)?subscription, self.event.activity"):
@@ -88,7 +102,10 @@ class update:
                 pass
             case "donation":
                 pass
-
+    
+    # ---------------------
+    # Take the event and adjust the score based on the event for Mattermost
+    # ---------------------
     def mattermost(self):
         match self.event.activity:
             case re.match(r"^(re-)?subscription, self.event.activity"):
@@ -101,8 +118,9 @@ class update:
                 pass
             case "donation":
                 pass
-
+    # ---------------------
     # Check what the adjustment based on general type should be
+    # ---------------------
     def __scoreAdjust(self, eventType: str, eventAmount: float = 1.0):
         scoreDBQ = dbquery
         scoreDBQ.columns = "adjustment"
@@ -112,7 +130,9 @@ class update:
         log.debug(f"Adjustment for {eventType} is {y[0][0]}")
         return y[0][0] * eventAmount
     
+    # ---------------------
     # Update the score in the database
+    # ---------------------
     def __updateScore(self, score: float):
         scoreDBQ = dbquery
         scoreDBQ.columns = "score"
@@ -121,3 +141,4 @@ class update:
         y = self.dbc.webdbUpdate(query=scoreDBQ)
         log.debug(f"Score for {self.id.id} updated to {score}")
         return y
+    '''

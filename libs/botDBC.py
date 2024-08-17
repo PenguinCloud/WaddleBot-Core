@@ -9,12 +9,12 @@ from libs.botLogger import botLogger
 log = botLogger("waddlebot-dbc")
 log.fileLogger("waddlebot-dbc.log")
 
-#const
+# const
 DEFAULT_CFG_FILENAME="config.yml"
 
-#---------------------
+# ---------------------
 # This is the class which will handle all database interactions
-#---------------------
+# ---------------------
 class botDb:
     def __init__(self, config: dict = None, dbc: dbinfo = None ):
         # our input
@@ -31,17 +31,17 @@ class botDb:
         # set the below to whatever request auth method you want before calling dbConnect functions
         self.auth = None
 
-    #---------------------
+    # ---------------------
     # This is a helper function will import the database config and select the columns / foreign keys
-    #---------------------
+    # ---------------------
     def __importColumns(self):
         columns = self.config["columns"]
         columns.update(self.config["foreignKeys"])
         return columns
 
-    #---------------------
+    # ---------------------
     # Function which calls out to a DB via API and returns a response
-    #---------------------
+    # ---------------------
     def webdbRead(self, query: dbquery):
         requrl = f"https://{self.db.webhost}:{self.db.webport}/{self.db.database}/{self.db.table}/read"
         reqquery = {'columns': ','.join(query.columns), 'queryColumn': query.queryColumn, 'queryValue': query.queryValue}
@@ -56,9 +56,9 @@ class botDb:
             log.error(f"JSON decoding failed: {err}")
             return None
     
-    #---------------------
+    # ---------------------
     # Function which calls out to a DB via API to update DB records
-    #---------------------
+    # ---------------------
     def webdbUpdate(self, query: dbquery):
         requrl = f"https://{self.db.webhost}:{self.db.webport}/{self.db.database}/{self.db.table}/update"
         reqquery = {'columns': ','.join(query.columns), 'queryColumn': query.queryColumn, 'queryValue': query.queryValue}

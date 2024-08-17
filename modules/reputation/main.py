@@ -13,11 +13,9 @@ CONFIG_FILE = f"{pathlib.Path(__file__).parent.resolve()}config.yml"
 log = botLogger("reputation-main")
 log.fileLogger("reputation.log")
 
-# --------
+# ---------------------
 # This is the function which lambda will call
-# --------
-
-
+# ---------------------
 def receiving(activity, userid, platform, interface, text: str = None, namespace: str = "global", subinterface: str = None, amount: float = 0):
     # Initiate the logger
     # Why are we even here bruh?
@@ -61,5 +59,4 @@ def receiving(activity, userid, platform, interface, text: str = None, namespace
                 x.youtube()
             case _:
                 log.error("I am not programmed to handle this platform")
-
     return msg, media, stdout
