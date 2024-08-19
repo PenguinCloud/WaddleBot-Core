@@ -1,2 +1,2 @@
 # Waddlebot-libs
-Collection of libraries built to make development quicker / easier / standardized. 
+Collection of libraries designed to streamline development by making it quicker, easier, and more standardized.
