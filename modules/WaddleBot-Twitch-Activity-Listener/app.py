@@ -384,7 +384,7 @@ def get_gateways(url):
 
             if len(data) > 0:
                 for gateway in data:
-                    if 'gateway_type' in gateway and gateway['gateway_type'] == 'Twitch' and 'channel_id' in gateway:
+                    if 'gateway_type' in gateway and gateway['gateway_type'] == 'Twitch' and 'channel_id' in gateway and 'is_active' in gateway and gateway['is_active'] == True:
                         channel_id = gateway['channel_id']
 
                         if channel_id not in channels:
