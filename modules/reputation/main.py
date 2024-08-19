@@ -16,7 +16,9 @@ log.fileLogger("reputation.log")
 # ---------------------
 # This is the function which lambda will call
 # ---------------------
-def receiving(activity, userid, platform, interface, text: str = None, namespace: str = "global", subinterface: str = None, amount: float = 0):
+
+def receiving(activity, userid, platform, interface, text: str = None, 
+              namespace: str = "global", subinterface: str = None, amount: float = 0):
     # Initiate the logger
     # Why are we even here bruh?
     ee = event

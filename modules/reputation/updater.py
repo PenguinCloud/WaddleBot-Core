@@ -10,11 +10,13 @@ from query import dbquery as dbq
 log = botLogger("reputation-updater")
 log.fileLogger("reputation.log")
 
-#--------
+# ---------------------
 # This is the function which will update the reputation of an identity
-#--------
+# ---------------------
+
 class update:
-    def __init__(self, id: identity, events: event, dbc: dbinfo, CONFIG_FILE: str) -> None:
+    def __init__(self, id: identity, events: event, dbc: dbinfo, 
+                 CONFIG_FILE: str) -> None:
         self.score = 0
         self.id = id
         self.event = events
@@ -26,6 +28,7 @@ class update:
     # ---------------------
     # Take the event and adjust the score based on the event for Twitch
     # ---------------------
+    
     def twitch(self):
         dbScore = dbquery
         dbScore.columns = ["score"]
@@ -39,7 +42,8 @@ class update:
                     amount = 10
                 if re.match(r"^tier 3"):
                     amount = 20
-                scoreChange = self.__scoreAdjust(eventType="subscription", eventAmount=amount)
+                scoreChange = self.__scoreAdjust(eventType="subscription", 
+                                                 eventAmount=amount)
             case _:
                 scoreChange = self.__scoreAdjust(eventType=self.event.activity)
         return self.__updateScores(scoreChange)
@@ -47,6 +51,7 @@ class update:
     # ---------------------
     # Take the event and adjust the score based on the event for Discord
     # ---------------------
+    
     def discord(self):
         eventType = ""
         amount = 1.0
@@ -57,7 +62,7 @@ class update:
                 eventType = "follower"
             case "boost":
                 eventType = "supporter"
-                amount =  3.5
+                amount = 3.5
             case "raffle":
                 eventType = "raffle"
             case "giveaway":
