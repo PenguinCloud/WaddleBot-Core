@@ -68,6 +68,12 @@ class botDb:
             responseJSON = response.json
             log.debug(responseJSON)
             return responseJSON['response']
+        except FileNotFoundError:
+            log.error(f"Config file not found: {self.cpath}")
+        except yaml.YAMLError as yaml_err:
+            log.error(f"YAML parsing error in {self.cpath}: {yaml_err}")
+        except PermissionError:
+            log.error(f"Permission denied when accessing {self.cpath}")
         except Exception as err:
-            log.error(err)
+            log.error(f"Unexpected error while importing {self.cpath}: {err}")
         return None
