@@ -205,7 +205,8 @@ def start_matterbridge(shFile):
     print("The entrypoint path is: ", entrypoint_path)
     # subprocess.run(['sh', entrypoint_path])
     # os.popen('sh ' + entrypoint_path)
-    subprocess.call(['sh', entrypoint_path])
+process = subprocess.Popen(['sh', entrypoint_path])
+print(f"Started matterbridge process with PID: {process.pid}")
     print("Started matterbridge process")
 
 
