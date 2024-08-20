@@ -30,7 +30,21 @@ If its installed correctly, you will see this output:
 
 `pip install -r requirements.txt`
 
-5. Ensure that the .env file with the correct environmental variables are present in the "app" folder.
+5. Ensure the following environmental variables are available:
+
+`
+GATEWAY_CREATION_URL
+GATEWAY_DELETION_URL
+GATEWAY_SERVER_GET_URL
+GATEWAY_SERVER_CREATE_URL
+GATEWAY_SERVER_DELETE_URL
+TWITCH_HOST
+TWITCH_PORT
+TWITCH_PASS
+TWITCH_NICK
+DISCORD_TOKEN
+DISCORD_BOT_INVITE_URL
+`
 
 6. Run the app by running the following command while having the virtual env active:
 

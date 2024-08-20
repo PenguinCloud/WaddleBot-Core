@@ -30,7 +30,7 @@ If its installed correctly, you will see this output:
 
 `pip install -r requirements.txt`
 
-5. Ensure that your .env file is found in the root folder of this project with the correct listed parameters:
+5. Ensure the following environmental variables are available:
 
 `
 GATEWAY_ACTIVATE_URL

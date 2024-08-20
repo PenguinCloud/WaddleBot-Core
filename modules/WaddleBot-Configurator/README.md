@@ -1,6 +1,6 @@
-# WaddleBot Twitch Activity Listener
+# WaddleBot Configurator
 
-This listener is responsible for subscribing to certain events that are bound to twitch channels listed in the waddlebot DB. 
+The waddlebot configurator is a script that runs everytime the matterbridge container starts. It is responsible for the creation of the matterbridge.toml file that matterbridge uses to connect to all the different gateways and channels.
 
 # Basic Setup
 
@@ -33,11 +33,12 @@ If its installed correctly, you will see this output:
 5. Ensure the following environmental variables are available:
 
 `
-TWITCH_APP_ID=""
-TWITCH_APP_SECRET=""
-TWITCH_CHANNEL=""
-CONTEXT_URL=""
-GATEWAYS_GET_URL=""
+GATEWAY_SERVERS_GET_URL
+GATEWAYS_GET_URL
+DISCORD_TOKEN
+TWITCH_TOKEN
+API_NAME
+API_ADDRESS
 `
 
 6. Run the app by running the following command while having the virtual env active:
