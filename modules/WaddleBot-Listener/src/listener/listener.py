@@ -175,7 +175,7 @@ class WaddleBotListener:
                 # print(metadata)
 
                 # Execute the command
-                cmdResult += self.execute_command(username, message, commandData, moduleID, moduleTypeName, channel)
+                cmdResult += self.execute_command(username, message, commandData, moduleID, moduleTypeName, channel, account)
             else:
                 print("Command not found in Redis cache.")
                 cmdResult += "Command not found. Please use !help to see the list of available commands."
@@ -409,7 +409,7 @@ class WaddleBotListener:
 
 
     # Function to execute a command from the Redis cache, given the message command and the command data
-    def execute_command(self, username, message, commandData, moduleId, moduleTypeName, channel):
+    def execute_command(self, username, message, commandData, moduleId, moduleTypeName, channel, account):
         print("Executing the command....")
 
         # Get the payload keys from the command data
@@ -439,6 +439,10 @@ class WaddleBotListener:
         # Check if 'channel' is in the function parameters. If it is, add the channel to the parameters at the beginning of the list
         if funcParams is not None and "channel_id" in funcParams:
             params.insert(0, channel)
+
+        # Check if 'account' is in the function parameters. If it is, add the account to the parameters at the beginning of the list
+        if funcParams is not None and "account" in funcParams:
+            params.insert(0, account)
         
         # Check if the module_type_name is in the command data. After that, check if the module is a core module. If it is a core module
         # then execute the command. If it is not a core module, check if the module exists in the community. If it does, execute the command.
