@@ -5,7 +5,7 @@
     name: waddlebot-configurator-restart
     user: "{{ run.user }}"
     weekday: "*"
-    minute: "*"
+    minute: "0"
     hour: "*"
     day: "*"
     month: "*"
