@@ -19,7 +19,7 @@ Command which use # are priv 1+
 
 # module data
 send:
-* activity
+* event
 * amount
 * userid
 * text
