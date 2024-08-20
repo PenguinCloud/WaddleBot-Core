@@ -69,7 +69,7 @@ def get_gateways(url):
     print("The URL is: ", url)
 
     # Make a GET request to the MAT API to get the gateways
-    response = requests.get(url)
+    response = requests.get(url, timeout=30)
 
     gateways = []
 
