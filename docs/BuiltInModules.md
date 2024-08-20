@@ -1,5 +1,5 @@
 # Always on PreBuilt In
-
+All built in commands will start with a ! , while "marketplace" modules will start with a hashtag (#)
 ## Tag: Community <name>
 ### Specifics: 
 * Manage <action> - Manages communities which you have access to! Common Actions:
@@ -40,14 +40,7 @@
   * rem <name> <role> - Removes the user from the role
 * More to come!
 
-## Tag: Policy <tag name> <specific name> [parameter] (If parameter is availble, must be set, or use any for all of them)
-### Specifics:
-* Role <action> - Manages the access list for roles. Common actions:
-  * add <name> - Adds the role to the allow list
-  * rem <name> - Removes the role from the allow list
-  * ls - List the allow list of roles
-
-## Tag: User <name>
+## Tag: Identity <name>
 ### Specifics:
  * RepCheck - Bans, Timeouts, Censor Hits, Channels Modding, etc. turn into a reputation score... everyone starts at 0
  * Ban - Bans user from channel
@@ -57,8 +50,12 @@
  * RoleAdd 
  * IDValidation - Utilizes a third party service to validate your identity... which boosts your reputation
  * Puzzle - Asks the user a question (math, basic science, ascii word id, etc.) which they must pass or loose reputation (bot defense)
+ * Role <action> - Manages the access list for roles. Common actions:
+   * add <name> - Adds the role to the allow list
+   * rem <name> - Removes the role from the allow list
+   * ls - List the allow list of roles
  
-## Tag: DoorCheck
+## Tag: Policy
 ### Specifics:
 * ChatReq <role name> <req name> - Sets requirements for the role of users before they can chat. Only applies first matched role, global community is always last. Common requirement names:
   * time <time>- Amount of time the user in this role has to be in the channel before they can talk
@@ -69,6 +66,9 @@
   * Puzzle <puzzle name> - Give the user in this role a puzzle which they must pass before they can chat
 * RoleReq <community name> <role name> - Sets what roles in what communities are allowed, for example a common global role is Creator (a la streamer)... you can allow or disallow. This can be used to just allow your community members to join the chat. Any users which do not match any of these (when set) will automatically be timed out continously at the max timeout for the platform.
 * AutoShout <community name> <role name> <optional text> - Sends a shoutout message to the channel when a user belonging to a community and role starts chatting on the channel, some platforms will add additional details (such as last game played) as well, if available.
+* ChatMsg
+  * word <word match> - block on a word match with spaces before and after
+  * string <regex match> - block on a boost regex match
 
 ## Tag: Alias
 ### Specifics:
