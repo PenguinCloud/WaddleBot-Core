@@ -1,14 +1,5 @@
 ---
 version: "2.4"
 services:
-  waddlebot:
-    image: penguintech/waddlebot-core
-    build: .
-    environment:
-      - USER_NAME="PenguinzPlays" 
-      - USER_DISCORD_ID="474965105759748096"
-      - USER_DISCORD_NAME="PenguinzPlays"
-      - DISCORD_TOKEN="NTg3NDkxNDMyOTQwNjk5NjUz.GCAykr.WHs0xNS2G4Linj3gkiSnEgViafVdCIr_8l0nA8"
-      - DISCORD_ENABLE="1"
-      - TWITCH_TOKEN="123getme"
-      - TWITCH_ENABLE="0"
+  app:
+    image: penguintech/core-ansible
