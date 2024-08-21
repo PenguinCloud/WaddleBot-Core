@@ -227,7 +227,6 @@ class TwitchAPIListener:
             auth = UserAuthenticator(twitch, self.user_scope)
 
             token, refresh_token = await auth.authenticate()
-            print("The token is: ", token)
 
             await twitch.set_user_authentication(token, self.user_scope, refresh_token)
         except Exception as e:
