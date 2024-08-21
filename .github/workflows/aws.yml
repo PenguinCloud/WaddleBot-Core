@@ -49,9 +49,12 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-    - name: Download task definition 
+    - name: Download task definition
       run: |
-        aws ecs describe-task-definition - task-definition etap-development - query taskDefinition > task-definition.json
+        if ! aws ecs describe-task-definition --task-definition etap-development --query taskDefinition > task-definition.json; then
+          echo "Failed to download task definition"
+          exit 1
+        fi
 
     - name: Fill in new image ID in task definition
       id: task-def
