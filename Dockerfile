@@ -9,7 +9,7 @@ WORKDIR /opt/manager
 
 
 # PUT YER ARGS in here
-ARG APP_TITLE="waddlebot" 
+ARG APP_TITLE="waddlebot-core" 
 ARG MATTERBRIDGE_VERSION="1.26.0"
 
 
