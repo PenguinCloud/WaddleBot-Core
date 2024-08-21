@@ -13,3 +13,5 @@ __pycahce__/
 *.table
 
 # WaddleBot-web2py/applications/*/databases/
+*.log
+*.secret
