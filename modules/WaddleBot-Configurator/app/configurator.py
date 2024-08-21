@@ -29,50 +29,65 @@ def main():
         script_dir = os.path.dirname(os.path.abspath(__file__))
         file_path = os.path.join(script_dir, 'mat_template.toml')
 
-        # Load the template toml file "mat_template.toml" in the "templates" folder
-        with open(file_path, 'r') as file:
-            template = file.read()
+        try:
+            # Load the template toml file "mat_template.toml" in the "templates" folder
+            with open(file_path, 'r') as matfile:
+                template = matfile.read()
 
-            # Replace the placeholders in the template file with the environment variables
-            # template = template.replace('{{discord_gateway_name}}', discord_name)
-            # template = template.replace('{{discord_server_id}}', discord_server_id)
-            # template = template.replace('{{discord_token}}', discord_token)
-            # template = template.replace('{{twitch_gateway_name}}', twitch_name)
-            # template = template.replace('{{twitch_nick}}', twitch_nick)
-            # template = template.replace('{{twitch_token}}', twitch_token)
-            template = template.replace('{{api_gateway_name}}', api_name)
-            template = template.replace('{{api_address}}', api_address)
-            # template = template.replace('{{gateway_name}}', gateway_name)
+                    # Close the file
+                matfile.close()
 
-            template += '\n'
+                # Replace the placeholders in the template file with the environment variables
+                # template = template.replace('{{discord_gateway_name}}', discord_name)
+                # template = template.replace('{{discord_server_id}}', discord_server_id)
+                # template = template.replace('{{discord_token}}', discord_token)
+                # template = template.replace('{{twitch_gateway_name}}', twitch_name)
+                # template = template.replace('{{twitch_nick}}', twitch_nick)
+                # template = template.replace('{{twitch_token}}', twitch_token)
+                template = template.replace('{{api_gateway_name}}', api_name)
+                template = template.replace('{{api_address}}', api_address)
+                # template = template.replace('{{gateway_name}}', gateway_name)
 
-            # Create the twitch server toml object string
-            twitch_server_toml = create_twitch_server(gateway_servers, os.path.join(script_dir, 'twitch_server_template.toml'), twitch_token)
-    
-            # Add the twitch server to the template file
-            template += twitch_server_toml
+                template += '\n'
 
-            # Create the discord server toml object string
-            discord_server_toml = create_discord_server(gateway_servers, os.path.join(script_dir, 'discord_server_template.toml'), discord_token)
+                # Create the twitch server toml object string
+                twitch_server_toml = create_twitch_server(gateway_servers, os.path.join(script_dir, 'twitch_server_template.toml'), twitch_token)
 
-            # Add the discord server to the template file
-            template += discord_server_toml
+                # Add the twitch server to the template file
+                template += twitch_server_toml
 
-            # Create the global community toml object string
-            gateway_inout_toml = create_gateways(gateways, api_name)
+                # Create the discord server toml object string
+                discord_server_toml = create_discord_server(gateway_servers, os.path.join(script_dir, 'discord_server_template.toml'), discord_token)
 
-            # Add the global community to the template file
-            template += gateway_inout_toml
+                # Add the discord server to the template file
+                template += discord_server_toml
 
-            # Get the path of the script directory and the output file path
-            out_file_path = os.path.join(script_dir, 'matterbridge.toml')
+                # Create the global community toml object string
+                gateway_inout_toml = create_gateways(gateways, api_name)
 
-            # Write the new toml file "matterbridge.toml"
-            with open(out_file_path, 'w') as file:
-                file.write(template)
+                # Add the global community to the template file
+                template += gateway_inout_toml
 
-        msg = "Successfully created MAT configuration file"
-        return(msg)
+                # Get the path of the script directory and the output file path
+                out_file_path = os.path.join(script_dir, 'matterbridge.toml')
+
+                try:
+                    # Write the new toml file "matterbridge.toml"
+                    with open(out_file_path, 'w') as file:
+                        file.write(template)
+
+                        # Close the file
+                        file.close()
+                except Exception as e:
+                    print("Failed to write MAT configuration file: " + str(e))
+                    return(str(e))
+
+            msg = "Successfully created MAT configuration file"
+            return(msg)
+        
+        except Exception as e:
+            print("Failed to read MAT template file: " + str(e))
+            return(str(e))
 
     except Exception as e:
         print("SOMETHING WENT WRONG: " + str(e))
