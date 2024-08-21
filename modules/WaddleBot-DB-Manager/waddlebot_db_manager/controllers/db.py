@@ -9,6 +9,8 @@ def index(): return dict(message="hello from db.py")
 
 # Function to insert a given table_name and columns into a configuration file.
 def insert_table_into_config(table_name, columns):
+    if not os.path.exists(CONFIG_FILE) or os.path.getsize(CONFIG_FILE) == 0:
+        raise FileNotFoundError(f"Config file not found or is empty: {CONFIG_FILE}")
     # Check if the table_name and columns are given.
     if not table_name or not columns:
         return dict(msg="Please provide a table_name and columns.")
