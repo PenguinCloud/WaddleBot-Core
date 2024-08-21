@@ -18,5 +18,5 @@ api = Api(app, version='1.0', title='WADDLEBOT GATEWAY CREATION API', descriptio
 api.add_namespace(gateway_creator_namespace)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='0.0.0.0', port=5000)
 
