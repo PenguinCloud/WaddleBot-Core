@@ -18,35 +18,6 @@ testCommands = {
     "#test": "Test Module"
     
 }
-# OLD COMMANDS
-# testCommands = {
-#     # Community related commands
-#     "!community_manage_add": "http://127.0.0.1:8000/WaddleDBM/communities/",
-#     "!community_manage_desc": "http://127.0.0.1:8000/WaddleDBM/communities/",
-#     "!community_manage_rem": "http://127.0.0.1:8000/WaddleDBM/communities/",
-#     "!community_manage_ls": "http://127.0.0.1:8000/WaddleDBM/communities/",
-#     # Community Member related commands
-#     "!community_join": "http://127.0.0.1:8000/WaddleDBM/community_members/",
-#     "!community_leave": "http://127.0.0.1:8000/WaddleDBM/community_members/",
-#     "!community_members_ls": "http://127.0.0.1:8000/WaddleDBM/community_members/",
-#     "!community_update_role": "http://127.0.0.1:8000/WaddleDBM/community_members/",
-#     # Context related commands
-#     "!namespace_switch":"http://127.0.0.1:8000/WaddleDBM/context/",
-#     # Marketplace Related Commands
-#     "!marketplace_ls": "http://127.0.0.1:8000/marketplace_manager/marketplace/",
-#     "!marketplace_install": "http://127.0.0.1:8000/WaddleDBM/community_modules/",
-#     "!marketplace_uninstall": "http://127.0.0.1:8000/WaddleDBM/community_modules/",
-#     # Gateway route related commands
-#     "!gateway_add": "http://127.0.0.1:5000/gateway-creator/",
-#     "!gateway_rem": "http://127.0.0.1:5000/gateway-creator/",
-#     # Routing related commands
-#     "!route_add": "http://127.0.0.1:8000/WaddleDBM/routing/",
-#     "!route_rem": "http://127.0.0.1:8000/WaddleDBM/routing/",
-#     # Test script related commands
-#     "#test_script": "http://127.0.0.1:8000/WaddleDBM/test_script/"
-    
-# }
-
 
 class RedisCache:
     def __init__(self, host: str, port: int):
