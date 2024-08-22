@@ -5,12 +5,15 @@ from pydal import DAL, Field
 from urllib.parse import quote, urlencode, quote_plus
 import asyncio
 import threading
-import json
+import logging
 
 from dataclasses import asdict
 
 from src.redis.redis_cache import RedisCache
 from src.models.dataclasses import messageData, commandData, sendMessageData, identityData, marketplaceModuleData
+
+# Set the logging level to INFO
+logging.basicConfig(level=logging.INFO)
 
 class WaddleBotListener:
     def __init__(self, matterbridgeGetURL: str, matterbridgePostURL: str, contextURL: str, redisHost: str, redisPort: int, marketplaceURL: str, communityModulesURL: str) -> None:
@@ -30,10 +33,10 @@ class WaddleBotListener:
     def listen(self) -> None:
         # TODO: When the Redis cache is implemented, remove the below execution of the add_test_commands function
         # Add the test commands to the Redis cache
-        print("Adding test commands to Redis....")
+        logging.info("Adding test commands to Redis....")
         self.redisManager.add_test_commands()
 
-        print("Listening for messages....")
+        logging.info("Listening for messages....")
 
         while True:
             # Check if the matterbridge API is reachable
@@ -42,8 +45,8 @@ class WaddleBotListener:
             try: 
                 resp = requests.get(self.matterbridgeGetURL)
             except requests.exceptions.RequestException as e:
-                print(e)
-                print("An error has occurred while trying to communicate with the API. Retrying in 1 second....")
+                logging.error(e)
+                logging.error("An error has occurred while trying to communicate with the API. Retrying in 1 second....")
                 time.sleep(1)
                 continue
 
@@ -54,9 +57,6 @@ class WaddleBotListener:
 
                 # Check if the message data is not empty
                 if len(messageData) > 0:
-                    print("FOUND MESSAGE!!")
-                    print(messageData)
-
                     username = None
 
                     # Create a user if the user does not exist
@@ -72,17 +72,17 @@ class WaddleBotListener:
 
                         if "!" in message and message[0] == "!" or "#" in message and message[0] == "#":
                             # If a command is found in the message, execute the command in its own thread
-                            print("Starting thread....")
+                            logging.info("Starting thread....")
 
                             t = threading.Thread(target=self.execute_command_from_message, args=(username, message, channel, gateway, account, messageData), daemon=True).start()
                         else:
-                            print("No command tag found in message.")
+                            logging.info("No command tag found in message.")
                     else:
-                        print("Error occured while processing the message. Either the 'gateway' or the 'text' attributes are missing.")
+                        logging.error("Error occured while processing the message. Either the 'gateway' or the 'text' attributes are missing.")
 
-                    print("Message processed. Waiting for next message....")
+                    logging.info("Message processed. Waiting for next message....")
             else:
-                print("An error has occurred while trying to communicate with the API.")
+                logging.error("An error has occurred while trying to communicate with the API.")
 
 
             time.sleep(1)
@@ -101,16 +101,16 @@ class WaddleBotListener:
             timeoutTime = 0
             timeoutValues = matching[0].split(":")
 
-            print(f"Timeout values: {timeoutValues}")
+            logging.info(f"Timeout values: {timeoutValues}")
 
             if len(timeoutValues) > 1 and timeoutValues[1] != "":
                 timeoutTime = timeoutValues[1]
 
-                print(f"Timeout command found. Timeout time: {timeoutTime} seconds.")
+                logging.info(f"Timeout command found. Timeout time: {timeoutTime} seconds.")
 
                 time.sleep(int(timeoutTime))
 
-                print("Timeout completed. Executing the command....")
+                logging.info("Timeout completed. Executing the command....")
             else:
                 # If the timeout time is not specified, set the timeout time to 0 and send a message to the user, stating
                 # that the timeout time was not specified correctly.
@@ -122,15 +122,7 @@ class WaddleBotListener:
 
         commands = self.get_commands(message)
 
-        # commands = self.get_commands(msgCommand)
-
-        # print("The list of commands are:")
-        # print(commands)
-
-        # Execute the command
-        # commandResult = self.execute_command(command)
-
-        print("Command found in text. Looking up command....")
+        logging.info("Command found in text. Looking up command....")
 
         # Check if the command is in the botCommands dictionary
         cmdResult = ""
@@ -146,25 +138,20 @@ class WaddleBotListener:
             cmdResult += self.display_help()
         # Else, check if the command is in the Redis cache
         else:
-            # Set the command as a Redis key
-            # redisCommand = self.set_redis_command(mainCommand)
-
             # Get the command data from the Redis cache
             commandName = self.redisManager.get_command(mainCommand)
             if commandName is not None:
-                print("Command found in Redis cache.")
-                print(commandName)
+                logging.info("Command found in Redis cache.")
+                logging.info(commandName)
                 
                 # Get marketplace module from the marketplace
                 module = self.get_marketplace_module_by_name(commandName)
 
                 if module is None:
-                    print("Error occured while trying to get the metadata from the marketplace.")
+                    logging.error("Error occured while trying to get the metadata from the marketplace.")
                     cmdResult += "The command could not be found. Ensure that the command is typed correctly."
                     self.send_bot_message(gateway, cmdResult, account)
 
-                # print("The module is:")
-                # print(module)
                 metadata = module['metadata']
                 moduleTypeName = module['module_type_name']
                 moduleID = module['id']
@@ -172,23 +159,20 @@ class WaddleBotListener:
                 # Get the command properties from the metadata
                 commandData = self.get_command_properties(commands, metadata)
 
-                print("The command data is:")
-                print(commandData)
-
-                # print("I GOT SOMETHING FROM THE MARKETPLACE!!!!")
-                # print(metadata)
+                logging.info("The command data is:")
+                logging.info(commandData)
 
                 # Execute the command
                 cmdResult += self.execute_command(username, message, commandData, moduleID, moduleTypeName, channel, account)
             else:
-                print("Command not found in Redis cache.")
+                logging.info("Command not found in Redis cache.")
                 cmdResult += "Command not found. Please use !help to see the list of available commands."
 
         self.send_bot_message(gateway, cmdResult, account) 
 
     # Function to get the command from the message
     def get_commands(self, message: str) -> list:
-        print("Getting the command from the message....")
+        logging.info("Getting the command from the message....")
 
         commands = []
 
@@ -208,14 +192,14 @@ class WaddleBotListener:
                 if command != "":
                     filteredCommands.append(command)
 
-        print(f"The command list is:")
-        print(filteredCommands)
+        logging.info(f"The command list is:")
+        logging.info(filteredCommands)
 
         return filteredCommands
     
     # Function to get the command parameters from the message, that fall between the < > brackets
     def get_message_params(self, message: str) -> list:
-        print("Getting the command parameters from the message....")
+        logging.info("Getting the command parameters from the message....")
 
         # Get the command parameters from the message
         params = re.findall(r'\<(.*?)\>', message)
@@ -224,14 +208,8 @@ class WaddleBotListener:
     
     # Function to get the payload values from the message, that fall between the [ ] brackets
     def get_payload_values(self, message: str) -> list:
-        print("Getting the payload values from the message....")
-        print(f"Message: {message}")
-
-        # s=str(re.escape('['))
-        # e=str(re.escape(']'))
-
-        # Get the payload values from the message
-        # values = re.findall(s+'(.*)'+e, message)
+        logging.info("Getting the payload values from the message....")
+        logging.info(f"Message: {message}")
 
         # Find all occerences of the strings that fall between their own [ ] brackets
         values = re.findall(r'\[(.*?)\]', message)
@@ -246,7 +224,7 @@ class WaddleBotListener:
     
     # Function to get the function parameters from a command retrieved from redis
     def get_function_params(self, commandData: commandData) -> list:
-        print("Getting the function parameters from the command....")
+        logging.info("Getting the function parameters from the command....")
 
         params = []
         # Get the function parameters from the command
@@ -259,10 +237,7 @@ class WaddleBotListener:
 
     # Function to get the payload keys from a command retrieved from redis
     def get_payload_keys(self, commandData: commandData) -> list:
-        print("Getting the payload keys from the command....")
-
-        # print("The command data is:")
-        # print(commandData)
+        logging.info("Getting the payload keys from the command....")
 
         keys = []
         # Get the payload keys from the command
@@ -275,7 +250,7 @@ class WaddleBotListener:
     
     # Function to get the action from the command data
     def get_action(self, commandData: commandData) -> str:
-        print("Getting the action from the command data....")
+        logging.info("Getting the action from the command data....")
 
         action = ""
         # Get the action from the command data
@@ -286,7 +261,7 @@ class WaddleBotListener:
     
     # Function to create a function URL with parameters by adding the parameters to the URL
     def create_function_url(self, action: str, params: list) -> str:
-        print("Creating the function URL....")
+        logging.info("Creating the function URL....")
 
         url = f"{action}"
 
@@ -302,7 +277,7 @@ class WaddleBotListener:
     
     # Function to create a function payload with values by adding given values and keys to a dictionary
     def create_function_payload(self, keys: list, values: list, username: str) -> dict:
-        print("Creating the function payload....")
+        logging.info("Creating the function payload....")
 
         # Create the payload dictionary
         payload = {}
@@ -312,7 +287,7 @@ class WaddleBotListener:
             payload[keys[i]] = values[i]
 
         # Add the username to the payload if it is not None
-        print(f"Username to be added to the payload: {username}")
+        logging.info(f"Username to be added to the payload: {username}")
         if username is not None:
             payload['identity_name'] = username
 
@@ -320,7 +295,7 @@ class WaddleBotListener:
     
     # Function to check if a given community module exists in a given community, using the module id and the community id
     def check_community_module_exists(self, community_id: int, module_id: int) -> bool:
-        print("Checking if the community module exists....")
+        logging.info("Checking if the community module exists....")
 
         # Create the function URL
         url = f"{self.communityModulesURL}{community_id}/{module_id}"
@@ -330,7 +305,7 @@ class WaddleBotListener:
         try:
             resp = requests.get(url=url)
         except requests.exceptions.RequestException as e:
-            print(e)
+            logging.error(e)
             return False
 
         if resp is not None and resp.ok:
@@ -345,7 +320,7 @@ class WaddleBotListener:
 
     # Function to check if the given module type of a command is a core module
     def check_core_module(self, moduleType: str) -> bool:
-        print("Checking if the module is a core module....")
+        logging.info("Checking if the module is a core module....")
 
         if moduleType == "Core":
             return True
@@ -354,18 +329,18 @@ class WaddleBotListener:
         
     # Function to check if a given module exists in a given community, using the module id and the community id
     def check_module_exists(self, community_id: int, module_id: int) -> bool:
-        print("Checking if the module exists....")
+        logging.info("Checking if the module exists....")
 
         # Create the function URL
         url = f"{self.communityModulesURL}{community_id}/{module_id}"
-        print(f"THE URL TO GET THE MODULE IS: {url}")
+        logging.info(f"THE URL TO GET THE MODULE IS: {url}")
 
         resp = None
 
         try:
             resp = requests.get(url=url)
         except requests.exceptions.RequestException as e:
-            print(e)
+            logging.error(e)
             return False
 
         if resp is not None and  resp.ok:
@@ -380,7 +355,7 @@ class WaddleBotListener:
 
     # Function to get the context of the current user
     def get_context(self, username: str) -> str:
-        print("Getting the context....")
+        logging.info("Getting the context....")
 
         # Create the function URL
         url = f"{self.getContextURL}{username}"
@@ -390,7 +365,7 @@ class WaddleBotListener:
         try:
             resp = requests.get(url=url)
         except requests.exceptions.RequestException as e:
-            print(e)
+            logging.error(e)
             return None
 
         if resp is not None and resp.ok:
@@ -406,7 +381,7 @@ class WaddleBotListener:
 
     # Function to execute a command from the Redis cache, given the message command and the command data
     def execute_command(self, username: str, message: str, commandData: commandData, moduleId: int, moduleTypeName: str, channel: str, account: str) -> str:
-        print("Executing the command....")
+        logging.info("Executing the command....")
 
         # Get the payload keys from the command data
         keys = self.get_payload_keys(commandData)
@@ -416,7 +391,7 @@ class WaddleBotListener:
 
         if keys is None:
             msg = "The command does not exist. Ensure that you typed it correctly."
-            print(msg)
+            logging.info(msg)
             return msg
 
         # Get the action value from the metadata
@@ -444,15 +419,15 @@ class WaddleBotListener:
         # If it does not, return a message saying that the module does not exist in the community.
         if moduleTypeName is not None:
             if self.check_core_module(moduleTypeName):
-                print("The module is a core module.")
+                logging.info("The module is a core module.")
             else:
-                print("The module is not a core module.")
+                logging.info("The module is not a core module.")
                 
                 # Check if the module exists in the current community context of the user
                 if self.check_module_exists(community_name, moduleId):
-                    print("The module exists in the community.")
+                    logging.info("The module exists in the community.")
                 else:
-                    print("The module does not exist in the community.")
+                    logging.info("The module does not exist in the community.")
                     return "The module does not exist in the community. Please install it first."
 
         # Get the payload values from the message
@@ -463,7 +438,7 @@ class WaddleBotListener:
         if 'description' in commandData:
             description = commandData['description']
 
-        print(f"The keys before removing the identity_name key: {keys}")
+        logging.info(f"The keys before removing the identity_name key: {keys}")
 
         # Set the payload username value if the identity_name key is in the keys
         payloadUsername = None
@@ -478,8 +453,8 @@ class WaddleBotListener:
         #     if key == "identity_name":
         #         values.append(dict(value=username, isidentity=True))
 
-        print(f"Keys: {keys}")
-        print(f"Values: {values}")
+        logging.info(f"Keys: {keys}")
+        logging.info(f"Values: {values}")
 
         # Check if the number of keys and values match
         if len(keys) != len(values):
@@ -491,7 +466,7 @@ class WaddleBotListener:
             else:
                 msg = "The number of keys and values do not match."
 
-            print(msg)
+            logging.info(msg)
             return msg
         
         # Check if the number 
@@ -502,39 +477,39 @@ class WaddleBotListener:
         # Create the function payload
         payload = self.create_function_payload(keys, values, payloadUsername)
 
-        print(f"URL: {url}")
-        print(f"Payload: {payload}")
+        logging.info(f"URL: {url}")
+        logging.info(f"Payload: {payload}")
 
         resp = None
 
         # Execute the function, depending on the method
         if commandData['method'] == "GET":
-            print("Executing GET Method")
+            logging.info("Executing GET Method")
             try:
                 resp = requests.get(url=url, json=payload)
             except requests.exceptions.RequestException as e:
-                print(e)
+                logging.error(e)
                 return "An error has occurred while trying to execute the command."
         elif commandData['method'] == "POST":
-            print("Executing POST Method")
+            logging.info("Executing POST Method")
             try:
                 resp = requests.post(url=url, json=payload)
             except requests.exceptions.RequestException as e:
-                print(e)
+                logging.error(e)
                 return "An error has occurred while trying to execute the command."
         elif commandData['method'] == "PUT":
-            print("Executing PUT Method")
+            logging.info("Executing PUT Method")
             try:
                 resp = requests.put(url=url, json=payload)
             except requests.exceptions.RequestException as e:
-                print(e)
+                logging.error(e)
                 return "An error has occurred while trying to execute the command."
         elif commandData['method'] == "DELETE":
-            print("Executing DELETE Method")
+            logging.info("Executing DELETE Method")
             try:
                 resp = requests.delete(url=url, json=payload)
             except requests.exceptions.RequestException as e:
-                print(e)
+                logging.error(e)
                 return "An error has occurred while trying to execute the command."
 
         if resp is not None and resp.ok:
@@ -547,44 +522,52 @@ class WaddleBotListener:
             elif "data" in respJson:
                 msg = self.data_to_string(respJson["data"])
             
-            print(msg)
+            logging.info(msg)
             return msg
         else:
             msg = f"An error has occurred while trying to execute the command. Command description: {description}. Error: {resp.text}"
-            print(msg)
+            logging.error(msg)
             return msg
 
     # Function to send a bot message
     def send_bot_message(self, gateway: str, command: str, account: str) -> None:
-        print("Sending Bot Message....")
+        logging.info("Sending Bot Message....")
 
-        payload = sendMessageData(text=command, username="Waddle Bot", gateway=gateway, account=account)
+        try:
+            payload = sendMessageData(text=command, username="Waddle Bot", gateway=gateway, account=account)
 
-        resp = requests.post(url=self.matterbridgePostURL, json=asdict(payload))
+            resp = requests.post(url=self.matterbridgePostURL, json=asdict(payload))
 
-        if resp.ok:
-            print("BOT Message Successfully Sent!")
+            if resp.ok:
+                logging.info("BOT Message Successfully Sent!")
+        except requests.exceptions.RequestException as e:
+            logging.error(e)
+            logging.error("An error has occurred while trying to send the bot message.")
 
     # Function to add an identity (User) to the database
     def add_identity(self, username : str) -> None:
-        print("Adding Identity....")
+        logging.info("Adding Identity....")
 
-        payload = identityData(identity_name=username)
+        try:
+            payload = identityData(identity_name=username)
 
-        resp = requests.post(url=self.initialContextURL, json=asdict(payload))
+            resp = requests.post(url=self.initialContextURL, json=asdict(payload))
 
-        if resp.ok:
-            msg = ""
-            if 'msg' in resp.json():
-                msg = resp.json()['msg']
-            print(msg) 
+            if resp.ok:
+                msg = ""
+                if 'msg' in resp.json():
+                    msg = resp.json()['msg']
+                logging.info(msg) 
+        except requests.exceptions.RequestException as e:
+            logging.error(e)
+            logging.error("An error has occurred while trying to add the identity.")
         
 
     # Function to turn a data dictionary response from a request into a string
     def data_to_string(self, data: dict) -> str:
-        print("Converting Data to String....")
-        print("The given data:")
-        print(data)
+        logging.info("Converting Data to String....")
+        logging.info("The given data:")
+        logging.info(data)
 
         # Convert the data dictionary to a string
         dataStr = ""
@@ -597,14 +580,9 @@ class WaddleBotListener:
 
     # Function to display the help message, containing all the associated commands from Redis
     def display_help(self) -> str:
-        print("Displaying Help Message....")
+        logging.info("Displaying Help Message....")
 
         keys = self.redisManager.get_all_keys()
-        # commands = self.redisManager.get_all_commands()
-
-        # Print the commands
-        # print("The commands are:")
-        # print(commands)
 
         helpMessage = "Available Commands:\n"
 
@@ -619,30 +597,32 @@ class WaddleBotListener:
     
     # Function to retrieve a marketplace module entry by its URL
     def get_marketplace_module_by_name(self, moduleName: str) -> marketplaceModuleData:
-        print("Getting Marketplace Module by URL....")
+        logging.info("Getting Marketplace Module by URL....")
 
-        # Old call
-        # callURL = self.marketplaceURL + "?url=" + quote_plus(url, safe='', encoding='utf-8')
-        callURL = self.marketplaceURL + "/" + moduleName
+        try:
+            callURL = self.marketplaceURL + "/" + moduleName
 
-        print(f"Call URL: {callURL}")
+            logging.info(f"Call URL: {callURL}")
 
-        resp = requests.get(url=callURL)
+            resp = requests.get(url=callURL)
 
-        if resp.ok:
-            response = resp.json()
-            marketplaceModule = response
+            if resp.ok:
+                response = resp.json()
+                marketplaceModule = response
 
-            return marketplaceModule
-        else:
+                return marketplaceModule
+            else:
+                return None
+        except requests.exceptions.RequestException as e:
+            logging.error(e)
             return None
         
     # A function that accepts a string list, loops through each string and checks if they are present within one another in a given metadata object, and returns the command properties
     def get_command_properties(self, commandlist: list, metadata: dict) -> commandData:
-        print("Getting Command Properties....")
+        logging.info("Getting Command Properties....")
 
-        print(f"Command List: {commandlist}")
-        print(f"Metadata: {metadata}")
+        logging.info(f"Command List: {commandlist}")
+        logging.info(f"Metadata: {metadata}")
 
         # TODO: Find a way to dynamically generate a metadata key path, dependant on the length of the commandlist
         if metadata is not None and len(commandlist) > 0:
