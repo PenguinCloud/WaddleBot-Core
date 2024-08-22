@@ -30,6 +30,18 @@ If its installed correctly, you will see this output:
 
 `pip install -r requirements.txt`
 
-5. Run the app by running the following command while having the virtual env active:
+5. Ensure that the following environmental variables are available:
+
+`
+MATTERBRIDGE_URL
+USER_MANGER_URL
+MARKETPLACE_URL
+COMMUNITY_MODULES_URL
+CONTEXT_URL
+REDIS_HOST
+REDIS_PORT
+`
+
+6. Run the app by running the following command while having the virtual env active:
 
 `py listener.py`
