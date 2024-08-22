@@ -5,11 +5,15 @@ from pydal import DAL, Field
 from urllib.parse import quote, urlencode, quote_plus
 import asyncio
 import threading
+import json
+
+from dataclasses import asdict
 
 from src.redis.redis_cache import RedisCache
+from src.models.dataclasses import messageData, commandData, sendMessageData, identityData, marketplaceModuleData
 
 class WaddleBotListener:
-    def __init__(self, matterbridgeGetURL, matterbridgePostURL, contextURL, redisHost, redisPort, marketplaceURL, communityModulesURL):
+    def __init__(self, matterbridgeGetURL: str, matterbridgePostURL: str, contextURL: str, redisHost: str, redisPort: int, marketplaceURL: str, communityModulesURL: str) -> None:
         # Initialize the variables
         self.matterbridgeGetURL = matterbridgeGetURL
         self.matterbridgePostURL = matterbridgePostURL
@@ -23,7 +27,7 @@ class WaddleBotListener:
         self.redisManager = RedisCache(redisHost, redisPort)
 
     # Function to listen for messages
-    def listen(self):
+    def listen(self) -> None:
         # TODO: When the Redis cache is implemented, remove the below execution of the add_test_commands function
         # Add the test commands to the Redis cache
         print("Adding test commands to Redis....")
@@ -84,7 +88,7 @@ class WaddleBotListener:
             time.sleep(1)
 
     # Function that executes the command from the message
-    def execute_command_from_message(self, username, message, channel, gateway, account, messageData):
+    def execute_command_from_message(self, username: str, message: str, channel: str, gateway: str, account: str, messageData: messageData) -> None:
         # Seperate the command from the message as the first item in the list
         msgCommands = message.split(" ")
 
@@ -182,16 +186,8 @@ class WaddleBotListener:
 
         self.send_bot_message(gateway, cmdResult, account) 
 
-    # Function to set the list of commands as a singular redis key string by concatenating the commands with the underscore character
-    def set_redis_command(self, commands):
-        print("Setting the Redis command....")
-
-        command = "_".join(commands)
-
-        return command
-
     # Function to get the command from the message
-    def get_commands(self, message):
+    def get_commands(self, message: str) -> list:
         print("Getting the command from the message....")
 
         commands = []
@@ -218,7 +214,7 @@ class WaddleBotListener:
         return filteredCommands
     
     # Function to get the command parameters from the message, that fall between the < > brackets
-    def get_message_params(self, message):
+    def get_message_params(self, message: str) -> list:
         print("Getting the command parameters from the message....")
 
         # Get the command parameters from the message
@@ -227,7 +223,7 @@ class WaddleBotListener:
         return params
     
     # Function to get the payload values from the message, that fall between the [ ] brackets
-    def get_payload_values(self, message):
+    def get_payload_values(self, message: str) -> list:
         print("Getting the payload values from the message....")
         print(f"Message: {message}")
 
@@ -249,7 +245,7 @@ class WaddleBotListener:
         return values
     
     # Function to get the function parameters from a command retrieved from redis
-    def get_function_params(self, commandData):
+    def get_function_params(self, commandData: commandData) -> list:
         print("Getting the function parameters from the command....")
 
         params = []
@@ -262,7 +258,7 @@ class WaddleBotListener:
         return params
 
     # Function to get the payload keys from a command retrieved from redis
-    def get_payload_keys(self, commandData):
+    def get_payload_keys(self, commandData: commandData) -> list:
         print("Getting the payload keys from the command....")
 
         # print("The command data is:")
@@ -278,7 +274,7 @@ class WaddleBotListener:
         return keys
     
     # Function to get the action from the command data
-    def get_action(self, commandData):
+    def get_action(self, commandData: commandData) -> str:
         print("Getting the action from the command data....")
 
         action = ""
@@ -289,7 +285,7 @@ class WaddleBotListener:
         return action
     
     # Function to create a function URL with parameters by adding the parameters to the URL
-    def create_function_url(self, action, params):
+    def create_function_url(self, action: str, params: list) -> str:
         print("Creating the function URL....")
 
         url = f"{action}"
@@ -305,7 +301,7 @@ class WaddleBotListener:
         return url
     
     # Function to create a function payload with values by adding given values and keys to a dictionary
-    def create_function_payload(self, keys, values, username):
+    def create_function_payload(self, keys: list, values: list, username: str) -> dict:
         print("Creating the function payload....")
 
         # Create the payload dictionary
@@ -323,7 +319,7 @@ class WaddleBotListener:
         return payload
     
     # Function to check if a given community module exists in a given community, using the module id and the community id
-    def check_community_module_exists(self, community_id, module_id):
+    def check_community_module_exists(self, community_id: int, module_id: int) -> bool:
         print("Checking if the community module exists....")
 
         # Create the function URL
@@ -348,7 +344,7 @@ class WaddleBotListener:
             return False
 
     # Function to check if the given module type of a command is a core module
-    def check_core_module(self, moduleType):
+    def check_core_module(self, moduleType: str) -> bool:
         print("Checking if the module is a core module....")
 
         if moduleType == "Core":
@@ -357,7 +353,7 @@ class WaddleBotListener:
             return False
         
     # Function to check if a given module exists in a given community, using the module id and the community id
-    def check_module_exists(self, community_id, module_id):
+    def check_module_exists(self, community_id: int, module_id: int) -> bool:
         print("Checking if the module exists....")
 
         # Create the function URL
@@ -383,7 +379,7 @@ class WaddleBotListener:
             return False
 
     # Function to get the context of the current user
-    def get_context(self, username):
+    def get_context(self, username: str) -> str:
         print("Getting the context....")
 
         # Create the function URL
@@ -409,7 +405,7 @@ class WaddleBotListener:
 
 
     # Function to execute a command from the Redis cache, given the message command and the command data
-    def execute_command(self, username, message, commandData, moduleId, moduleTypeName, channel, account):
+    def execute_command(self, username: str, message: str, commandData: commandData, moduleId: int, moduleTypeName: str, channel: str, account: str) -> str:
         print("Executing the command....")
 
         # Get the payload keys from the command data
@@ -559,33 +555,25 @@ class WaddleBotListener:
             return msg
 
     # Function to send a bot message
-    def send_bot_message(self, gateway, command, account):
+    def send_bot_message(self, gateway: str, command: str, account: str) -> None:
         print("Sending Bot Message....")
 
-        payload = {
-            "text": f"{command}",
-            "username": "Waddle Bot",
-            "gateway": gateway,
-            "account": account,
-        }
+        payload = sendMessageData(text=command, username="Waddle Bot", gateway=gateway, account=account)
 
-        resp = requests.post(url=self.matterbridgePostURL, json=payload)
+        resp = requests.post(url=self.matterbridgePostURL, json=asdict(payload))
 
         if resp.ok:
             print("BOT Message Successfully Sent!")
 
     # Function to add an identity (User) to the database
-    def add_identity(self, username):
+    def add_identity(self, username : str) -> None:
         print("Adding Identity....")
 
-        payload = {
-            "identity_name": username
-        }
+        payload = identityData(identity_name=username)
 
-        resp = requests.post(url=self.initialContextURL, json=payload)
+        resp = requests.post(url=self.initialContextURL, json=asdict(payload))
 
         if resp.ok:
-            # print('response:', resp.json())
             msg = ""
             if 'msg' in resp.json():
                 msg = resp.json()['msg']
@@ -593,7 +581,7 @@ class WaddleBotListener:
         
 
     # Function to turn a data dictionary response from a request into a string
-    def data_to_string(self, data):
+    def data_to_string(self, data: dict) -> str:
         print("Converting Data to String....")
         print("The given data:")
         print(data)
@@ -608,7 +596,7 @@ class WaddleBotListener:
         return dataStr
 
     # Function to display the help message, containing all the associated commands from Redis
-    def display_help(self):
+    def display_help(self) -> str:
         print("Displaying Help Message....")
 
         keys = self.redisManager.get_all_keys()
@@ -630,7 +618,7 @@ class WaddleBotListener:
         return helpMessage
     
     # Function to retrieve a marketplace module entry by its URL
-    def get_marketplace_module_by_name(self, moduleName):
+    def get_marketplace_module_by_name(self, moduleName: str) -> marketplaceModuleData:
         print("Getting Marketplace Module by URL....")
 
         # Old call
@@ -648,34 +636,9 @@ class WaddleBotListener:
             return marketplaceModule
         else:
             return None
-
-    # Function to retrieve the metadata json object from a given marketplace module URL
-    def get_marketplace_metadata(self, marketplaceModuleURL):
-        print("Getting Marketplace Metadata....")
-
-        callURL = self.marketplaceURL + "?url=" + quote_plus(marketplaceModuleURL, safe='', encoding='utf-8')
-
-        print(f"Call URL: {callURL}")
-
-        resp = requests.get(url=callURL)
-
-        if resp.ok:
-            response = resp.json()
-
-            if 'metadata' in response:
-                metadata = response['metadata']
-                # print("The metadata is:")
-                # print(metadata)
-
-                return metadata
-
-            else:
-                return None
-        else:
-            return None
         
     # A function that accepts a string list, loops through each string and checks if they are present within one another in a given metadata object, and returns the command properties
-    def get_command_properties(self, commandlist, metadata):
+    def get_command_properties(self, commandlist: list, metadata: dict) -> commandData:
         print("Getting Command Properties....")
 
         print(f"Command List: {commandlist}")

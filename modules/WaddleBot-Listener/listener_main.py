@@ -20,7 +20,7 @@ redisHost = 'localhost'
 redisPort = 6379
 
 # The main function of the program
-def main():
+def main() -> None:
     matterbridgeGetURL = matterbridgeURL + 'messages'
     matterbridgePostURL = matterbridgeURL + 'message'
 
