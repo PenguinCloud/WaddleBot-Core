@@ -29,7 +29,6 @@
       include_tasks:
         file: "jobs/run/{{ job }}.yml"
         apply:
-          tags: configure
+          tags: run
       loop:
         - run
-        - restart
