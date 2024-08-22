@@ -1,4 +1,4 @@
-FROM ghcr.io/penguincloud/core AS BUILD
+FROM ghcr.io/penguincloud/core:v5.0.1 AS BUILD
 LABEL company="Penguin Tech Group LLC"
 LABEL org.opencontainers.image.authors="info@penguintech.group"
 LABEL license="GNU AGPL3"
@@ -55,7 +55,7 @@ WORKDIR /opt/manager
 EXPOSE 4000
 
 # BUILD IT!
-RUN ansible-playbook entrypoint.yml -c local --tags "build,configure"
+RUN ansible-playbook entrypoint.yml -c local --tags "build,run"
 
 
 # Switch to non-root user
