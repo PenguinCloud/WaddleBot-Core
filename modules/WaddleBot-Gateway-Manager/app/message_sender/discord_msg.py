@@ -1,26 +1,33 @@
 import requests
+import logging
 
 class Discord_Message_Sender:
-    def __init__(self, token, user_id, message):
+    def __init__(self, token: str, user_id: str, message: str) -> None:
         self.token = token
         self.user_id = user_id
         self.message = message
         self.channel_id = self.create_dm_channel()
 
-    def send_message(self):
-        url = 'https://discord.com/api/v8/channels/{}/messages'.format(self.channel_id)
-        data = {"content": self.message}
-        header = {"authorization": self.token}
-        r = requests.post(url, data=data, headers=header)
-        print(r.status_code)
+    def send_message(self) -> None:
+        try:
+            url = 'https://discord.com/api/v8/channels/{}/messages'.format(self.channel_id)
+            data = {"content": self.message}
+            header = {"authorization": self.token}
+            r = requests.post(url, data=data, headers=header)
+            logging.info(r.status_code)
+        except Exception as e:
+            logging.error(f"Error sending message: {e}")
 
-    def create_dm_channel(self):
-        data = {"recipient_id": self.user_id}
-        headers = {"authorization": self.token}
-        r = requests.post(f'https://discord.com/api/v9/users/@me/channels', json=data, headers=headers)
-        print(r.status_code)
-        channel_id = r.json()['id']
-        return channel_id
+    def create_dm_channel(self) -> str:
+        try:
+            data = {"recipient_id": self.user_id}
+            headers = {"authorization": self.token}
+            r = requests.post(f'https://discord.com/api/v9/users/@me/channels', json=data, headers=headers)
+            logging.info(r.status_code)
+            channel_id = r.json()['id']
+            return channel_id
+        except Exception as e:
+            logging.error(f"Error creating DM channel: {e}")
     
 
 
