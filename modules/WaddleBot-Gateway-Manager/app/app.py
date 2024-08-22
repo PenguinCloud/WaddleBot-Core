@@ -7,9 +7,13 @@ from datetime import datetime
 import base64
 import sys
 import requests
+import logging
 
 from namespaces.gateway_creator_namespace import gateway_creator_namespace
 # from message_sender.twitch_msg import Twitch_Message_Sender
+
+# Set the logging level
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 

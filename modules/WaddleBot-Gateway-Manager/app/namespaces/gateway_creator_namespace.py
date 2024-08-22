@@ -14,19 +14,16 @@ import requests
 from dotenv import load_dotenv
 from message_sender.twitch_msg import Twitch_Message_Sender
 
+import logging
+
 
 # This scripts handles the creation of a gateway in the application, as a namespace
 
 gateway_creator_namespace = Namespace('gateway-creator', description='Gateway Creator operations')
 
 gateway_creator_model = gateway_creator_namespace.model('Gateway Creator', {
-    # 'account_name': fields.String(required=True, description='The account name'),
     'gateway_type_name': fields.String(required=True, description='The gateway type name'),
     'channel_id': fields.String(required=True, description='The channel id')})
-
-# Check if the .env file exists
-# if not os.path.exists('.env'):
-#     raise Exception('.env file not found')
 
 load_dotenv()
 
@@ -73,25 +70,8 @@ twitch_port = os.getenv('TWITCH_PORT')
 twitch_pass = os.getenv('TWITCH_PASS')
 twitch_nick = os.getenv('TWITCH_NICK')
 
-# Function route to get the default account for a given account type
-# def get_default_account(account_type):
-#     try:
-#         response = requests.get(gateway_default_account_get_url, json={'account_type_name': account_type})
-#         response_payload = response.json()
-#         if 'data' not in response_payload and len(response_payload['data']) == 0:
-#             return make_response(jsonify({'msg': 'Something went wrong while getting the default account. Please try again later, or contact a technician for further assistance'}), 500)
-
-#         response_data = response_payload['data']
-#         if 'account_name' not in response_data[0]:
-#             return make_response(jsonify({'msg': 'Something went wrong while getting the default account. Please try again later, or contact a technician for further assistance'}), 500)
-
-#         account_name = response_data[0]['account_name']
-#         return account_name
-#     except Exception as e:
-#         return make_response(jsonify({'msg': str(e)}), 500)
-
 # Function to get the list of gateway servers from the gateway server service and return the list
-def get_gateway_servers():
+def get_gateway_servers() -> list:
     try:
         response = requests.get(gateway_server_get_url)
         response_payload = response.json()
@@ -107,7 +87,7 @@ def get_gateway_servers():
 @gateway_creator_namespace.route('/')
 class GatewayCreator(Resource):
     @gateway_creator_namespace.expect(gateway_creator_model)
-    def post(self):
+    def post(self) -> tuple:
         try:
             # account_name = request.json['account_name']
             gateway_type_name = request.json['gateway_type_name']
@@ -120,15 +100,9 @@ class GatewayCreator(Resource):
                 return make_response(jsonify({'msg': 'Gateway type name not set'}), 400)
             if not channel_id:
                 return make_response(jsonify({'msg': 'Channel id not set'}), 400)
-            
-            # Get the default account
-            # account_name = get_default_account(gateway_type_name)
 
             # Get the gateway servers
             gateway_servers = get_gateway_servers()
-
-            # if not account_name:
-            #     return make_response(jsonify({'msg': 'Default gateway account could not be found.'}), 400)
 
             default_twitch_server = None
 
@@ -184,7 +158,7 @@ class GatewayCreator(Resource):
                 if 'msg' not in response_payload:
                     return make_response(jsonify({'msg': 'Something went wrong while creating the gateway. Please try again later, or contact a technician for further assistance'}), 500)
                 
-                print(response_payload)
+                logging.info(response_payload)
                 # If the server creation process was successful, create the gateway route
                 if response_payload['status'] == 201:
                     response = requests.post(gateway_creation_url, json={'gateway_server_name': server_name, 'gateway_type_name': gateway_type_name, 'channel_id': "general"})
@@ -209,7 +183,7 @@ class GatewayCreator(Resource):
                     else:
                         return make_response(jsonify({'msg': msg}), 500)
                 else:
-                    print("AN ERROR OCURRED")
+                    logging.error("AN ERROR OCURRED")
                     if 'msg' in response_payload:
                         return make_response(jsonify({'msg': response_payload['msg']}), 500)
                     return make_response(jsonify({'msg': 'Something went wrong while creating the gateway. Please try again later, or contact a technician for further assistance.'}), 500)
@@ -222,9 +196,8 @@ class GatewayCreator(Resource):
         
     # Function route to delete a gateway
     @gateway_creator_namespace.expect(gateway_creator_model)
-    def delete(self):
+    def delete(self) -> tuple:
         try:
-            # account_name = request.json['account_name']
             gateway_type_name = request.json['gateway_type_name']
             channel_id = request.json['channel_id']
 
