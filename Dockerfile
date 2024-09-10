@@ -14,9 +14,9 @@ ARG MATTERBRIDGE_VERSION="1.26.0"
 
 
 # PUT YER ENVS in here
-ENV GATEWAYS_GET_URL="http://host.docker.internal:8000/waddlebot_db_manager/routing_gateways/get_all.json"
-ENV COM_ROUTES_GET_URL="http://host.docker.internal:8000/waddlebot_db_manager/routing/get_all_community_routes.json"
-ENV GATEWAY_SERVERS_GET_URL="http://host.docker.internal:8000/waddlebot_db_manager/gateway_servers/get_all.json"
+ENV GATEWAYS_GET_URL="http://host.docker.internal:8000/WaddleDBM/routing_gateways/get_all.json"
+ENV COM_ROUTES_GET_URL="http://host.docker.internal:8000/WaddleDBM/routing/get_all_community_routes.json"
+ENV GATEWAY_SERVERS_GET_URL="http://host.docker.internal:8000/WaddleDBM/gateway_servers/get_all.json"
 ENV APP_TITLE="waddlebot" 
 ENV USER_NAME="waddlebot" 
 ENV USER_DISCORD_ID=""
