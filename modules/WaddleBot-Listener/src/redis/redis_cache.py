@@ -14,6 +14,8 @@ testCommands = {
     "!route": "Routing Manager",
     # Currency related commands
     "!currency": "Currency",
+    # Admin related commands
+    "!admin": "Admin Context",
     # Test script related commands
     "#test": "Test Module"
     
