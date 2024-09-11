@@ -669,9 +669,16 @@ class WaddleBotListener:
 
         req_priv_list = commandData['req_priv_list']
 
+        logging.info(f"Required Privileges of the command is: {req_priv_list}")
+        logging.info(f"User Privileges are: {user_priv_list}")
+
         # Check if the user has the required priv_list to execute the command
         if len(req_priv_list) > 0 and len(user_priv_list) > 0:
             if not all(item in user_priv_list for item in req_priv_list):
+                # Compile a list of privileges that the user lacks to execute the command
+                missing_privs = [item for item in req_priv_list if item not in user_priv_list]
+
+                logging.info(f"Found privileges that the user lacks to execute the command: {missing_privs}")
                 return False
 
         # If the command requires admin priv_list, check if the user is an admin
@@ -682,14 +689,19 @@ class WaddleBotListener:
                 if sessionData["identity_id"] == contextData["identity_id"] and sessionData["community_id"] == contextData["community_id"]:
                     # Check if the session data contains a valid session token
                     if self.check_token_expiry(sessionData):
+                        logging.info("The user has an active admin context session, meaning the user has admin privileges to execute this command.")
                         return True
                     else:
+                        logging.error("The user has an invalid session token, meaning the user does not have admin privileges to execute this command.")
                         return False
                 else:
+                    logging.error("The identity_id or the community_id in the session data and the context data do not match, meaning this user has an invalid session.")
                     return False
             else:
+                logging.error("An error has occurred while trying to check if the user has admin privileges. The session data or the context data is None or the identity_id or the community_id is missing.")
                 return False
         else:
+            logging.info("No admin privileges required to execute the command.")
             return True
         
     # Using session data, check if a token has not expired
