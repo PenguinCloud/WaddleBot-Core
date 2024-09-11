@@ -412,8 +412,8 @@ class WaddleBotListener:
         community_name = contextData['community_name']
 
         # Check if the user has the required priv_list to execute the command
-        if not self.check_command_priv_list(sessionData, contextData, commandData, priv_list):
-            return "You do not have the required priv_list to execute this command."
+        if not self.check_permissions(sessionData, contextData, commandData, priv_list):
+            return "You do not have the required privileges to execute this command."
 
         # Get the command parameters from the message
         params = self.get_message_params(message)
@@ -664,45 +664,31 @@ class WaddleBotListener:
     # Function to return a flag depending on whether the given admin command can be excuted or not. 
     # For this check to work, it receives the session data of the user, the context of the user, and 
     # the command data of the command to be executed.
-    def check_command_priv_list(self, sessionData: sessionData, contextData: contextData, commandData: commandData, user_priv_list: list) -> bool:
-        logging.info("Checking Admin Command....")
+    def check_permissions(self, sessionData, contextData, commandData, user_priv_list):
+        logging.info("Checking Permissions....")
+        if not self._has_required_privileges(user_priv_list, commandData['req_priv_list']):
+            # Compile a list of the required privileges
+            missing_privileges = [priv for priv in commandData['req_priv_list'] if priv not in user_priv_list]
+            logging.info(f"User does not have the required privileges to execute the command. Missing privileges: {missing_privileges}")
+            return False
+        if 'admin' in commandData['req_priv_list']:
+            logging.info("Checking if the user has a valid admin session....")
+            return self._is_valid_admin_session(sessionData, contextData)
+        return True
 
-        req_priv_list = commandData['req_priv_list']
+    # Function to check if the user has the required privileges to execute the command
+    def _has_required_privileges(self, user_priv_list, required_priv_list):
+        return all(item in user_priv_list for item in required_priv_list)
 
-        logging.info(f"Required Privileges of the command is: {req_priv_list}")
-        logging.info(f"User Privileges are: {user_priv_list}")
-
-        # Check if the user has the required priv_list to execute the command
-        if len(req_priv_list) > 0 and len(user_priv_list) > 0:
-            if not all(item in user_priv_list for item in req_priv_list):
-                # Compile a list of privileges that the user lacks to execute the command
-                missing_privs = [item for item in req_priv_list if item not in user_priv_list]
-
-                logging.info(f"Found privileges that the user lacks to execute the command: {missing_privs}")
-                return False
-
-        # If the command requires admin priv_list, check if the user is an admin
-        if 'admin' in req_priv_list:
-            # Check that both the session data and the context data are not None and both contain the idenity_id and community_id
-            if sessionData is not None and contextData is not None and 'identity_id' in sessionData and 'community_id' in sessionData:
-                # Check if session data identity_id and context data identity_id are the same, as well as the session data community_id and context data community_id
-                if sessionData["identity_id"] == contextData["identity_id"] and sessionData["community_id"] == contextData["community_id"]:
-                    # Check if the session data contains a valid session token
-                    if self.check_token_expiry(sessionData):
-                        logging.info("The user has an active admin context session, meaning the user has admin privileges to execute this command.")
-                        return True
-                    else:
-                        logging.error("The user has an invalid session token, meaning the user does not have admin privileges to execute this command.")
-                        return False
-                else:
-                    logging.error("The identity_id or the community_id in the session data and the context data do not match, meaning this user has an invalid session.")
-                    return False
-            else:
-                logging.error("An error has occurred while trying to check if the user has admin privileges. The session data or the context data is None or the identity_id or the community_id is missing.")
-                return False
-        else:
-            logging.info("No admin privileges required to execute the command.")
-            return True
+    # Function to check if the user has a valid admin session
+    def _is_valid_admin_session(self, sessionData, contextData):
+        if not (sessionData and contextData and 'identity_id' in sessionData and 'community_id' in sessionData):
+            logging.info("User does not have a valid session.")
+            return False
+        if sessionData["identity_id"] != contextData["identity_id"] or sessionData["community_id"] != contextData["community_id"]:
+            logging.info("User does not have a valid session.")
+            return False
+        return self.check_token_expiry(sessionData)
         
     # Using session data, check if a token has not expired
     def check_token_expiry(self, sessionData: sessionData) -> bool:
@@ -714,11 +700,15 @@ class WaddleBotListener:
         # Get the session expiry time
         sessionExpiry = sessionData['session_expires']
 
+        logging.info(f"Session Expiry: {sessionExpiry}")
+
         # Convert the session expiry date string to a datetime object
         sessionExpiry = time.mktime(time.strptime(sessionExpiry, "%Y-%m-%d %H:%M:%S"))
 
         # Check if the session expiry time is greater than the current time
         if sessionExpiry > currentTime:
+            logging.info("The session has not expired. The user has a valid session.")
             return True
         else:
-            return False
+            logging.info("The session has expired.")
+            return False  
