@@ -120,6 +120,13 @@ class WaddleBotListener:
             # After the timeout, remove the timeout command from the message
             message = message.replace(matching[0], "")
 
+        # Get the context data of the user
+        contextData = self.get_context(username)
+
+        if contextData is None:
+            self.send_bot_message(gateway, "An error has occurred while trying to get the context data of the user.", account)
+            return 
+
         commands = self.get_commands(message)
 
         logging.info("Command found in text. Looking up command....")
@@ -140,39 +147,46 @@ class WaddleBotListener:
         else:
             # Get the command data from the Redis cache
             commandName = self.redisManager.get_command(mainCommand)
+
             if commandName is not None:
                 logging.info("Command found in Redis cache.")
                 logging.info(commandName)
-                
-                # Get marketplace module from the marketplace
-                module = self.get_marketplace_module_by_name(commandName, username)
-
-                if module is None:
-                    logging.error("Error occured while trying to get the metadata from the marketplace.")
-                    cmdResult += "The command could not be found. Ensure that the command is typed correctly."
-                    self.send_bot_message(gateway, cmdResult, account)
-
-                    return
-
-                print(f"Module: {module}")
-
-                metadata = module['metadata']
-                moduleTypeName = module['module_type_name']
-                moduleID = module['id']
-                priv_list = module['priv_list']
-                sessionData = module['session_data']
-
-                # Get the command properties from the metadata
-                commandData = self.get_command_properties(commands, metadata)
-
-                logging.info("The command data is:")
-                logging.info(commandData)
-
-                # Execute the command
-                cmdResult += self.execute_command(username, message, commandData, moduleID, moduleTypeName, channel, account, sessionData, priv_list)
+            # If the command isnt part of the Redis cache, try getting the module using the command list as an alias
             else:
-                logging.info("Command not found in Redis cache.")
-                cmdResult += "Command not found. Please use !help to see the list of available commands."
+                logging.info("Command not found in Redis cache. Attempting to get an alias from the marketplace.")
+                commandName = " ".join(commands)
+                logging.info(f"Alias command Name: {commandName}")
+                
+            # Get marketplace module from the marketplace
+            module = self.get_marketplace_module_by_name(commandName, username)
+
+            # Get the aliased command from the module
+            commands = self.get_aliased_command(module, commands)
+
+            # If the module is None or the status is not 200, return an error message
+            if module is None or ('status' in module and module['status'] != 200):
+                logging.error("Error occured while trying to get the metadata from the marketplace.")
+                cmdResult += "The command could not be found. Ensure that the command is typed correctly."
+                self.send_bot_message(gateway, cmdResult, account)
+
+                return
+
+            print(f"Module: {module}")
+
+            metadata = module['metadata']
+            moduleTypeName = module['module_type_name']
+            moduleID = module['id']
+            priv_list = module['priv_list']
+            sessionData = module['session_data']
+
+            # Get the command properties from the metadata
+            commandData = self.get_command_properties(commands, metadata)
+
+            logging.info("The command data is:")
+            logging.info(commandData)
+
+            # Execute the command
+            cmdResult += self.execute_command(username, contextData, message, commandData, moduleID, moduleTypeName, channel, account, sessionData, priv_list)
 
         self.send_bot_message(gateway, cmdResult, account) 
 
@@ -202,6 +216,19 @@ class WaddleBotListener:
         logging.info(filteredCommands)
 
         return filteredCommands
+    
+    # Function to get the aliased command from a marketplace module and return a list of commands,
+    # seperated by a space. Returns a list of the old commands if the aliased command is not found.
+    def get_aliased_command(self, module: marketplaceModuleData, commands) -> list:
+        logging.info("Getting the aliased command....")
+
+        aliasedCommand = commands
+
+        # Get the aliased command from the module
+        if module is not None and 'aliased_command' in module:
+            aliasedCommand = module['aliased_command'].split(" ")
+
+        return aliasedCommand
     
     # Function to get the command parameters from the message, that fall between the < > brackets
     def get_message_params(self, message: str) -> list:
@@ -387,7 +414,7 @@ class WaddleBotListener:
 
 
     # Function to execute a command from the Redis cache, given the message command and the command data
-    def execute_command(self, username: str, message: str, commandData: commandData, moduleId: int, moduleTypeName: str, channel: str, account: str, sessionData: sessionData, priv_list: list) -> str:
+    def execute_command(self, username: str, contextData: contextData, message: str, commandData: commandData, moduleId: int, moduleTypeName: str, channel: str, account: str, sessionData: sessionData, priv_list: list) -> str:
         logging.info("Executing the command....")
 
         # Get the payload keys from the command data
@@ -404,10 +431,7 @@ class WaddleBotListener:
         # Get the action value from the metadata
         action = commandData['action']
 
-        contextData = self.get_context(username)
-
-        if contextData is None:
-            return "An error has occurred while trying to get the context."
+        
         
         community_name = contextData['community_name']
 
@@ -616,17 +640,19 @@ class WaddleBotListener:
         logging.info("Getting Marketplace Module by URL....")
 
         try:
-            # URL encode the module name
-            moduleName = quote(moduleName)
+            logging.info(f"Module Name: {moduleName}")
 
-            print(f"Module Name: {moduleName}")
-
-            callURL = self.marketplaceURL + "/" + moduleName
+            callURL = self.marketplaceURL
 
             logging.info(f"Call URL: {callURL}")
 
             # Create a body for the request that only contains the identity_name
-            body = {"identity_name": identity_name}
+            body = {
+                "identity_name": identity_name,
+                "name": moduleName
+            }
+
+            logging.info(f"Body: {body}")
 
             resp = requests.get(url=callURL, json=body)
 

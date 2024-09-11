@@ -16,9 +16,12 @@ testCommands = {
     "!currency": "Currency",
     # Admin related commands
     "!admin": "Admin Context",
+    # Text Response related commands
+    "!text": "Text Response",
+    # Alias related commands
+    "!alias": "Alias Commands",
     # Test script related commands
     "#test": "Test Module"
-    
 }
 
 class RedisCache:
