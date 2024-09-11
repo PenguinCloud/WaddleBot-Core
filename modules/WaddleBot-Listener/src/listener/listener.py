@@ -159,7 +159,7 @@ class WaddleBotListener:
                 metadata = module['metadata']
                 moduleTypeName = module['module_type_name']
                 moduleID = module['id']
-                privilages = module['privilages']
+                priv_list = module['priv_list']
                 sessionData = module['session_data']
 
                 # Get the command properties from the metadata
@@ -169,7 +169,7 @@ class WaddleBotListener:
                 logging.info(commandData)
 
                 # Execute the command
-                cmdResult += self.execute_command(username, message, commandData, moduleID, moduleTypeName, channel, account, sessionData, privilages)
+                cmdResult += self.execute_command(username, message, commandData, moduleID, moduleTypeName, channel, account, sessionData, priv_list)
             else:
                 logging.info("Command not found in Redis cache.")
                 cmdResult += "Command not found. Please use !help to see the list of available commands."
@@ -387,7 +387,7 @@ class WaddleBotListener:
 
 
     # Function to execute a command from the Redis cache, given the message command and the command data
-    def execute_command(self, username: str, message: str, commandData: commandData, moduleId: int, moduleTypeName: str, channel: str, account: str, sessionData: sessionData, privilages: list) -> str:
+    def execute_command(self, username: str, message: str, commandData: commandData, moduleId: int, moduleTypeName: str, channel: str, account: str, sessionData: sessionData, priv_list: list) -> str:
         logging.info("Executing the command....")
 
         # Get the payload keys from the command data
@@ -411,9 +411,9 @@ class WaddleBotListener:
         
         community_name = contextData['community_name']
 
-        # Check if the user has the required privilages to execute the command
-        if not self.check_command_privilages(sessionData, contextData, commandData, privilages):
-            return "You do not have the required privilages to execute this command."
+        # Check if the user has the required priv_list to execute the command
+        if not self.check_command_priv_list(sessionData, contextData, commandData, priv_list):
+            return "You do not have the required priv_list to execute this command."
 
         # Get the command parameters from the message
         params = self.get_message_params(message)
@@ -664,18 +664,18 @@ class WaddleBotListener:
     # Function to return a flag depending on whether the given admin command can be excuted or not. 
     # For this check to work, it receives the session data of the user, the context of the user, and 
     # the command data of the command to be executed.
-    def check_command_privilages(self, sessionData: sessionData, contextData: contextData, commandData: commandData, user_privilages: list) -> bool:
+    def check_command_priv_list(self, sessionData: sessionData, contextData: contextData, commandData: commandData, user_priv_list: list) -> bool:
         logging.info("Checking Admin Command....")
 
-        req_privilages = commandData['req_privilages']
+        req_priv_list = commandData['req_priv_list']
 
-        # Check if the user has the required privilages to execute the command
-        if len(req_privilages) > 0 and len(user_privilages) > 0:
-            if not all(item in user_privilages for item in req_privilages):
+        # Check if the user has the required priv_list to execute the command
+        if len(req_priv_list) > 0 and len(user_priv_list) > 0:
+            if not all(item in user_priv_list for item in req_priv_list):
                 return False
 
-        # If the command requires admin privilages, check if the user is an admin
-        if 'admin' in req_privilages:
+        # If the command requires admin priv_list, check if the user is an admin
+        if 'admin' in req_priv_list:
             # Check that both the session data and the context data are not None and both contain the idenity_id and community_id
             if sessionData is not None and contextData is not None and 'identity_id' in sessionData and 'community_id' in sessionData:
                 # Check if session data identity_id and context data identity_id are the same, as well as the session data community_id and context data community_id
