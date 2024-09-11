@@ -32,7 +32,7 @@ class marketplaceModuleData():
     module_type_id: int
     metadata: dict
     module_type_name: str
-    privilages: list
+    priv_list: list
     session_data: sessionData
 
 @dataclass
@@ -42,7 +42,7 @@ class commandData():
     method: str
     parameters: list
     payload_keys: list
-    req_privilages: list
+    req_priv_list: list
 
 @dataclass
 class sendMessageData():
