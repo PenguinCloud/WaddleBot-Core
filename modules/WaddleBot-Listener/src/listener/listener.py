@@ -648,18 +648,16 @@ class WaddleBotListener:
         logging.info(f"Command List: {commandlist}")
         logging.info(f"Metadata: {metadata}")
 
-        # TODO: Find a way to dynamically generate a metadata key path, dependant on the length of the commandlist
-        if metadata is not None and len(commandlist) > 0:
-            if len(commandlist) == 1 and commandlist[0] in metadata and 'description' in metadata[commandlist[0]]:
-                return metadata[commandlist[0]]
-            elif len(commandlist) == 2 and commandlist[0] in metadata and commandlist[1] in metadata[commandlist[0]] and 'description' in metadata[commandlist[0]][commandlist[1]]:
-                return metadata[commandlist[0]][commandlist[1]]
-            elif len(commandlist) == 3 and commandlist[0] in metadata and commandlist[1] in metadata[commandlist[0]] and commandlist[2] in metadata[commandlist[0]][commandlist[1]] and 'description' in metadata[commandlist[0]][commandlist[1]][commandlist[2]]:
-                return metadata[commandlist[0]][commandlist[1]][commandlist[2]]
-            else:
-                return None
-                
-        return None
+        # Combine all the commands into a single string with the _ character. This will be used to search for the command in the metadata.
+        command = "_".join(commandlist)
+
+        logging.info(f"Command that needs to be found in the metadata: {command}")
+
+        # Check if the command is in the metadata
+        if command in metadata:
+            return metadata[command]
+        else:
+            return None
     
     # Function to return a flag depending on whether the given admin command can be excuted or not. 
     # For this check to work, it receives the session data of the user, the context of the user, and 
