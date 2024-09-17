@@ -1,0 +1,4 @@
+---
+- name: Run the WaddleBot-Configurator configure script
+  command: python3 /opt/manager/listener_main.py
+  become: false
