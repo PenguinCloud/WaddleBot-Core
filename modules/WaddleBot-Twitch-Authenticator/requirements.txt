@@ -16,7 +16,7 @@ django-constance==3.1.0
 django-import-export==4.0.3
 django-picklefield==3.2
 django_restframework_apiview==1.4.3
-djangorestframework==3.15.1
+djangorestframework==3.15.2
 et-xmlfile==1.1.0
 Flask==3.0.3
 flask-core==2.9.0
