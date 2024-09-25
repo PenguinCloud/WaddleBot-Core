@@ -658,9 +658,8 @@ class WaddleBotListener:
 
             if resp.ok:
                 response = resp.json()
-                marketplaceModule = response
 
-                return marketplaceModule
+                return response
             else:
                 return None
         except requests.exceptions.RequestException as e:
