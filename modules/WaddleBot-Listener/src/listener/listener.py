@@ -220,6 +220,9 @@ class WaddleBotListener:
     # Function to get the aliased command from a marketplace module and return a list of commands,
     # seperated by a space. Returns a list of the old commands if the aliased command is not found.
     def get_aliased_command(self, module: marketplaceModuleData, commands) -> list:
+        if not module or not hasattr(module, 'aliased_command'):
+            logging.warning("Invalid module or missing 'aliased_command'")
+            return commands
         logging.info("Getting the aliased command....")
 
         aliasedCommand = commands
