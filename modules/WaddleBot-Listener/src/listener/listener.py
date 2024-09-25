@@ -121,74 +121,50 @@ class WaddleBotListener:
             message = message.replace(matching[0], "")
 
         # Get the context data of the user
-        contextData = self.get_context(username)
-
-        if contextData is None:
-            self.send_bot_message(gateway, "An error has occurred while trying to get the context data of the user.", account)
-            return 
-
+        context_data = self.get_context_data(username, gateway, account)
+        if context_data is None:
+            return
+        
+        # Get the command list from the message
         commands = self.get_commands(message)
 
-        logging.info("Command found in text. Looking up command....")
-
-        # Check if the command is in the botCommands dictionary
-        cmdResult = ""
-
-        # Get the userid from the message
-        pingUsername = "<@" + messageData[0]['userid'] + ">"
-
-        # Add the username to the response message
-        cmdResult += f"{pingUsername}, "
-
-        # If the command is !help, display the help message
-        if mainCommand == "!help":
-            cmdResult += self.display_help()
-        # Else, check if the command is in the Redis cache
-        else:
-            # Get the command data from the Redis cache
-            commandName = self.redisManager.get_command(mainCommand)
-
-            if commandName is not None:
-                logging.info("Command found in Redis cache.")
-                logging.info(commandName)
-            # If the command isnt part of the Redis cache, try getting the module using the command list as an alias
-            else:
-                logging.info("Command not found in Redis cache. Attempting to get an alias from the marketplace.")
-                commandName = " ".join(commands)
-                logging.info(f"Alias command Name: {commandName}")
-                
-            # Get marketplace module from the marketplace
-            module = self.get_marketplace_module_by_name(commandName, username)
-
-            # Get the aliased command from the module
-            commands = self.get_aliased_command(module, commands)
-
-            # If the module is None or the status is not 200, return an error message
-            if module is None or ('status' in module and module['status'] != 200):
-                logging.error("Error occured while trying to get the metadata from the marketplace.")
-                cmdResult += "The command could not be found. Ensure that the command is typed correctly."
-                self.send_bot_message(gateway, cmdResult, account)
-
-                return
-
-            print(f"Module: {module}")
-
-            metadata = module['metadata']
-            moduleTypeName = module['module_type_name']
-            moduleID = module['id']
-            priv_list = module['priv_list']
-            sessionData = module['session_data']
-
-            # Get the command properties from the metadata
-            commandData = self.get_command_properties(commands, metadata)
-
-            logging.info("The command data is:")
-            logging.info(commandData)
-
-            # Execute the command
-            cmdResult += self.execute_command(username, contextData, message, commandData, moduleID, moduleTypeName, channel, account, sessionData, priv_list)
+        # Process the command
+        cmdResult = self.process_command(commands, context_data, message, username, channel, account, messageData)
 
         self.send_bot_message(gateway, cmdResult, account) 
+
+    # Function to get the context of the user
+    def get_context_data(self, username, gateway, account):
+        context_data = self.get_context(username)
+        if context_data is None:
+            self.send_bot_message(gateway, "An error has occurred while trying to get the context data of the user.", account)
+            return None
+        return context_data
+
+    # Function to process the command
+    def process_command(self, commands, context_data, message, username, channel, account, messageData):
+        main_command = commands[0]
+        if main_command == "!help":
+            return self.display_help()
+
+        module = self.lookup_command(commands, username)
+        if module is None:
+            return "The command could not be found. Ensure that the command is typed correctly."
+
+        return self.execute_command(username, context_data, message, module, channel, account, messageData)
+
+    # Function to lookup the command in the Redis cache
+    def lookup_command(self, commands, username):
+        command_name = self.redisManager.get_command(commands[0])
+        if command_name is None:
+            command_name = " ".join(commands)
+
+        module = self.get_marketplace_module_by_name(command_name, username)
+        if module is None or ('status' in module and module['status'] != 200):
+            return None
+
+        aliased_commands = self.get_aliased_command(module, commands)
+        return self.get_command_properties(aliased_commands, module)
 
     # Function to get the command from the message
     def get_commands(self, message: str) -> list:
