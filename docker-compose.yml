@@ -2,4 +2,23 @@
 version: "2.4"
 services:
   app:
-    image: penguintech/core-ansible
+    image: ghcr.io/penguincloud/web2py-core:latest
+    ports:
+      - "1080-1090:80"
+    env_file: .env
+    volumes:
+      - /app
+      - ./data:/data
+    networks:
+      - web2py
+    restart: always
+    depends_on:
+      - db
+  db:
+    image: mariadb:10.5
+    env_file: .env
+    volumes:
+      - ./data:/var/lib/mysql
+    networks:
+      - web2py
+    restart: always
