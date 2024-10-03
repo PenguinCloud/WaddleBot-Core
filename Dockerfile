@@ -39,8 +39,7 @@ ENV TELEGRAM_ENABLE="0"
 ENV GATEWAY_NAME="GatewayExample"
 
 # Python related commands to install dependencies, create a virtual environment, and run the application
-RUN apt-get update 
-RUN apt-get install -y python3
+RUN apt-get update && apt-get install -y python3
 
 # Set the working directory to the WaddleBot-Configurator directory
 WORKDIR /opt/manager/modules/WaddleBot-Configurator
