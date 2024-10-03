@@ -34,6 +34,7 @@ class marketplaceModuleData():
     module_type_name: str
     priv_list: list
     session_data: sessionData
+    aliased_command: str
 
 @dataclass
 class commandData():
