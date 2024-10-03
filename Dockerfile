@@ -2,6 +2,7 @@ FROM ghcr.io/penguincloud/core:v5.0.1 AS BUILD
 LABEL company="Penguin Tech Group LLC"
 LABEL org.opencontainers.image.authors="info@penguintech.group"
 LABEL license="GNU AGPL3"
+# TODO - Switch FROM to web2py
 
 # GET THE FILES WHERE WE NEED THEM!
 COPY . /opt/manager/
