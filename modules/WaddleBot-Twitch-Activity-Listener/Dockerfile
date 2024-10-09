@@ -39,9 +39,6 @@ RUN pip install -r requirements.txt
 # Set the working directory back to the manager directory
 WORKDIR /opt/manager
 
-# Expose the port
-EXPOSE 4000
-
 # BUILD IT!
 RUN ansible-playbook entrypoint.yml -c local --tags "build"
 
