@@ -1,0 +1,1 @@
+[{"table_name": "my_table", "columns": {"name": "string", "value_1": "float"}}, {"table_name": "test_table", "columns": {"name": "string", "value_1": "float"}}]

@@ -1,0 +1,30 @@
+---
+- name: PROJECT NAME
+  hosts: localhost
+  connection: local
+  vars_files:
+    - vars/base.yml
+  tasks:
+    - name: Build
+      tags:
+        - build
+      include_tasks:
+        file: jobs/build/build.yml
+        apply:
+          tags: build
+    - name: Run And Configure
+      tags:
+        - run
+        - configure
+      include_tasks:
+        file: jobs/run/run.yml
+    - name: Execute application
+      tags:
+        - exec
+      include_tasks:
+        file: jobs/run/exec.yml
+    - name: Run tests to make sure app is running as expected
+      tags:
+        - test
+      include_tasks:
+        file: jobs/tests/tests.yml
