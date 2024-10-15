@@ -1,6 +1,11 @@
 ---
 version: "2.4"
 services:
+  waddledbm:
+    build: modules/WaddleDBM
+    ports: 
+      - "8000:8000"
+    restart: always
   redis:
     image: redis:6.0.7
     container_name: redis
@@ -23,12 +28,18 @@ services:
       - "4200:4000"
     env_file: .env
     restart: always
+    depends_on:
+      waddledbm:
+        condition: service_started
   waddlebot-gateway-manager:
     build: modules/WaddleBot-Gateway-Manager
     ports: 
       - "5000:5000"
     env_file: .env
     restart: always
+    depends_on:
+      waddledbm:
+        condition: service_started
   waddlebot-listener:
     build: modules/WaddleBot-Listener
     env_file: .env
@@ -38,12 +49,17 @@ services:
         condition: service_started
       matterbridge:
         condition: service_started
+      waddledbm:
+        condition: service_started
   waddlebot-twitch-authenticator:
     build: modules/WaddleBot-Twitch-Authenticator
     ports: 
       - "5001:17563"
     env_file: .env
     restart: always
+    depends_on:
+      waddledbm:
+        condition: service_started
 
 volumes:
   redis_volume_data:
