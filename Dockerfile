@@ -2,6 +2,7 @@ FROM ghcr.io/penguincloud/core:v5.0.1 AS BUILD
 LABEL company="Penguin Tech Group LLC"
 LABEL org.opencontainers.image.authors="info@penguintech.group"
 LABEL license="GNU AGPL3"
+# TODO - Switch FROM to web2py
 
 # GET THE FILES WHERE WE NEED THEM!
 COPY . /opt/manager/
@@ -39,8 +40,7 @@ ENV TELEGRAM_ENABLE="0"
 ENV GATEWAY_NAME="GatewayExample"
 
 # Python related commands to install dependencies, create a virtual environment, and run the application
-RUN apt-get update 
-RUN apt-get install -y python3
+RUN apt-get update && apt-get install -y python3
 
 # Set the working directory to the WaddleBot-Configurator directory
 WORKDIR /opt/manager/modules/WaddleBot-Configurator
