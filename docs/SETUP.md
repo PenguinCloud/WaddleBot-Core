@@ -1,4 +1,13 @@
 
+# Option 1 - Docker-Compose
+1. Pull the docker-compose file here:
+2. Pull the .env.example from here: 
+3. Rename the .env.example to .env
+4. Update the .env file to your specifications
+5. run the command: ``` docker-compose up -d```
+6. Enjoy your masterpiece!
+
+# Option 2 - Docker Native
 1. Ensure that docker is installed on your local machine. URL:
 https://www.docker.com/products/docker-desktop/
 
