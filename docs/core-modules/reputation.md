@@ -18,6 +18,7 @@
 
 ## Bouncer
 - Community Namespace Administrators will be able to set reputation requirements if they wish, if not set it is assumed off, example:
+
 ```
 ---
 policy:
