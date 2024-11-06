@@ -1,4 +1,4 @@
-SDK info and onbaording process here @thysw95
+SDK info and onboarding process here @thysw95
 
 # WaddleBot Module Protocol Definition
 send via webhook to AWS Lambda:
