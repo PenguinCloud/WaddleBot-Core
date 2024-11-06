@@ -19,13 +19,6 @@ We heavily use Linux networking terms as our team and founder are heavily into t
 
 # Community Namespace
 
-## Roles
-
-- Administrator (2)
-- Moderator (1)
-- User (0)
-- Custom Roles (A-Z)
-
 ## Adding Resources 
 
 1. Resource owner adds Waddlebot to their server / channel
