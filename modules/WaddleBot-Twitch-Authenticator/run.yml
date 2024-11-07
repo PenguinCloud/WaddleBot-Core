@@ -1,4 +1,6 @@
 ---
-- name: Run the WaddleBot-Configurator configure script
-  command: python3 /opt/manager/app.py
-  become: false
+---
+- name: Run the WaddleBot-twitch-authnticator configure script
+  ansible.builtin.script: /opt/manager/app.py
+  args:
+    executable: python3
