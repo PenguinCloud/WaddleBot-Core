@@ -1,4 +1,5 @@
 ---
-- name: Run the WaddleBot-Configurator configure script
-  command: python3 /opt/manager/app/app.py
-  become: false
+- name: Run the WaddleBot-Gateway-Manager configure script
+  ansible.builtin.script: /opt/manager/app/app.py
+  args:
+    executable: python3
