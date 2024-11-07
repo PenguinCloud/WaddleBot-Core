@@ -1,5 +1,5 @@
 ---
-- name: PROJECT NAME
+- name: WaddleBot Listener
   hosts: localhost
   connection: local
   vars_files:
