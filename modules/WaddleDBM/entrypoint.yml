@@ -1,5 +1,5 @@
 ---
-- name: PROJECT NAME
+- name: WaddleDBM
   hosts: localhost
   connection: local
   vars_files:
