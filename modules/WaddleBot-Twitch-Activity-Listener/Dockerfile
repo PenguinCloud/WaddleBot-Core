@@ -22,10 +22,10 @@ ENV EVENTSUB_URL = 'https://mj-dev.penguintech.io/'
 
 
 # Python related commands to install dependencies, create a virtual environment, and run the application
-RUN apt-get update 
-RUN apt-get install -y python3-dev
-RUN apt-get install -y libpq-dev
-RUN apt-get install -y postgresql
+# RUN apt-get update 
+# RUN apt-get install -y python3-dev
+# RUN apt-get install -y libpq-dev
+# RUN apt-get install -y postgresql
 
 
 # Set the working directory to the WaddleBot-Configurator directory
@@ -34,7 +34,7 @@ WORKDIR /opt/manager/
 # # Install the dependencies in the virtual environment, located in the WaddleBot-Configurator directory
 RUN pip install psycopg2-binary
 RUN pip install --ignore-installed blinker
-RUN pip install -r requirements.txt
+# RUN pip install -r requirements.txt
 
 # Set the working directory back to the manager directory
 WORKDIR /opt/manager
