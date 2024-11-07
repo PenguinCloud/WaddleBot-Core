@@ -27,10 +27,10 @@ ENV DISCORD_TOKEN=""
 ENV DISCORD_BOT_INVITE_URL=""
 
 # Python related commands to install dependencies, create a virtual environment, and run the application
-RUN apt-get update 
-RUN apt-get install -y python3-dev
-RUN apt-get install -y libpq-dev
-RUN apt-get install -y postgresql
+# RUN apt-get update 
+# RUN apt-get install -y python3-dev
+# RUN apt-get install -y libpq-dev
+# RUN apt-get install -y postgresql
 
 
 # Set the working directory to the WaddleBot-Configurator directory
