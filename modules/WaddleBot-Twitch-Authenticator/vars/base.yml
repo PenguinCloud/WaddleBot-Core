@@ -1,4 +1,4 @@
 run:
   user: waddlebot
 app:
-  title: "{{ lookup('ansible.builtin.env', 'APP_TILE') }}"
+  title: Twitch-Authenticator
