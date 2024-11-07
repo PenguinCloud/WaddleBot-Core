@@ -1,5 +1,4 @@
 ---
----
 - name: Run the WaddleBot-twitch-authnticator configure script
   ansible.builtin.script: /opt/manager/app.py
   args:
