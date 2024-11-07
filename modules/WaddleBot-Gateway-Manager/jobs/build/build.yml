@@ -20,3 +20,7 @@
     owner: "{{ run.user }}"
     group: "{{ run.user }}"
     mode: '0755'
+
+- name: Install specified python requirements
+  ansible.builtin.pip:
+    requirements: /app/requirements.txt
