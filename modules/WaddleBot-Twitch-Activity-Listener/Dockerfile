@@ -9,7 +9,7 @@ WORKDIR /opt/manager
 
 
 # PUT YER ARGS in here
-ARG APP_TITLE="waddlebot-core" 
+ARG APP_TITLE="waddlebot-twitch-activity" 
 ARG MATTERBRIDGE_VERSION="1.26.0"
 
 
