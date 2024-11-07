@@ -39,7 +39,7 @@ WORKDIR /opt/manager/app
 # # Install the dependencies in the virtual environment, located in the WaddleBot-Configurator directory
 RUN pip install psycopg2-binary
 RUN pip install --ignore-installed blinker
-RUN pip install -r requirements.txt
+# RUN pip install -r requirements.txt
 
 # Set the working directory back to the manager directory
 WORKDIR /opt/manager
