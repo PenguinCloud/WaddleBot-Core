@@ -370,10 +370,11 @@ Currently, all the following tables receive default values on startup:
 
 During DB initialization, the "Global" community is also created and contain the following default roles, with their accompanying privileges that is used by certain module functions, if stipulated in the "modules" table, for each stored command in a module:
 
-| Role | Privileges |
+| Role          | Privileges                                |
+| ------------- | ----------------------------------------- |
 | Administrator | read, write, update, delete, admin, owner |
-| Moderator | read, write, update, delete |
-| User | read |
+| Moderator     | read, write, update, delete               |
+| User          | read                                      |
 
 (This readme is still very W.I.P)
 
