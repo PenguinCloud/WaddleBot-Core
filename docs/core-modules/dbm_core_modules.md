@@ -58,7 +58,7 @@ Each WaddleDBM core module found within the DBM module, consists of the followin
 
 2. A controller .py file that is responsible for all the core DBM module endpoints, located in `/WaddleDBM/controllers` (link: https://github.com/PenguinCloud/WaddleDBM/tree/main/controllers)
 
-3. An entry in the marketplace_modules table of the DB (might need to rename this table, because it does contain a module type pointing towards whether its a core module, or a marketplace module that needs to be installed).
+3. An entry in the modules table of the DB (might need to rename this table, because it does contain a module type pointing towards whether its a core module, or a marketplace module that needs to be installed).
 
 4. An entry in the waddlebotCore's REDIS table.
 
@@ -204,11 +204,11 @@ def get_all()
 
 There are many other things that you can do with these endpoint functions, but the above examples provided the most basic functions to get started. For a full documentation of PyDAL's database interactions, go to https://web2py.com/books/default/chapter/29/06/the-database-abstraction-layer#Run-time-field-and-table-modification
 
-### Marketplace Table entry
+### Modules Table entry
 
-After a new module has been created in the WaddleDBM, the first step for the listener to interact with this module, is through the creation of a record in the marketplace_modules table (TODO: Change table name). All modules found within WaddleDBM must contain a record within this table to store metadata of each command within each module.
+After a new module has been created in the WaddleDBM, the first step for the listener to interact with this module, is through the creation of a record in the modules table. All modules found within WaddleDBM must contain a record within this table to store metadata of each command within each module.
 
-The marketplace_modules table requires the following fields:
+The modules table requires the following fields:
 
 1. name (type: string) 
 2. description (type: string) 
@@ -344,11 +344,36 @@ The base functionality of WaddleDBM contains the following modules (As of v1.1.0
 - Admin Context Module
 - Currency Module
 - Gateway Manager
+- Routing Module
 - Giveaway Module
 - Identity Label Module
 - Marketplace Module
 - Module Onboarding
 - Text Response Module
+
+## DB Initialization
+
+When the WaddleDBM module starts up, some initial values need to be created in the DB for some features of the DBM to work properly. To do this, a script class called db_initializer is used. 
+
+This class object contains some helper functions to read data from given JSON files, and load data into given table, if they dont exists yet. The script can be found at https://github.com/PenguinCloud/WaddleDBM/blob/1.1.0-test/scripts/init_db.py
+
+Currently, all the following tables receive default values on startup:
+
+- modules
+- module_types
+- prize_statusses
+- account_types
+- gateway_server_types
+- gateway_types
+- gateway_accounts
+- gateway_servers
+
+During DB initialization, the "Global" community is also created and contain the following default roles, with their accompanying privileges that is used by certain module functions, if stipulated in the "modules" table, for each stored command in a module:
+
+| Role | Privileges |
+| Administrator | read, write, update, delete, admin, owner |
+| Moderator | read, write, update, delete |
+| User | read |
 
 (This readme is still very W.I.P)
 
