@@ -1,8 +1,8 @@
 ---
 - name: Run the WaddleBot-Configurator configure script
-  ansible.builtin.script: "/opt/manager/modules/WaddleBot-Configurator/app/configurator.py"
-  args:
-    executable: python3
+  command: python3 /opt/manager/modules/WaddleBot-Configurator/app/configurator.py
+  become: false
+  register: configurator
 
 - name: Debug the output of the WaddleBot-Configurator configure script
   debug:

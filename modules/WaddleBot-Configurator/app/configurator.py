@@ -74,18 +74,21 @@ def main() -> str:
 
                 template += '\n'
 
+                logging.info("Creating Twitch Server toml object")
                 # Create the twitch server toml object string
                 twitch_server_toml = create_twitch_server(gateway_servers, os.path.join(script_dir, 'twitch_server_template.toml'), twitch_token)
 
                 # Add the twitch server to the template file
                 template += twitch_server_toml
 
+                logging.info("Creating Discord Server toml object")
                 # Create the discord server toml object string
                 discord_server_toml = create_discord_server(gateway_servers, os.path.join(script_dir, 'discord_server_template.toml'), discord_token)
 
                 # Add the discord server to the template file
                 template += discord_server_toml
 
+                logging.info("Creating Gateway toml object")
                 # Create the global community toml object string
                 gateway_inout_toml = create_gateways(gateways, api_name)
 
@@ -126,6 +129,8 @@ def create_twitch_server(gateway_servers: list[gateway_server], file: str, twitc
 
     logging.info("Creating twitch server toml object")
 
+    logging.info(gateway_servers)
+
     try:
         # Open the twitch template file
         with open(file, 'r') as f:
@@ -145,6 +150,7 @@ def create_twitch_server(gateway_servers: list[gateway_server], file: str, twitc
                     twitch_server += '\n'
                     toml_string += twitch_server
 
+        logging.info("Successfully created twitch server toml object")
         return toml_string
     except Exception as e:
         logging.error("Failed to create twitch server toml object: " + str(e))
@@ -174,6 +180,7 @@ def create_discord_server(gateway_servers: list[gateway_server], file: str, disc
                     discord_server += '\n'
                     toml_string += discord_server
 
+        logging.info("Successfully created discord server toml object")
         return toml_string
     except Exception as e:
         logging.error("Failed to create discord server toml object: " + str(e))
@@ -182,6 +189,8 @@ def create_discord_server(gateway_servers: list[gateway_server], file: str, disc
 # Function to create a gateway opject for each gateway in the list of gateways
 def create_gateways(gateways: list[gateway], api_name: str) -> str:
     toml_string = ""
+
+    logging.info("Creating gateway toml object")
 
     # Create all the gateway objects
     for gateway in gateways:
@@ -198,8 +207,10 @@ def create_gateways(gateways: list[gateway], api_name: str) -> str:
         # Get the gateway type from the gateway
         gateway_type = gateway['gateway_type']
         if gateway_type == "Discord":
+            logging.info("Discord gateway found")
             gateway_type = "discord"
         elif gateway_type == "Twitch":
+            logging.info("Twitch gateway found")
             gateway_type = "irc"
 
         # Create the second part of the toml string to contain the gateway inout objects
