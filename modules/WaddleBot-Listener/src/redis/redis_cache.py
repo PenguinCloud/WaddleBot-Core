@@ -20,8 +20,15 @@ testCommands = {
     "!text": "Text Response",
     # Alias related commands
     "!alias": "Alias Commands",
+    # Calender related commands
+    "!calender": "Calender",
+    # Identity label related commands
+    "!identity": "Identity Label",
+    # Giveaway related commands
+    "!giveaway": "Giveaway",
     # Test script related commands
-    "#test": "Test Module"
+    "#test": "Test Module",
+
 }
 
 class RedisCache:
