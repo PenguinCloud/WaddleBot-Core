@@ -32,7 +32,7 @@ services:
       waddledbm:
         condition: service_started
   waddlebot-gateway-manager:
-    build: modules/WaddleBot-Gateway-Manager
+    build: modules/Waddlebot-GwMgr
     ports: 
       - "5000:5000"
     env_file: .env

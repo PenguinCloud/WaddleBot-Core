@@ -17,3 +17,6 @@ __pycahce__/
 *.secret
 
 .env
+
+# Exclude any locally generated matterbridge.toml files. Must be dynamic via container
+matterbridge.toml

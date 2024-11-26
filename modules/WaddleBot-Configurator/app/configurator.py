@@ -34,12 +34,16 @@ def main() -> str:
     try:
         # If the .env file exists, get the values of the environment variables
         # and store them in variables
+        logging.info("Getting MAT configuration data from environment variables")
+
         gateway_servers_url = os.getenv('GATEWAY_SERVERS_GET_URL')
         gateways_url = os.getenv('GATEWAYS_GET_URL')
         discord_token = os.getenv('DISCORD_TOKEN')
         twitch_token = os.getenv('TWITCH_TOKEN')
         api_name = os.getenv('API_NAME')
         api_address = os.getenv('API_ADDRESS')
+
+        logging.info("Executing requests to get MAT configuration data")
 
         # Get the gateway servers and their gateways
         gateway_servers = get_gateway_servers(gateway_servers_url)
@@ -49,10 +53,14 @@ def main() -> str:
         if (gateway_servers is None or gateways is None) or (len(gateway_servers) == 0 or len(gateways) == 0):
             return "Failed to get gateway servers or gateways"
 
+        logging.info("Finished the requests to get MAT configuration data")
+
         script_dir = os.path.dirname(os.path.abspath(__file__))
         file_path = os.path.join(script_dir, 'mat_template.toml')
 
         try:
+            logging.info("Reading MAT template file")
+
             # Load the template toml file "mat_template.toml" in the "templates" folder
             with open(file_path, 'r') as matfile:
                 template = matfile.read()
@@ -94,6 +102,8 @@ def main() -> str:
 
                         # Close the file
                         file.close()
+
+                        logging.info("Successfully created MAT configuration file")
                 except Exception as e:
                     logging.error("Failed to write MAT configuration file: " + str(e))
                     return(str(e))
@@ -203,10 +213,15 @@ def create_gateways(gateways: list[gateway], api_name: str) -> str:
 # Function to get the gateways from the API
 def get_gateways(url: str) -> list[gateway]:
     try:
+        logging.info("Getting gateways from MAT API")
+
         # Make a GET request to the MAT API to get the gateways
         response = requests.get(url)
 
         gateways = []
+
+        logging.info("Got a response from MAT API")
+        logging.info(response.json())
 
         # Check if the response is successful
         if response.status_code == 200:
@@ -223,6 +238,7 @@ def get_gateways(url: str) -> list[gateway]:
             logging.info("No gateways found")
             return None
         
+        logging.info("Successfully got gateways from MAT API")
         return gateways
     except Exception as e:
         logging.error("Failed to get gateways from WaddleDBM: " + str(e))
@@ -231,10 +247,15 @@ def get_gateways(url: str) -> list[gateway]:
 # Function to get the gateway servers from the API
 def get_gateway_servers(url: str) -> list[gateway_server]:
     try:
+        logging.info("Getting gateway servers from MAT API")
+
         # Make a GET request to the MAT API to get the gateway servers
         response = requests.get(url)
 
         gateway_servers = []
+
+        logging.info("Got a response from MAT API")
+        logging.info(response.json())
 
         # Check if the response is successful
         if response.status_code == 200:
@@ -251,6 +272,7 @@ def get_gateway_servers(url: str) -> list[gateway_server]:
             logging.info("No gateway servers found")
             return None
         
+        logging.info("Successfully got gateway servers from MAT API")
         return gateway_servers
     except Exception as e:
         logging.error("Failed to get gateway servers from WaddleDBM: " + str(e))
