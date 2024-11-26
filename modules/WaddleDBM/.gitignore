@@ -1,7 +1,0 @@
-*.yaml
-*secret*
-id_rsa*
-*.key
-venv/
-.idea/
-
