@@ -42,4 +42,4 @@
 
 - name: Install specified python requirements
   ansible.builtin.pip:
-    requirements: /requirements.txt
+    requirements: "/opt/manager/requirements.txt"
