@@ -59,7 +59,8 @@ RUN ansible-playbook entrypoint.yml -c local --tags "build,run"
 
 
 # Switch to non-root user
-USER waddlebot
+# TODO: Uncomment the below user line when the user's privilages have been fixed
+# USER waddlebot
 
 # Entrypoint time (aka runtime)
 ENTRYPOINT ["/bin/bash","/opt/manager/entrypoint.sh"]
