@@ -15,4 +15,5 @@ __pycahce__/
 # WaddleBot-web2py/applications/*/databases/
 *.log
 *.secret
+
 .env

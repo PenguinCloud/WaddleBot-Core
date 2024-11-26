@@ -10,7 +10,7 @@ import logging
 from dataclasses import asdict
 
 from src.redis.redis_cache import RedisCache
-from src.models.dataclasses import messageData, commandData, sendMessageData, identityData, marketplaceModuleData
+from src.models.dataclasses import messageData, commandData, sendMessageData, identityData, marketplaceModuleData, sessionData, contextData
 
 # Set the logging level to INFO
 logging.basicConfig(level=logging.INFO)
@@ -120,55 +120,51 @@ class WaddleBotListener:
             # After the timeout, remove the timeout command from the message
             message = message.replace(matching[0], "")
 
+        # Get the context data of the user
+        context_data = self.get_context_data(username, gateway, account)
+        if context_data is None:
+            return
+        
+        # Get the command list from the message
         commands = self.get_commands(message)
 
-        logging.info("Command found in text. Looking up command....")
-
-        # Check if the command is in the botCommands dictionary
-        cmdResult = ""
-
-        # Get the userid from the message
-        pingUsername = "<@" + messageData[0]['userid'] + ">"
-
-        # Add the username to the response message
-        cmdResult += f"{pingUsername}, "
-
-        # If the command is !help, display the help message
-        if mainCommand == "!help":
-            cmdResult += self.display_help()
-        # Else, check if the command is in the Redis cache
-        else:
-            # Get the command data from the Redis cache
-            commandName = self.redisManager.get_command(mainCommand)
-            if commandName is not None:
-                logging.info("Command found in Redis cache.")
-                logging.info(commandName)
-                
-                # Get marketplace module from the marketplace
-                module = self.get_marketplace_module_by_name(commandName)
-
-                if module is None:
-                    logging.error("Error occured while trying to get the metadata from the marketplace.")
-                    cmdResult += "The command could not be found. Ensure that the command is typed correctly."
-                    self.send_bot_message(gateway, cmdResult, account)
-
-                metadata = module['metadata']
-                moduleTypeName = module['module_type_name']
-                moduleID = module['id']
-
-                # Get the command properties from the metadata
-                commandData = self.get_command_properties(commands, metadata)
-
-                logging.info("The command data is:")
-                logging.info(commandData)
-
-                # Execute the command
-                cmdResult += self.execute_command(username, message, commandData, moduleID, moduleTypeName, channel, account)
-            else:
-                logging.info("Command not found in Redis cache.")
-                cmdResult += "Command not found. Please use !help to see the list of available commands."
+        # Process the command
+        cmdResult = self.process_command(commands, context_data, message, username, channel, account, messageData)
 
         self.send_bot_message(gateway, cmdResult, account) 
+
+    # Function to get the context of the user
+    def get_context_data(self, username, gateway, account):
+        context_data = self.get_context(username)
+        if context_data is None:
+            self.send_bot_message(gateway, "An error has occurred while trying to get the context data of the user.", account)
+            return None
+        return context_data
+
+    # Function to process the command
+    def process_command(self, commands, context_data, message, username, channel, account, messageData):
+        main_command = commands[0]
+        if main_command == "!help":
+            return self.display_help()
+
+        module = self.lookup_command(commands, username)
+        if module is None:
+            return "The command could not be found. Ensure that the command is typed correctly."
+
+        return self.execute_command(username, context_data, message, module, channel, account, messageData)
+
+    # Function to lookup the command in the Redis cache
+    def lookup_command(self, commands, username):
+        command_name = self.redisManager.get_command(commands[0])
+        if command_name is None:
+            command_name = " ".join(commands)
+
+        module = self.get_marketplace_module_by_name(command_name, username)
+        if module is None or ('status' in module and module['status'] != 200):
+            return None
+
+        aliased_commands = self.get_aliased_command(module, commands)
+        return self.get_command_properties(aliased_commands, module)
 
     # Function to get the command from the message
     def get_commands(self, message: str) -> list:
@@ -196,6 +192,22 @@ class WaddleBotListener:
         logging.info(filteredCommands)
 
         return filteredCommands
+    
+    # Function to get the aliased command from a marketplace module and return a list of commands,
+    # seperated by a space. Returns a list of the old commands if the aliased command is not found.
+    def get_aliased_command(self, module: marketplaceModuleData, commands) -> list:
+        if not module or not hasattr(module, 'aliased_command'):
+            logging.warning("Invalid module or missing 'aliased_command'")
+            return commands
+        logging.info("Getting the aliased command....")
+
+        aliasedCommand = commands
+
+        # Get the aliased command from the module
+        if module is not None and 'aliased_command' in module:
+            aliasedCommand = module['aliased_command'].split(" ")
+
+        return aliasedCommand
     
     # Function to get the command parameters from the message, that fall between the < > brackets
     def get_message_params(self, message: str) -> list:
@@ -354,7 +366,7 @@ class WaddleBotListener:
             return False
 
     # Function to get the context of the current user
-    def get_context(self, username: str) -> str:
+    def get_context(self, username: str) -> contextData:
         logging.info("Getting the context....")
 
         # Create the function URL
@@ -373,14 +385,15 @@ class WaddleBotListener:
 
             if 'msg' in respJson and respJson['msg'] is not None:
                 return None
-            elif "data" in respJson and "community_name" in respJson["data"]:
-                return respJson["data"]["community_name"]
+            # Return the data if the data is in the response
+            elif "data" in respJson and "community_name" in respJson["data"] and "community_id" in respJson["data"]:
+                return respJson["data"]
         else:
             return None
 
 
     # Function to execute a command from the Redis cache, given the message command and the command data
-    def execute_command(self, username: str, message: str, commandData: commandData, moduleId: int, moduleTypeName: str, channel: str, account: str) -> str:
+    def execute_command(self, username: str, contextData: contextData, message: str, commandData: commandData, moduleId: int, moduleTypeName: str, channel: str, account: str, sessionData: sessionData, priv_list: list) -> str:
         logging.info("Executing the command....")
 
         # Get the payload keys from the command data
@@ -397,7 +410,13 @@ class WaddleBotListener:
         # Get the action value from the metadata
         action = commandData['action']
 
-        community_name = self.get_context(username)
+        
+        
+        community_name = contextData['community_name']
+
+        # Check if the user has the required priv_list to execute the command
+        if not self.check_permissions(sessionData, contextData, commandData, priv_list):
+            return "You do not have the required privileges to execute this command."
 
         # Get the command parameters from the message
         params = self.get_message_params(message)
@@ -596,21 +615,30 @@ class WaddleBotListener:
         return helpMessage
     
     # Function to retrieve a marketplace module entry by its URL
-    def get_marketplace_module_by_name(self, moduleName: str) -> marketplaceModuleData:
+    def get_marketplace_module_by_name(self, moduleName: str, identity_name: str) -> marketplaceModuleData:
         logging.info("Getting Marketplace Module by URL....")
 
         try:
-            callURL = self.marketplaceURL + "/" + moduleName
+            logging.info(f"Module Name: {moduleName}")
+
+            callURL = self.marketplaceURL
 
             logging.info(f"Call URL: {callURL}")
 
-            resp = requests.get(url=callURL)
+            # Create a body for the request that only contains the identity_name
+            body = {
+                "identity_name": identity_name,
+                "name": moduleName
+            }
+
+            logging.info(f"Body: {body}")
+
+            resp = requests.get(url=callURL, json=body)
 
             if resp.ok:
                 response = resp.json()
-                marketplaceModule = response
 
-                return marketplaceModule
+                return response
             else:
                 return None
         except requests.exceptions.RequestException as e:
@@ -624,19 +652,65 @@ class WaddleBotListener:
         logging.info(f"Command List: {commandlist}")
         logging.info(f"Metadata: {metadata}")
 
-        # TODO: Find a way to dynamically generate a metadata key path, dependant on the length of the commandlist
-        if metadata is not None and len(commandlist) > 0:
-            if len(commandlist) == 1 and commandlist[0] in metadata and 'description' in metadata[commandlist[0]]:
-                return metadata[commandlist[0]]
-            elif len(commandlist) == 2 and commandlist[0] in metadata and commandlist[1] in metadata[commandlist[0]] and 'description' in metadata[commandlist[0]][commandlist[1]]:
-                return metadata[commandlist[0]][commandlist[1]]
-            elif len(commandlist) == 3 and commandlist[0] in metadata and commandlist[1] in metadata[commandlist[0]] and commandlist[2] in metadata[commandlist[0]][commandlist[1]] and 'description' in metadata[commandlist[0]][commandlist[1]][commandlist[2]]:
-                return metadata[commandlist[0]][commandlist[1]][commandlist[2]]
-            else:
-                return None
-                
-            
-        
+        # Combine all the commands into a single string with the _ character. This will be used to search for the command in the metadata.
+        command = "_".join(commandlist)
 
+        logging.info(f"Command that needs to be found in the metadata: {command}")
+
+        # Check if the command is in the metadata
+        if command in metadata:
+            return metadata[command]
+        else:
+            return None
     
+    # Function to return a flag depending on whether the given admin command can be excuted or not. 
+    # For this check to work, it receives the session data of the user, the context of the user, and 
+    # the command data of the command to be executed.
+    def check_permissions(self, sessionData, contextData, commandData, user_priv_list):
+        logging.info("Checking Permissions....")
+        if not self._has_required_privileges(user_priv_list, commandData['req_priv_list']):
+            # Compile a list of the required privileges
+            missing_privileges = [priv for priv in commandData['req_priv_list'] if priv not in user_priv_list]
+            logging.info(f"User does not have the required privileges to execute the command. Missing privileges: {missing_privileges}")
+            return False
+        if 'admin' in commandData['req_priv_list']:
+            logging.info("Checking if the user has a valid admin session....")
+            return self._is_valid_admin_session(sessionData, contextData)
+        return True
 
+    # Function to check if the user has the required privileges to execute the command
+    def _has_required_privileges(self, user_priv_list, required_priv_list):
+        return all(item in user_priv_list for item in required_priv_list)
+
+    # Function to check if the user has a valid admin session
+    def _is_valid_admin_session(self, sessionData, contextData):
+        if not (sessionData and contextData and 'identity_id' in sessionData and 'community_id' in sessionData):
+            logging.info("User does not have a valid session.")
+            return False
+        if sessionData["identity_id"] != contextData["identity_id"] or sessionData["community_id"] != contextData["community_id"]:
+            logging.info("User does not have a valid session.")
+            return False
+        return self.check_token_expiry(sessionData)
+        
+    # Using session data, check if a token has not expired
+    def check_token_expiry(self, sessionData: sessionData) -> bool:
+        logging.info("Checking Token Expiry....")
+
+        # Get the current time
+        currentTime = time.time()
+
+        # Get the session expiry time
+        sessionExpiry = sessionData['session_expires']
+
+        logging.info(f"Session Expiry: {sessionExpiry}")
+
+        # Convert the session expiry date string to a datetime object
+        sessionExpiry = time.mktime(time.strptime(sessionExpiry, "%Y-%m-%d %H:%M:%S"))
+
+        # Check if the session expiry time is greater than the current time
+        if sessionExpiry > currentTime:
+            logging.info("The session has not expired. The user has a valid session.")
+            return True
+        else:
+            logging.info("The session has expired.")
+            return False  
