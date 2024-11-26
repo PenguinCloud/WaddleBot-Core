@@ -1,3 +1,6 @@
 [submodule "Waddlebot-libs"]
 	path = Waddlebot-libs
 	url = https://github.com/PenguinCloud/Waddlebot-libs.git
+[submodule "modules/WaddleDBM"]
+	path = modules/WaddleDBM
+	url = https://github.com/PenguinCloud/WaddleDBM.git
