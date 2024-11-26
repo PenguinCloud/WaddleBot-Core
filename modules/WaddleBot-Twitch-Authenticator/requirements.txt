@@ -11,7 +11,7 @@ click==8.1.7
 colorama==0.4.6
 cryptography==43.0.1
 diff-match-patch==20230430
-Django==5.0.8
+Django==5.0.9
 django-constance==3.1.0
 django-import-export==4.0.3
 django-picklefield==3.2
@@ -42,7 +42,7 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 pytz==2024.1
 referencing==0.35.1
-requests==2.31.0
+requests==2.32.2
 rpds-py==0.18.1
 six==1.16.0
 SQLAlchemy==2.0.30
@@ -52,4 +52,4 @@ toml==0.10.2
 typing_extensions==4.11.0
 tzdata==2024.1
 urllib3==2.2.2
-Werkzeug==3.0.3
+Werkzeug==3.0.6

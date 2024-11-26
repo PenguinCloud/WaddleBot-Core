@@ -1,7 +1,19 @@
-[[_TOC_]]
+SDK info and onboarding process here @thysw95
 
-# Requirements to Collaborate
-This is a Penguin Technologies Group LLC image, depending on the type of license, you may not be able to contribute. Please see license agreement and ask.
+# WaddleBot Module Protocol Definition
+send via webhook to AWS Lambda:
+* event
+* amount
+* userid
+* text
+* namespace
+* platform / interface / subinterface 
 
-# How to contribute your code.
-< input how to either fork and merge or pull and merge here>
+``` {"event": "subscription", "amount": "5.00", "userid": "PenguinzPlays", "Text": "I love to support!" , "Namespace": "ProWaddlers", "Resource": { "Platform": "Twitch", "Interface": "None", "Sub-Interface": "PenguinzPlays"}}```
+
+ 
+receive via webhook:
+* msg: text
+* media: url to media (gif, video, sound, etc.) 
+* stdout: (chat, dm, ticker, browser)
+* platform / interface / subinterface 
