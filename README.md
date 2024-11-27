@@ -33,11 +33,30 @@ Penguinz relies on volunteer customers and community members to beta test images
 ## Project Setup
 To compile the project for testing/deployment, do the following:
 
-1. Navigate to the root folder of Waddlebot Core where the docker-compose.yml file is located.
+1. Run git clone to also setup the submodules:
+`git clone --recurse-submodules -b 1.1.0test https://github.com/PenguinCloud/WaddleBot-Core.git`
 
-2. Ensure that you have docker installed and running on your local machine.
+2. Set the branches of all the submodules as follows:
 
-3. Ensure you have a .env file setup with the necessary variables in the root folder where the docker-compose.yml is located. The necessary variables (fill in the values between <> characters):
+```
+WaddleDBM: '1.1.0-test'
+WaddlebotLibs: '1.1.0-waddledbm-test'
+Waddlebot-GwMgr: 'MJ-Development'
+```
+
+To change branches, run the command `git checkout <branch name>` in the root folder of the above submodules like so:
+
+```
+In "WaddleBot-Core/modules/WaddleDBM" do "git checkout 1.1.0-test"
+In "WaddleBot-Core/modules/WaddleDBM/modules/WaddlebotLibs" do "git checkout 1.1.0-waddledbm-test"
+In "WaddleBot-Core/modules/Waddlebot-GwMgr" do "git checkout MJ-Development"
+```
+
+3. Navigate to the root folder of Waddlebot Core where the docker-compose.yml file is located.
+
+4. Ensure that you have docker installed and running on your local machine.
+
+5. Ensure you have a .env file setup with the necessary variables in the root folder where the docker-compose.yml is located. The necessary variables (fill in the values between <> characters):
 
 ```
 GATEWAY_CREATION_URL="http://host.docker.internal:8000/WaddleDBM/routing_gateways/create_gateway.json"
@@ -49,7 +68,7 @@ GATEWAY_SERVER_CREATE_URL="http://host.docker.internal:8000/WaddleDBM/gateway_se
 GATEWAY_SERVER_DELETE_URL="http://host.docker.internal:8000/WaddleDBM/gateway_servers/delete_by_name.json/"
 TWITCH_HOST="irc.chat.twitch.tv"
 TWITCH_PORT="6667"
-TWITCH_PASS="<Twitch Token>"
+TWITCH_PASS="<Twitch Oauth Token>"
 TWITCH_NICK="WaddleBot"
 TWITCH_AUTH_URL="https://id.twitch.tv/oauth2/authorize"
 TWITCH_AUTH_CLIENT_ID="<Twitch APP ID>"
@@ -64,7 +83,7 @@ CONTEXT_URL="http://host.docker.internal:8000/WaddleDBM/context/initialize_user.
 GATEWAYS_GET_URL="http://host.docker.internal:8000/WaddleDBM/routing_gateways/get_all.json"
 EVENTSUB_URL = 'https://mj-dev.penguintech.io/'
 GATEWAY_ACTIVATE_URL="http://host.docker.internal:8000/WaddleDBM/routing_gateways/activate_gateway.json"
-TWITCH_TOKEN="<Twitch Oath token>"
+TWITCH_TOKEN="<Twitch Oauth token>"
 API_NAME="WaddleAPI"
 API_ADDRESS="0.0.0.0:4000"
 MATTERBRIDGE_URL='http://host.docker.internal:4200/api/'
@@ -76,15 +95,15 @@ REDIS_HOST='host.docker.internal'
 REDIS_PORT=6379
 ```
 
-4. Run the following command:
+6. Run the following command:
 
 `docker compose up`
 
-5. In docker, a collection of containers should be setup and running now.
+7. In docker, a collection of containers should be setup and running now.
 
-6. Matterbridge and the listener should be throwing errors, because no gateway is setup.
+8. Matterbridge and the listener should be throwing errors, because no gateway is setup.
 
-7. Go to the next section [Channel Onboarding](#channel-onboarding)
+9. Go to the next section [Channel Onboarding](#channel-onboarding)
 
 ## Channel onboarding
 For the core with all of its modules to function properly and interaction via commands to commence, a basic gateway needs to be configured. Its done through the following steps:
