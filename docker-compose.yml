@@ -34,7 +34,7 @@ services:
   waddlebot-gateway-manager:
     build: modules/Waddlebot-GwMgr
     ports: 
-      - "2052:5000"
+      - "80:5000"
     env_file: .env
     restart: always
     depends_on:
