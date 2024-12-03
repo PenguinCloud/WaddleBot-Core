@@ -59,13 +59,13 @@ In "WaddleBot-Core/modules/Waddlebot-GwMgr" do "git checkout MJ-Development"
 5. Ensure you have a .env file setup with the necessary variables in the root folder where the docker-compose.yml is located. The necessary variables (fill in the values between <> characters):
 
 ```
-GATEWAY_CREATION_URL="http://host.docker.internal:8000/WaddleDBM/routing_gateways/create_gateway.json"
-GATEWAY_DELETION_URL="http://host.docker.internal:8000/WaddleDBM/routing_gateways/delete_by_channel_id_and_gateway_type.json/"
-GATEWAY_SERVER_GET_URL="http://host.docker.internal:8000/WaddleDBM/gateway_servers/get_all.json"
-GATEWAY_ACTIVATE_URL="http://127.0.0.1:8000/WaddleDBM/routing_gateways/activate_gateway.json"
-GATEWAY_SERVERS_GET_URL="http://host.docker.internal:8000/WaddleDBM/gateway_servers/get_all.json"
-GATEWAY_SERVER_CREATE_URL="http://host.docker.internal:8000/WaddleDBM/gateway_servers/create_gateway_server.json"
-GATEWAY_SERVER_DELETE_URL="http://host.docker.internal:8000/WaddleDBM/gateway_servers/delete_by_name.json/"
+GATEWAY_CREATION_URL="http://172.17.0.1:8000/WaddleDBM/routing_gateways/create_gateway.json"
+GATEWAY_DELETION_URL="http://172.17.0.1:8000/WaddleDBM/routing_gateways/delete_by_channel_id_and_gateway_type.json/"
+GATEWAY_SERVER_GET_URL="http://172.17.0.1:8000/WaddleDBM/gateway_servers/get_all.json"
+GATEWAY_ACTIVATE_URL="http://172.17.0.1:8000/WaddleDBM/routing_gateways/activate_gateway.json"
+GATEWAY_SERVERS_GET_URL="http://172.17.0.1:8000/WaddleDBM/gateway_servers/get_all.json"
+GATEWAY_SERVER_CREATE_URL="http://172.17.0.1:8000/WaddleDBM/gateway_servers/create_gateway_server.json"
+GATEWAY_SERVER_DELETE_URL="http://172.17.0.1:8000/WaddleDBM/gateway_servers/delete_by_name.json/"
 TWITCH_HOST="irc.chat.twitch.tv"
 TWITCH_PORT="6667"
 TWITCH_PASS="<Twitch Oauth Token>"
@@ -79,19 +79,19 @@ DISCORD_TOKEN="<Discord Token>"
 DISCORD_BOT_INVITE_URL="https://discordapp.com/oauth2/authorize?&client_id=1233317711967424522&scope=bot&permissions=536870912"
 TWITCH_APP_ID="<Twitch APP ID>"
 TWITCH_APP_SECRET="<Twitch App Secret>"
-CONTEXT_URL="http://host.docker.internal:8000/WaddleDBM/context/initialize_user.json"
-GATEWAYS_GET_URL="http://host.docker.internal:8000/WaddleDBM/routing_gateways/get_all.json"
+CONTEXT_URL="http://172.17.0.1:8000/WaddleDBM/context/initialize_user.json"
+GATEWAYS_GET_URL="http://172.17.0.1:8000/WaddleDBM/routing_gateways/get_all.json"
 EVENTSUB_URL = 'https://mj-dev.penguintech.io/'
-GATEWAY_ACTIVATE_URL="http://host.docker.internal:8000/WaddleDBM/routing_gateways/activate_gateway.json"
+GATEWAY_ACTIVATE_URL="http://172.17.0.1:8000/WaddleDBM/routing_gateways/activate_gateway.json"
 TWITCH_TOKEN="<Twitch Oauth token>"
 API_NAME="WaddleAPI"
 API_ADDRESS="0.0.0.0:4000"
-MATTERBRIDGE_URL='http://host.docker.internal:4200/api/'
-USER_MANGER_URL='http://host.docker.internal:8000/WaddleDBM/identities/create.json/'
-MARKETPLACE_URL='http://host.docker.internal:8000/marketplace_manager/marketplace/get.json'
-COMMUNITY_MODULES_URL='http://host.docker.internal:8000/WaddleDBM/community_modules/get_by_community_name_and_module_id.json/'
-CONTEXT_URL='http://host.docker.internal:8000/WaddleDBM/context/'
-REDIS_HOST='host.docker.internal'
+MATTERBRIDGE_URL='http://172.17.0.1:4200/api/'
+USER_MANGER_URL='http://172.17.0.1:8000/WaddleDBM/identities/create.json/'
+MARKETPLACE_URL='http://172.17.0.1:8000/marketplace_manager/marketplace/get.json'
+COMMUNITY_MODULES_URL='http://172.17.0.1:8000/WaddleDBM/community_modules/get_by_community_name_and_module_id.json/'
+CONTEXT_URL='http://172.17.0.1:8000/WaddleDBM/context/'
+REDIS_HOST='172.17.0.1'
 REDIS_PORT=6379
 ```
 
