@@ -1,5 +1,6 @@
-[![Publish Docker image](https://github.com/PenguinzPlays/MenialBotler/actions/workflows/docker-image.yml/badge.svg)](https://github.com/PenguinCloud/core/actions/workflows/docker-image.yml) [![version](https://img.shields.io/badge/version-0.0.0-yellow.svg)](https://semver.org) ![Docker Image Version (latest by date)](https://img.shields.io/docker/v//PenguinzPlays/MenialBotler?sort=date&style=plastic)
+[![version](https://img.shields.io/badge/version-1.1.0-yellow.svg)](https://semver.org) 
 
+<img height=200 width=150 src="waddlebot-logo.png" alt="Waddlebot Logo">
 
 # Project Overview
 WaddleBot is a combination of a watcher service, core modules and serverless scripting (Lambda / OpenWhisk) which enables you to tag and direct traffic live to scripts any time anywhere! 
