@@ -52,7 +52,7 @@ services:
       waddledbm:
         condition: service_started
   waddlebot-twitch-authenticator:
-    build: modules/WaddleBot-Twitch-Authenticator
+    build: ../WaddleBot-Listener/WaddleBot-Twitch-Authenticator
     ports:
       - "5001:17563"
     env_file: .env
