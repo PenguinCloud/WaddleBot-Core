@@ -3,7 +3,13 @@ import requests
 import os
 from dotenv import load_dotenv
 
-from libs.botLogger import BotLogger as botlog
+from libs.botLogger import BotLogger 
+
+# CONSTANTS
+LOG_LEVEL = "INFO"
+
+# Initiate the logger
+log = BotLogger("configurator", LOG_LEVEL)
 
 from dataclasses import dataclass, asdict
 
@@ -23,8 +29,6 @@ class gateway_server():
     server_type: str
 
 # Set the logging level to INFO
-logging.basicConfig(level=log.info)
-log = botlog
 log.debug("Starting the MAT configurator script")
 # Load the environment variables from the .env file
 load_dotenv()

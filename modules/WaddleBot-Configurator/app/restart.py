@@ -4,10 +4,13 @@ import os
 from dotenv import load_dotenv
 import subprocess
 from libs.botLogger import BotLogger
-log = BotLogger()
 
 #constant
 ROOT_FOLDER = os.path('/opt/manager/')
+LOG_LEVEL = "INFO"
+
+# Initiate the logger
+log = BotLogger("restart", LOG_LEVEL)
 
 # This function will retrieve the MAT gateways from the API and compare them with the existing 
 # matterbridge.toml accounts found in the configuration file. If there are any new gateways, 
@@ -98,11 +101,11 @@ def get_gateways(url):
 
 def pretty(d, indent=0):
         for key, value in d.items():
-        log.debug('\t' * indent + str(key))
-        if isinstance(value, dict):
-            pretty(value, indent+1)
-        else:
-            log.debug('\t' * (indent+1) + str(value))
+            log.debug('\t' * indent + str(key))
+            if isinstance(value, dict):
+                pretty(value, indent+1)
+            else:
+                log.debug('\t' * (indent+1) + str(value))
 
 # Function to read the existing matterbridge.toml file and return all the instances of the gateway.inout's account variables
 def get_gateway_accounts():

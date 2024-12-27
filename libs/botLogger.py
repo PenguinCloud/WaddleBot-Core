@@ -5,7 +5,7 @@ import inspect
 # This is a class which will handle all logging for the bot
 # ---------------------
 class BotLogger:
-    def __init__(self, logname: str = None):
+    def __init__(self, logname: str = None, level: str = "INFO"):
         self.callFunction = None
         if logname is None:
             logname = self.caller
@@ -56,4 +56,7 @@ class BotLogger:
     # this is a functin which will change the logging level
     # ---------------------
     def changeLevel(self, level):
-        self.logger.setLevel(level)
+        if level not in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+            raise ValueError("Invalid log level")
+        else:
+            self.logger.setLevel(level)
