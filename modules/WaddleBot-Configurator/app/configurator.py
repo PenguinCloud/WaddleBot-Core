@@ -1,7 +1,7 @@
 import toml
 import requests
 import os
-from dotenv import load_dotenv
+
 
 from libs.botLogger import BotLogger 
 
@@ -30,8 +30,7 @@ class gateway_server():
 
 # Set the logging level to INFO
 log.debug("Starting the MAT configurator script")
-# Load the environment variables from the .env file
-load_dotenv()
+
 
 # The main function that will be called when the script is run
 def main() -> str:

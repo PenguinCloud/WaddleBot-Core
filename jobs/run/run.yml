@@ -15,3 +15,4 @@
     dest: "/etc/matterbridge/matterbridge.toml"
     owner: "{{ run.user }}"
     group: "{{ run.user }}"
+    mode: '0755'

@@ -6,9 +6,9 @@
     groups: root
     append: true
 
-- name: Create /etc/{{ app.title }} if it does not exist
+- name: Create config directory if it does not exist
   ansible.builtin.file:
-    path:  "/etc/{{ app.title }}"
+    path: "/etc/{{ app.title }}"
     state: directory
     mode: '0755'
     owner: "{{ run.user }}"
@@ -21,9 +21,9 @@
     group: "{{ run.user }}"
     mode: '0755'
 
-- name: Update repositories cache 
+- name: Update repositories cache
   ansible.builtin.apt:
-    update_cache: yes
+    update_cache: true
 
 - name: Install python3-dev
   ansible.builtin.apt:
@@ -43,5 +43,3 @@
 - name: Install specified python requirements
   ansible.builtin.pip:
     requirements: "/opt/manager/requirements.txt"
-
-    

@@ -11,4 +11,3 @@
     month: "*"
     job: "{{ run.user }} python3 /opt/manager/modules/WaddleBot-Configurator/app/restart.py > restart_log.txt 2>&1"
     state: present
-  
