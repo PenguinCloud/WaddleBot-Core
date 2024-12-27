@@ -5,22 +5,26 @@ import inspect
 # This is a class which will handle all logging for the bot
 # ---------------------
 class BotLogger:
-    def __init__(self, logname: str = "WaddleBot"):
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.INFO)
+    def __init__(self, logname: str = None):
         self.callFunction = None
+        if logname is None:
+            logname = self.caller
+        self.logger = logging.getLogger(logname)
+        self.logger.setLevel(logging.INFO)
+        
     
     # ---------------------
     # This is a function which will set the handler name to the caller function
     # ---------------------
     def caller(self):
         try:
-            self.callFunction = inspect.stack()[2][3]
+            caller = inspect.stack()[2][3]
         except Exception:
             self.logger.debug("Unable to get the caller function 2 levels up, tryin 1 level up!")
-        if len(self.callFunction) < 2:
-            self.callFunction = inspect.stack()[1][3]
-            
+        if len(caller) < 2:
+            caller = inspect.stack()[1][3]
+        self.callFunction = caller
+        return caller    
     # ---------------------
     # This is a function which will create a logger using file handler
     # ---------------------
@@ -47,3 +51,9 @@ class BotLogger:
         json_handler.setLevel(logging.INFO)
         json_handler.setFormatter(logging.Formatter('{"function": "%(name)s", "level": "%(levelname)s", "rawMsg": "%(message)s"}'))
         self.logger.addHandler(json_handler)
+
+    # ---------------------
+    # this is a functin which will change the logging level
+    # ---------------------
+    def changeLevel(self, level):
+        self.logger.setLevel(level)

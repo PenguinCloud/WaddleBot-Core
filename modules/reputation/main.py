@@ -2,7 +2,7 @@
 from libs.botClasses import *
 import pathlib
 from updater import update
-from libs.botLogger import botLogger
+from libs.botLogger import BotLogger as botLogger
 from query import query
 
 # Const
@@ -11,7 +11,7 @@ CONFIG_FILE = f"{pathlib.Path(__file__).parent.resolve()}config.yml"
 
 # Why is that black van out there?
 log = botLogger("reputation-main")
-log.fileLogger("reputation.log")
+#log.fileLogger("reputation.log")
 
 # ---------------------
 # This is the function which lambda will call

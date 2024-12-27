@@ -3,7 +3,7 @@ import requests
 import os
 from dotenv import load_dotenv
 
-import logging
+from libs.botLogger import BotLogger as botlog
 
 from dataclasses import dataclass, asdict
 
@@ -23,8 +23,9 @@ class gateway_server():
     server_type: str
 
 # Set the logging level to INFO
-logging.basicConfig(level=logging.INFO)
-
+logging.basicConfig(level=log.info)
+log = botlog
+log.debug("Starting the MAT configurator script")
 # Load the environment variables from the .env file
 load_dotenv()
 
@@ -34,7 +35,7 @@ def main() -> str:
     try:
         # If the .env file exists, get the values of the environment variables
         # and store them in variables
-        logging.info("Getting MAT configuration data from environment variables")
+        log.info("Getting MAT configuration data from environment variables")
 
         gateway_servers_url = os.getenv('GATEWAY_SERVERS_GET_URL')
         gateways_url = os.getenv('GATEWAYS_GET_URL')
@@ -43,7 +44,7 @@ def main() -> str:
         api_name = os.getenv('API_NAME')
         api_address = os.getenv('API_ADDRESS')
 
-        logging.info("Executing requests to get MAT configuration data")
+        log.info("Executing requests to get MAT configuration data")
 
         # Get the gateway servers and their gateways
         gateway_servers = get_gateway_servers(gateway_servers_url)
@@ -53,13 +54,13 @@ def main() -> str:
         if (gateway_servers is None or gateways is None) or (len(gateway_servers) == 0 or len(gateways) == 0):
             return "Failed to get gateway servers or gateways"
 
-        logging.info("Finished the requests to get MAT configuration data")
+        log.info("Finished the requests to get MAT configuration data")
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
         file_path = os.path.join(script_dir, 'mat_template.toml')
 
         try:
-            logging.info("Reading MAT template file")
+            log.info("Reading MAT template file")
 
             # Load the template toml file "mat_template.toml" in the "templates" folder
             with open(file_path, 'r') as matfile:
@@ -74,21 +75,21 @@ def main() -> str:
 
                 template += '\n'
 
-                logging.info("Creating Twitch Server toml object")
+                log.info("Creating Twitch Server toml object")
                 # Create the twitch server toml object string
                 twitch_server_toml = create_twitch_server(gateway_servers, os.path.join(script_dir, 'twitch_server_template.toml'), twitch_token)
 
                 # Add the twitch server to the template file
                 template += twitch_server_toml
 
-                logging.info("Creating Discord Server toml object")
+                log.info("Creating Discord Server toml object")
                 # Create the discord server toml object string
                 discord_server_toml = create_discord_server(gateway_servers, os.path.join(script_dir, 'discord_server_template.toml'), discord_token)
 
                 # Add the discord server to the template file
                 template += discord_server_toml
 
-                logging.info("Creating Gateway toml object")
+                log.info("Creating Gateway toml object")
                 # Create the global community toml object string
                 gateway_inout_toml = create_gateways(gateways, api_name)
 
@@ -106,20 +107,20 @@ def main() -> str:
                         # Close the file
                         file.close()
 
-                        logging.info("Successfully created MAT configuration file")
+                    log.info("Successfully created MAT configuration file")
                 except Exception as e:
-                    logging.error("Failed to write MAT configuration file: " + str(e))
+                    log.error("Failed to write MAT configuration file: " + str(e))
                     return(str(e))
 
             msg = "Successfully created MAT configuration file"
             return(msg)
         
         except Exception as e:
-            logging.error("Failed to read MAT template file: " + str(e))
+            log.error("Failed to read MAT template file: " + str(e))
             return(str(e))
 
     except Exception as e:
-        logging.error("SOMETHING WENT WRONG: " + str(e))
+        log.error("SOMETHING WENT WRONG: " + str(e))
         return(str(e))
 
 
@@ -127,9 +128,9 @@ def main() -> str:
 def create_twitch_server(gateway_servers: list[gateway_server], file: str, twitch_token: str) -> str:
     toml_string = ""
 
-    logging.info("Creating twitch server toml object")
+    log.info("Creating twitch server toml object")
 
-    logging.info(gateway_servers)
+    log.debug(gateway_servers)
 
     try:
         # Open the twitch template file
@@ -150,17 +151,17 @@ def create_twitch_server(gateway_servers: list[gateway_server], file: str, twitc
                     twitch_server += '\n'
                     toml_string += twitch_server
 
-        logging.info("Successfully created twitch server toml object")
+        log.info("Successfully created twitch server toml object")
         return toml_string
     except Exception as e:
-        logging.error("Failed to create twitch server toml object: " + str(e))
+        log.error("Failed to create twitch server toml object: " + str(e))
         return(str(e))
 
 # Function to create the discord server toml object from the template discord file
 def create_discord_server(gateway_servers: list[gateway_server], file: str, discord_token: str) -> str:
     toml_string = "\n[discord]\n"
 
-    logging.info("Creating discord server toml object")
+    log.info("Creating discord server toml object")
 
     try:
         # Open the discord template file
@@ -180,17 +181,16 @@ def create_discord_server(gateway_servers: list[gateway_server], file: str, disc
                     discord_server += '\n'
                     toml_string += discord_server
 
-        logging.info("Successfully created discord server toml object")
+        log.info("Successfully created discord server toml object")
         return toml_string
     except Exception as e:
-        logging.error("Failed to create discord server toml object: " + str(e))
+        log.error("Failed to create discord server toml object: " + str(e))
         return(str(e))
 
 # Function to create a gateway opject for each gateway in the list of gateways
 def create_gateways(gateways: list[gateway], api_name: str) -> str:
     toml_string = ""
-
-    logging.info("Creating gateway toml object")
+    log.info("Creating gateway toml object")
 
     # Create all the gateway objects
     for gateway in gateways:
@@ -207,10 +207,10 @@ def create_gateways(gateways: list[gateway], api_name: str) -> str:
         # Get the gateway type from the gateway
         gateway_type = gateway['gateway_type']
         if gateway_type == "Discord":
-            logging.info("Discord gateway found")
+            log.info("Discord gateway found")
             gateway_type = "discord"
         elif gateway_type == "Twitch":
-            logging.info("Twitch gateway found")
+            log.info("Twitch gateway found")
             gateway_type = "irc"
 
         # Create the second part of the toml string to contain the gateway inout objects
@@ -224,15 +224,15 @@ def create_gateways(gateways: list[gateway], api_name: str) -> str:
 # Function to get the gateways from the API
 def get_gateways(url: str) -> list[gateway]:
     try:
-        logging.info("Getting gateways from MAT API")
+        log.info("Getting gateways from MAT API")
 
         # Make a GET request to the MAT API to get the gateways
         response = requests.get(url)
 
         gateways = []
 
-        logging.info("Got a response from MAT API")
-        logging.info(response.json())
+        log.info("Got a response from MAT API")
+        log.info(response.json())
 
         # Check if the response is successful
         if response.status_code == 200:
@@ -241,32 +241,32 @@ def get_gateways(url: str) -> list[gateway]:
                 response_json = response.json()
                 gateways = response_json['data']
         else:
-            logging.info("Failed to get gateways from MAT API")
+            log.info("Failed to get gateways from MAT API")
             return None
 
         # Check if the gateways list is not empty
         if len(gateways) == 0:
-            logging.info("No gateways found")
+            log.info("No gateways found")
             return None
         
-        logging.info("Successfully got gateways from MAT API")
+        log.info("Successfully got gateways from MAT API")
         return gateways
     except Exception as e:
-        logging.error("Failed to get gateways from WaddleDBM: " + str(e))
+        log.error("Failed to get gateways from WaddleDBM: " + str(e))
         return None
 
 # Function to get the gateway servers from the API
 def get_gateway_servers(url: str) -> list[gateway_server]:
     try:
-        logging.info("Getting gateway servers from MAT API")
+        log.info("Getting gateway servers from MAT API")
 
         # Make a GET request to the MAT API to get the gateway servers
         response = requests.get(url)
 
         gateway_servers = []
 
-        logging.info("Got a response from MAT API")
-        logging.info(response.json())
+        log.info("Got a response from MAT API")
+        log.info(response.json())
 
         # Check if the response is successful
         if response.status_code == 200:
@@ -275,21 +275,21 @@ def get_gateway_servers(url: str) -> list[gateway_server]:
                 response_json = response.json()
                 gateway_servers = response_json['data']
         else:
-            logging.info("Failed to get gateway servers from MAT API")
+            log.info("Failed to get gateway servers from MAT API")
             return None
 
         # Check if the gateway servers list is not empty
         if len(gateway_servers) == 0:
-            logging.info("No gateway servers found")
+            log.info("No gateway servers found")
             return None
         
-        logging.info("Successfully got gateway servers from MAT API")
+        log.info("Successfully got gateway servers from MAT API")
         return gateway_servers
     except Exception as e:
-        logging.error("Failed to get gateway servers from WaddleDBM: " + str(e))
+        log.error("Failed to get gateway servers from WaddleDBM: " + str(e))
         return None
 
 
 msg = main()
-logging.info(msg)
+log.debug(msg)
 
