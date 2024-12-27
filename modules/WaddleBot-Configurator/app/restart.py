@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import subprocess
 from libs.botLogger import BotLogger
 
-#constant
+# constants
 ROOT_FOLDER = os.path('/opt/manager/')
 LOG_LEVEL = "INFO"
 
@@ -47,7 +47,6 @@ def main():
         if channels is None:
             log.error("Failed to get gateway channels from matterbridge.toml")
             return "Failed to get gateway channels from matterbridge.toml"
-        
 
         log.debug("The existing channels are: ")
         log.debug(channels)
