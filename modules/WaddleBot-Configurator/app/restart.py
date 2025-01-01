@@ -3,7 +3,14 @@ import requests
 import os
 from dotenv import load_dotenv
 import subprocess
+from libs.botLogger import BotLogger
 
+# constants
+ROOT_FOLDER = os.path('/opt/manager/')
+LOG_LEVEL = "INFO"
+
+# Initiate the logger
+log = BotLogger("restart", LOG_LEVEL)
 
 # This function will retrieve the MAT gateways from the API and compare them with the existing 
 # matterbridge.toml accounts found in the configuration file. If there are any new gateways, 
@@ -23,6 +30,7 @@ def main():
 
         # Check if the gateways list is not empty
         if gateways is None:
+            log.error("Failed to get gateways from MAT API")
             return "Failed to get gateways from MAT API"
         
         # Get the existing gateway accounts from the matterbridge.toml file
@@ -37,17 +45,16 @@ def main():
 
         # Check if the channels list is not empty
         if channels is None:
+            log.error("Failed to get gateway channels from matterbridge.toml")
             return "Failed to get gateway channels from matterbridge.toml"
-        
-        # print("The existing accounts are: ")
-        # print(accounts)
-        print("The existing channels are: ")
-        print(channels)
-        # print("The found gateways are: ")
-        # print(gateways)
-        # Print only the account key from the gateways list
+
+        log.debug("The existing channels are: ")
+        log.debug(channels)
+        # log.debug("The found gateways are: ")
+        # log.debug(gateways)
+        # log.debug only the account key from the gateways list
         gAccounts = [gateway['channel_id'] for gateway in gateways]
-        print(gAccounts)
+        log.debug(gAccounts)
 
         # Check if there are any new gateways
         new_gateways = [gateway for gateway in gateways if gateway['channel_id'] not in channels]
@@ -65,8 +72,8 @@ def main():
 
 # Function to get the gateways from the API
 def get_gateways(url):
-    print("Getting gateways from MAT API")
-    print("The URL is: ", url)
+    log.debug("Getting gateways from MAT API")
+    log.debug("The URL is: ", url)
 
     # Make a GET request to the MAT API to get the gateways
     response = requests.get(url, timeout=30)
@@ -80,28 +87,28 @@ def get_gateways(url):
             response_json = response.json()
             gateways = response_json['data']
     else:
-        print("Failed to get gateways from MAT API")
+        log.debug("Failed to get gateways from MAT API")
         return None
 
     # Check if the gateways list is not empty
     if len(gateways) == 0:
-        print("No gateways found")
+        log.debug("No gateways found")
         return None
     
     return gateways
 
 
 def pretty(d, indent=0):
-   for key, value in d.items():
-      print('\t' * indent + str(key))
-      if isinstance(value, dict):
-         pretty(value, indent+1)
-      else:
-         print('\t' * (indent+1) + str(value))
+        for key, value in d.items():
+            log.debug('\t' * indent + str(key))
+            if isinstance(value, dict):
+                pretty(value, indent+1)
+            else:
+                log.debug('\t' * (indent+1) + str(value))
 
 # Function to read the existing matterbridge.toml file and return all the instances of the gateway.inout's account variables
 def get_gateway_accounts():
-    print("Getting gateway accounts from matterbridge.toml")
+    log.debug("Getting gateway accounts from matterbridge.toml")
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(script_dir, 'matterbridge.toml')
@@ -113,7 +120,7 @@ def get_gateway_accounts():
     # Parse the toml file
     toml_data = toml.loads(data)
 
-    # print("The toml data is: ")
+    # log.debug("The toml data is: ")
     # pretty(toml_data)
 
     # Get all the instances of the gateway.inout's account variables
@@ -139,7 +146,7 @@ def get_gateway_accounts():
 
 # Function to read the existing matterbridge.toml file and return all the instances of the gateway.inout's channel variables
 def get_gateway_channels():
-    print("Getting gateway channels from matterbridge.toml")
+    log.debug("Getting gateway channels from matterbridge.toml")
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(script_dir, 'matterbridge.toml')
@@ -151,7 +158,7 @@ def get_gateway_channels():
     # Parse the toml file
     toml_data = toml.loads(data)
 
-    # print("The toml data is: ")
+    # log.debug("The toml data is: ")
     # pretty(toml_data)
 
     # Get all the instances of the gateway.inout's account variables
@@ -165,11 +172,9 @@ def get_gateway_channels():
         # Check if each dictionary contains the key "inout"
         for g in gateway:
             if 'inout' in g:
-                inout = g['inout']
-                
                 # inout is a list of dictionaries. Each dictionary represents an inout. 
                 # Check if each dictionary contains the key "account"
-                for i in inout:
+                for i in g['inout']:
                     if 'channel' in i:
                         channels.append(i['channel'])
 
@@ -185,9 +190,9 @@ def stop_matterbridge():
     if stdout:
         process_id = int(stdout.decode().strip())
         subprocess.run(['kill', str(process_id)])
-        print("Stopped matterbridge process")
+        log.debug("Stopped matterbridge process")
     else:
-        print("matterbridge process is not running")
+        log.debug("matterbridge process is not running")
 
 # This function executes the entrypoint.sh script to start the matterbridge.exe process
 def start_matterbridge(shFile):
@@ -196,21 +201,21 @@ def start_matterbridge(shFile):
     stdout, stderr = process.communicate()
 
     if stdout:
-        print("matterbridge process is running")
+        log.debug("matterbridge process is running")
         return
 
     # Execute the entrypoint.sh script to start the matterbridge process
-    entrypoint_path = os.path.join('/opt/manager/', shFile)
+    entrypoint_path = os.path.join(ROOT_FOLDER, shFile)
 
-    print("The entrypoint path is: ", entrypoint_path)
+    log.debug("The entrypoint path is: ", entrypoint_path)
     # subprocess.run(['sh', entrypoint_path])
     # os.popen('sh ' + entrypoint_path)
-process = subprocess.Popen(['sh', entrypoint_path])
-print(f"Started matterbridge process with PID: {process.pid}")
-    print("Started matterbridge process")
+    process = subprocess.Popen(['sh', entrypoint_path])
+    log.debug(f"Started matterbridge process with PID: {process.pid}")
+    log.debug("Started matterbridge process")
 
 
 if __name__ == '__main__':
     # msg = main()
-    # print(msg)
-    print("The restart.py script is running")
+    # log.debug(msg)
+    log.debug("The restart.py script is running")

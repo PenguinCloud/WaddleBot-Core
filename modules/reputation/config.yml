@@ -21,12 +21,12 @@ database:
   webuser: waddlebot
   webpassword: changeme
   database: waddlebot
-  tables: 
+  tables:
     - reputation
     - reputation-scoring
 reputation-alias:
-  bronze: (300, 579)  #Poor
-  silver: (580, 669)  #Fair
-  gold: (670, 739)    #Good
-  platinum: (740,799) #VeryGood
-  diamond: (800,850)  #Excellent
+  bronze: (300, 579)  # Poor
+  silver: (580, 669)  # Fair
+  gold: (670, 739)    # Good
+  platinum: (740,799) # VeryGood
+  diamond: (800,850)  # Excellent

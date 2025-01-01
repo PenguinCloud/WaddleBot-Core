@@ -1,4 +1,4 @@
-FROM ghcr.io/penguincloud/core:v5.0.1 AS BUILD
+FROM ghcr.io/penguincloud/core:v5.2.3 AS BUILD
 LABEL company="Penguin Tech Group LLC"
 LABEL org.opencontainers.image.authors="info@penguintech.group"
 LABEL license="GNU AGPL3"
@@ -40,7 +40,7 @@ ENV TELEGRAM_ENABLE="0"
 ENV GATEWAY_NAME="GatewayExample"
 
 # Python related commands to install dependencies, create a virtual environment, and run the application
-RUN apt-get update && apt-get install -y python3
+#RUN apt-get update && apt-get install -y python3
 
 # Set the working directory to the WaddleBot-Configurator directory
 WORKDIR /opt/manager/modules/WaddleBot-Configurator
@@ -51,15 +51,13 @@ RUN pip install -r requirements.txt
 # Set the working directory back to the manager directory
 WORKDIR /opt/manager
 
-# Expose the port
-EXPOSE 4000
-
 # BUILD IT!
 RUN ansible-playbook entrypoint.yml -c local --tags "build,run"
 
 
 # Switch to non-root user
-USER waddlebot
+# TODO: Uncomment the below user line when the user's privilages have been fixed
+# USER www-data
 
 # Entrypoint time (aka runtime)
 ENTRYPOINT ["/bin/bash","/opt/manager/entrypoint.sh"]

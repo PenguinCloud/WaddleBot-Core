@@ -1,24 +1,66 @@
 ---
 version: "2.4"
 services:
-  app:
-    image: ghcr.io/penguincloud/web2py-core:latest
+  waddledbm:
+    build: placeholder
     ports:
-      - "1080-1090:80"
-    env_file: .env
+      - "8000:8000"
+    restart: always
+  redis:
+    image: redis:6.0.7
+    container_name: redis
+    restart: always
     volumes:
-      - /app
-      - ./data:/data
-    networks:
-      - web2py
+      - redis_volume_data:/data
+    ports:
+      - 6379:6379
+  redis_insight:
+    image: redislabs/redisinsight:1.14.0
+    container_name: redis_insight
+    restart: always
+    ports:
+      - 8001:8001
+    volumes:
+      - redis_insight_volume_data:/db
+  waddlebot-core:
+    build: .
+    ports:
+      - "4200:4000"
+    env_file: .env
     restart: always
     depends_on:
-      - db
-  db:
-    image: mariadb:10.5
+      waddledbm:
+        condition: service_started
+  waddlebot-gateway-manager:
+    build: modules/Waddlebot-GwMgr
+    ports:
+      - "80:5000"
     env_file: .env
-    volumes:
-      - ./data:/var/lib/mysql
-    networks:
-      - web2py
     restart: always
+    depends_on:
+      waddledbm:
+        condition: service_started
+  waddlebot-listener:
+    build: modules/WaddleBot-Listener
+    env_file: .env
+    restart: always
+    depends_on:
+      redis:
+        condition: service_started
+      waddlebot-core:
+        condition: service_started
+      waddledbm:
+        condition: service_started
+  waddlebot-twitch-authenticator:
+    build: ../WaddleBot-Listener/WaddleBot-Twitch-Authenticator
+    ports:
+      - "5001:17563"
+    env_file: .env
+    restart: always
+    depends_on:
+      waddledbm:
+        condition: service_started
+
+volumes:
+  redis_volume_data:
+  redis_insight_volume_data:
