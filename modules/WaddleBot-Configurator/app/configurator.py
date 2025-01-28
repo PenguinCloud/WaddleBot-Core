@@ -1,15 +1,19 @@
 import toml
 import requests
 import os
+import logging
 
+# TODO: Get the bot logger from the main bot file when that is sorted
+# from libs.botLogger import BotLogger
 
-from libs.botLogger import BotLogger
+# # CONSTANTS
+# LOG_LEVEL = "INFO"
 
-# CONSTANTS
-LOG_LEVEL = "INFO"
+# # Initiate the logger
+# log = BotLogger("configurator", LOG_LEVEL)
 
-# Initiate the logger
-log = BotLogger("configurator", LOG_LEVEL)
+# Set up the logger
+log = logging.getLogger(__name__)
 
 from dataclasses import dataclass, asdict
 
@@ -51,8 +55,8 @@ class configuration():
             log.info("Executing requests to get MAT configuration data")
 
             # Get the gateway servers and their gateways
-            gateway_servers = get_gateway_servers(gateway_servers_url)
-            gateways = get_gateways(gateways_url)
+            gateway_servers = self.get_gateway_servers(gateway_servers_url)
+            gateways = self.get_gateways(gateways_url)
 
             # Check if the gateway servers and gateways are not empty
             if (gateway_servers is None or gateways is None) or (len(gateway_servers) == 0 or len(gateways) == 0):
@@ -81,21 +85,21 @@ class configuration():
 
                     log.info("Creating Twitch Server toml object")
                     # Create the twitch server toml object string
-                    twitch_server_toml = create_twitch_server(gateway_servers, os.path.join(script_dir, 'twitch_server_template.toml'), twitch_token)
+                    twitch_server_toml = self.create_twitch_server(gateway_servers, os.path.join(script_dir, 'twitch_server_template.toml'), twitch_token)
 
                     # Add the twitch server to the template file
                     template += twitch_server_toml
 
                     log.info("Creating Discord Server toml object")
                     # Create the discord server toml object string
-                    discord_server_toml = create_discord_server(gateway_servers, os.path.join(script_dir, 'discord_server_template.toml'), discord_token)
+                    discord_server_toml = self.create_discord_server(gateway_servers, os.path.join(script_dir, 'discord_server_template.toml'), discord_token)
 
                     # Add the discord server to the template file
                     template += discord_server_toml
 
                     log.info("Creating Gateway toml object")
                     # Create the global community toml object string
-                    gateway_inout_toml = create_gateways(gateways, api_name)
+                    gateway_inout_toml = self.create_gateways(gateways, api_name)
 
                     # Add the global community to the template file
                     template += gateway_inout_toml
@@ -199,9 +203,17 @@ class configuration():
         # Create all the gateway objects
         for gateway in gateways:
             channel_id = gateway['channel_id']
+            server_id = gateway['gateway_server']
 
             # Create the first part of the toml string to contain the gateway name
-            toml_string += f'\n[[gateway]]\nname = "{channel_id}"\nenable=true\n'
+            # If the gateway is twitch, use the channel id as the gateway name
+            gateway_name = ""
+            if gateway['gateway_type'] == "Twitch":
+                gateway_name = channel_id
+            else:
+                gateway_name = server_id
+
+            toml_string += f'\n[[gateway]]\nname = "{gateway_name}"\nenable=true\n'
 
             # Replace all special characters and spaces in the server name with underscores
             gateway_server = gateway['gateway_server']
@@ -294,7 +306,7 @@ class configuration():
             return None
 
 if __name__ == "__main__": 
-    msg = configuration
-    msg.main(args=None)
+    conf = configuration()
+    msg = conf.main()
     log.debug(msg)
 
