@@ -208,11 +208,7 @@ class configuration():
             # Create the first part of the toml string to contain the gateway name
             # If the gateway is twitch, use the channel id as the gateway name
             gateway_name = ""
-            if gateway['gateway_type'] == "Twitch":
-                gateway_name = channel_id
-            else:
-                gateway_name = server_id
-
+            gateway_name = channel_id if gateway['gateway_type'] == "Twitch" else server_id
             toml_string += f'\n[[gateway]]\nname = "{gateway_name}"\nenable=true\n'
 
             # Replace all special characters and spaces in the server name with underscores
