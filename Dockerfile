@@ -1,4 +1,4 @@
-FROM ghcr.io/penguincloud/core AS BUILD
+FROM  ghcr.io/penguincloud/web2py-core:latest AS BUILD
 LABEL company="Penguin Tech Group LLC"
 LABEL org.opencontainers.image.authors="info@penguintech.group"
 LABEL license="GNU AGPL3"
